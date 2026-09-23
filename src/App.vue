@@ -3,12 +3,14 @@ import { computed } from 'vue'
 import Home from './Home.vue'
 import Otc from './Otc.vue'
 import Company from './Company.vue'
+import UserCenter from './UserCenter.vue'
 const path = window.location.pathname
-const page = computed(() => path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
+const page = computed(() => path.includes('/user/assets') ? 'assets' : path.includes('/user/dashboard') ? 'dashboard' : path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
 </script>
 
 <template>
   <Otc v-if="page === 'otc'" />
+  <UserCenter v-else-if="page === 'assets' || page === 'dashboard'" :assets="page === 'assets'" />
   <Company v-else-if="page === 'about' || page === 'security'" :security="page === 'security'" />
   <Home v-else />
 <!--
