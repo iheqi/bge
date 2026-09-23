@@ -1,10 +1,17 @@
 <script setup>
-import { ArrowDown } from '@element-plus/icons-vue'
+import { computed } from 'vue'
+import Home from './Home.vue'
+import Otc from './Otc.vue'
+import Company from './Company.vue'
+const path = window.location.pathname
+const page = computed(() => path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
 </script>
 
 <template>
-  <div class="page">
-    <header class="nav">
+  <Otc v-if="page === 'otc'" />
+  <Company v-else-if="page === 'about' || page === 'security'" :security="page === 'security'" />
+  <Home v-else />
+<!--
       <div class="brand"><span class="brand-mark">╱</span><b>BGE</b></div>
       <nav class="main-links"><a class="active">首页</a><a>场外</a><a>现货交易</a><a class="company">公司 <el-icon><ArrowDown /></el-icon></a></nav>
       <div class="right-links"><a>账户记录</a><a>资产管理</a><span class="avatar"><span></span></span><a>简体中文</a><i></i><a>USD</a></div>
@@ -23,5 +30,5 @@ import { ArrowDown } from '@element-plus/icons-vue'
     </main>
 
     <footer><div class="footer-inner"><div class="brand footer-brand"><span class="brand-mark">╱</span><b>BGE</b></div><div><h4>公司</h4><a>关于我们</a><a>安全</a></div><div><h4>产品</h4><a>现货交易</a><a>场外</a><h4 class="service">服务</h4><a>帮助中心</a></div><div><h4>条款</h4><a>条款及细则</a><a>隐私政策</a><a>免责声明</a><a>交易规则</a><a>Cookie政策</a><a>Cookie偏好设置</a></div><div class="contact"><h4>关于我们</h4><a>邮箱：cs@bg.exchange</a><a>地址：香港上环干诺道中168-200号信德中心<br/>招商局大厦24楼2414-2416室</a></div></div><div class="legal"><span>BGE@2026</span><p>免责声明：HKBGF所提供的虚拟资产交易服务只针对专业投资者。虚拟资产的价值很可能剧烈波动。虚拟资产交易有极高风险，因此可能不适合所有投资者/交易者。虚拟资产过去的价格不代表未来的结果。在决定投资之前，您应该仔细考虑您的投资目标、经验水平和风险偏好。</p></div></footer>
-  </div>
+  </div> -->
 </template>
