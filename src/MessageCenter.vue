@@ -1,4 +1,6 @@
 <script setup>
+import { tr } from './i18n'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 import { computed, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import MessageBell from './MessageBell.vue'
@@ -27,9 +29,9 @@ function readAll() {
 async function deleteAll() {
   const ids = filtered.value.map((m) => m.id)
   try {
-    await ElMessageBox.confirm('确定删除当前分类中的全部消息？', '删除消息', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(tr('确定删除当前分类中的全部消息？'), tr('删除消息'), {
+      confirmButtonText: tr('删除'),
+      cancelButtonText: tr('取消'),
       type: 'warning',
     })
   } catch {
@@ -53,26 +55,29 @@ async function deleteAll() {
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="/bge/hk/zh-CN/about">公司</a>
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="/bge/hk/zh-CN/about">{{ $t('text004') }}</a>
       </nav>
       <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><a
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><a
           class="avatar"
           href="/bge/hk/zh-CN/user/dashboard"
-          aria-label="个人中心"
+          :aria-label="$t('text184')"
           ><img
             src="/avatar.png"
             alt=""
             width="30"
             height="30" /></a
-        ><span>简体中文</span>
+        ><LanguageSwitcher />
       </div>
     </header>
     <main class="message-layout">
       <aside class="message-sidebar">
-        <h1>消息中心</h1>
+        <h1>{{ $t('text174') }}</h1>
         <button
           v-for="item in messageCategories"
           :key="item"
@@ -80,26 +85,26 @@ async function deleteAll() {
           :aria-pressed="category === item"
           @click="category = item"
         >
-          {{ item }}
+          {{ tr(item) }}
         </button>
       </aside>
       <div class="message-content">
         <section
           class="message-list"
-          :aria-label="category"
+          :aria-label="tr(category)"
         >
-          <h2>{{ category }}</h2>
+          <h2>{{ tr(category) }}</h2>
           <div class="message-actions">
             <button
               :disabled="!filtered.some((m) => !m.read)"
               @click="readAll"
             >
-              全部已读</button
+              {{ $t('text175') }}</button
             ><button
               :disabled="!filtered.length"
               @click="deleteAll"
             >
-              全部删除
+              {{ $t('text185') }}
             </button>
           </div>
           <div class="message-rows">
@@ -111,22 +116,22 @@ async function deleteAll() {
             >
               <button
                 class="message-text"
-                :aria-label="`${message.read ? '已读' : '标记已读'}：${message.text}`"
+                :aria-label="`${tr(message.read ? '已读' : '标记已读')}: ${tr(message.text)}`"
                 @click="markRead(message.id)"
               >
-                <span>{{ message.text }}</span
-                ><time>{{ message.date }}</time>
+                <span>{{ tr(message.text) }}</span
+                ><time>{{ tr(message.date) }}</time>
               </button>
               <button
                 class="message-delete"
                 @click="removeMessages([message.id])"
               >
-                删除
+                {{ $t('text182') }}
               </button>
             </article>
             <el-empty
               v-if="!visible.length"
-              description="暂无消息"
+              :description="$t('text177')"
               :image-size="80"
             />
           </div>

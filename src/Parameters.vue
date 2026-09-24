@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import ParameterContent from './ParameterContent.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
@@ -27,16 +29,18 @@ import {
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
-        ><span
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span>
@@ -46,19 +50,19 @@ import {
     <div class="user-layout">
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>总览</a
+          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
         ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>身份认证</a
+          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
         ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>账户安全</a
+          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>收付款管理</a
+          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
         ><a
           class="sel"
           href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>参数查询</a
+          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>API管理</a
+          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
       </aside>
       <ParameterContent />
@@ -76,20 +80,21 @@ import {
             height="28"
         /></a>
         <div>
-          <h4>公司</h4>
-          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+          <h4>{{ $t('text004') }}</h4>
+          <a href="/bge/hk/zh-CN/about">{{ $t('text067') }}</a
+          ><a href="/bge/hk/zh-CN/security">{{ $t('text068') }}</a>
         </div>
         <div>
-          <h4>产品</h4>
-          <a href="/bge/hk/zh-CN/otc">场外</a>
+          <h4>{{ $t('text069') }}</h4>
+          <a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
         </div>
         <div>
-          <h4>条款</h4>
-          <a>条款及细则</a>
+          <h4>{{ $t('text070') }}</h4>
+          <a>{{ $t('text071') }}</a>
         </div>
         <div>
-          <h4>关于我们</h4>
-          <a>邮箱：cs@bg.exchange</a>
+          <h4>{{ $t('text067') }}</h4>
+          <a>{{ $t('text072') }}</a>
         </div>
       </div>
     </footer>

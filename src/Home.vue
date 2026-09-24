@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
@@ -20,20 +22,20 @@ import { ArrowDown } from '@element-plus/icons-vue'
         <a
           class="active"
           href="/bge/hk/zh-CN/"
-          >首页</a
-        ><a href="/bge/hk/zh-CN/market">行情</a><a href="/bge/hk/zh-CN/otc">场外</a
-        ><a href="#">现货交易</a
+          >{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a
           class="company"
           href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="right-links">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a href="#"
-          >简体中文</a
-        ><span
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span
@@ -44,7 +46,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
     <main>
       <section class="hero">
         <div class="hero-inner">
-          <h1>在安全可靠的<br />数字资产平台交易</h1>
+          <h1>{{ $t('text117') }}<br />{{ $t('text118') }}</h1>
           <div
             class="hero-art"
             aria-hidden="true"
@@ -55,38 +57,31 @@ import { ArrowDown } from '@element-plus/icons-vue'
         </div>
         <div class="news">
           <span class="slider"></span>
-          <div>
-            保护您的账户与资产安全　 2026-09-21　/　 系统维护完成：HKBGF 服务已全面恢复　
-            2026-07-14　/　 关于2026年7月11日至7月15日进行系统临时性维护...　 2026-07-08　/　 更多
-            &gt;
-          </div>
+          <div>{{ $t('text119') }}</div>
         </div>
       </section>
 
       <section class="about">
-        <h2>进一步了解我们</h2>
+        <h2>{{ $t('text120') }}</h2>
         <div class="about-row company-row">
           <div class="scene scene-hk">
             <div class="disc">✦</div>
             <div class="disc coin-hk">◆</div>
           </div>
           <div class="copy">
-            <h3>香港上市公司旗下成员</h3>
-            <p>
-              BGE
-              为香港上市公司旗下成员公司，我们致力于打造一家安全、稳健、合规的数字资产交易平台，客户的资产安全和合规运营从第一天开始都是我们的首要任务。
-            </p>
-            <strong><span class="hk-icon">✤</span> 股票代码 1726.HK</strong>
+            <h3>{{ $t('text121') }}</h3>
+            <p>{{ $t('text122') }}</p>
+            <strong><span class="hk-icon">✤</span>{{ $t('text123') }}</strong>
           </div>
         </div>
         <div class="about-row safety-row">
           <div class="copy">
-            <h3>资产安全</h3>
+            <h3>{{ $t('text124') }}</h3>
             <ul>
-              <li>线下冷钱包存储 98% 的用户资产，冷温热三层安全结构</li>
-              <li>更高安全级别的 HSM 加密机</li>
-              <li>离线签名，多重验证</li>
-              <li>多级审核冷钱包体系确保资产安全</li>
+              <li>{{ $t('text125') }}</li>
+              <li>{{ $t('text126') }}</li>
+              <li>{{ $t('text127') }}</li>
+              <li>{{ $t('text128') }}</li>
             </ul>
           </div>
           <div class="scene shield-scene">
@@ -111,31 +106,35 @@ import { ArrowDown } from '@element-plus/icons-vue'
             height="28"
         /></a>
         <div>
-          <h4>公司</h4>
-          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+          <h4>{{ $t('text004') }}</h4>
+          <a href="/bge/hk/zh-CN/about">{{ $t('text067') }}</a
+          ><a href="/bge/hk/zh-CN/security">{{ $t('text068') }}</a>
         </div>
         <div>
-          <h4>产品</h4>
-          <a href="#">现货交易</a><a href="/bge/hk/zh-CN/otc">场外</a>
-          <h4 class="service">服务</h4>
-          <a href="#">帮助中心</a>
+          <h4>{{ $t('text069') }}</h4>
+          <a href="#">{{ $t('text003') }}</a
+          ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
+          <h4 class="service">{{ $t('text108') }}</h4>
+          <a href="#">{{ $t('text109') }}</a>
         </div>
         <div>
-          <h4>条款</h4>
-          <a href="#">条款及细则</a><a href="#">隐私政策</a><a href="#">免责声明</a
-          ><a href="#">交易规则</a><a href="#">Cookie政策</a><a href="#">Cookie偏好设置</a>
+          <h4>{{ $t('text070') }}</h4>
+          <a href="#">{{ $t('text071') }}</a
+          ><a href="#">{{ $t('text110') }}</a
+          ><a href="#">{{ $t('text111') }}</a
+          ><a href="#">{{ $t('text112') }}</a
+          ><a href="#">{{ $t('text113') }}</a
+          ><a href="#">{{ $t('text114') }}</a>
         </div>
         <div class="contact">
-          <h4>关于我们</h4>
-          <a href="mailto:cs@bg.exchange">邮箱：cs@bg.exchange</a
-          ><a href="#">地址：香港上环干诺道中168-200号信德中心<br />招商局大厦24楼2414-2416室</a>
+          <h4>{{ $t('text067') }}</h4>
+          <a href="mailto:cs@bg.exchange">{{ $t('text072') }}</a
+          ><a href="#">{{ $t('text115') }}<br />{{ $t('text116') }}</a>
         </div>
       </div>
       <div class="legal">
         <span>BGE@2026</span>
-        <p>
-          免责声明：HKBGF所提供的虚拟资产交易服务只针对专业投资者。虚拟资产的价值很可能剧烈波动。虚拟资产交易有极高风险，因此可能不适合所有投资者/交易者。虚拟资产过去的价格不代表未来的结果。
-        </p>
+        <p>{{ $t('text129') }}</p>
       </div>
     </footer>
   </div>

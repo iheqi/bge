@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import {
@@ -40,20 +42,21 @@ const coins = [
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a>现货交易</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a>{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
         ><a
           :class="{ active: assets }"
           href="/bge/hk/zh-CN/user/assets"
-          >资产管理</a
-        ><MessageBell /><UserMenu /><a>简体中文</a
-        ><span
+          >{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span>
@@ -69,29 +72,29 @@ const coins = [
           class="asset-menu-link"
           :class="{ sel: accountTab === 'fund' }"
           href="/bge/hk/zh-CN/user/assets?account=fund"
-          ><el-icon><Wallet /></el-icon>资金账户</a
+          ><el-icon><Wallet /></el-icon>{{ $t('text333') }}</a
         ><a
           class="asset-menu-link"
           :class="{ sel: accountTab === 'trade' }"
           href="/bge/hk/zh-CN/user/assets?account=trade"
-          ><el-icon><Tickets /></el-icon>交易账户</a
+          ><el-icon><Tickets /></el-icon>{{ $t('text334') }}</a
         >
       </aside>
       <aside v-else>
         <a
           href="/bge/hk/zh-CN/user/dashboard"
           :class="{ sel: !assets }"
-          ><el-icon><Grid /></el-icon>总览</a
+          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
         ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>身份认证</a
+          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
         ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>账户安全</a
+          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>收付款管理</a
+          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
         ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>参数查询</a
+          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>API管理</a
+          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
       </aside>
       <main class="user-main">
@@ -102,58 +105,70 @@ const coins = [
           <div class="avatar big">
             <img
               src="/avatar.png"
-              alt="用户头像"
+              :alt="$t('text335')"
               width="44"
               height="44"
             />
           </div>
           <div>
             <h3>heqi**gic@gmail.com</h3>
-            <p>
-              UID 8395618828　<span>▢</span>　上次登录时间 2026-09-23 15:06:00　 IP 116.149.145.110
-            </p>
+            <p>UID 8395618828　<span>▢</span>{{ $t('text336') }}</p>
           </div>
         </section>
         <template v-if="!assets"
           ><section class="overview">
-            <h2>资产总览</h2>
+            <h2>{{ $t('text337') }}</h2>
             <div class="tabs">
-              <b>账户总资产折合(BTC)</b><span>资金账户</span><span>交易账户</span>
+              <b>{{ $t('text338') }}</b
+              ><span>{{ $t('text333') }}</span
+              ><span>{{ $t('text334') }}</span>
             </div>
-            <p class="label">账户总资产折合(BTC)　◉</p>
+            <p class="label">{{ $t('text339') }}</p>
             <strong>0.00000000</strong>
-            <div><button>存款</button><button class="muted">取款</button></div>
+            <div>
+              <button>{{ $t('text275') }}</button><button class="muted">{{ $t('text276') }}</button>
+            </div>
           </section>
           <div class="panels">
             <section>
-              <h2>当前委托 <small>查看更多 ›</small></h2>
-              <div class="empty">暂无数据</div>
+              <h2>
+                {{ $t('text294') }}<small>{{ $t('text340') }}</small>
+              </h2>
+              <div class="empty">{{ $t('text066') }}</div>
             </section>
             <section>
-              <h2>订单 <small>查看更多 ›</small></h2>
-              <div class="empty">暂无数据</div>
+              <h2>
+                {{ $t('text005') }}<small>{{ $t('text340') }}</small>
+              </h2>
+              <div class="empty">{{ $t('text066') }}</div>
             </section>
           </div></template
         ><template v-else
           ><section class="asset-banner">
-            <span>账户总资产折合 ◉</span><strong>0.00000000 BTC <small>≈ USD 0.0000</small></strong
-            ><a>▣ 资产报告</a>
+            <span>{{ $t('text341') }}</span
+            ><strong>0.00000000 BTC <small>≈ USD 0.0000</small></strong
+            ><a>{{ $t('text342') }}</a>
           </section>
           <section class="asset-box">
             <h2 class="asset-account-title">
-              {{ accountTab === 'fund' ? '资金账户' : '交易账户' }}
+              {{ tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}
             </h2>
-            <p class="label">{{ accountTab === 'fund' ? '资金账户' : '交易账户' }}折合</p>
+            <p class="label">
+              {{ tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text343') }}
+            </p>
             <strong>0.00000000 BTC <small>≈ USD 0.0000</small></strong>
             <div class="asset-tools">
-              <label>□　隐藏小额资产</label>
+              <label>{{ $t('text344') }}</label>
               <div class="search">
-                <input placeholder="搜索" /><el-icon><Search /></el-icon>
+                <input :placeholder="$t('text283')" /><el-icon><Search /></el-icon>
               </div>
             </div>
             <div class="coin-head">
-              <span>币种</span><span>可用</span><span>冻结</span><span>资产估值（BTC）</span
-              ><span>操作</span>
+              <span>{{ $t('text345') }}</span
+              ><span>{{ $t('text346') }}</span
+              ><span>{{ $t('text347') }}</span
+              ><span>{{ $t('text348') }}</span
+              ><span>{{ $t('text065') }}</span>
             </div>
             <div
               v-for="coin in coins"
@@ -161,14 +176,18 @@ const coins = [
               class="coin-row"
             >
               <div class="coin-name">
-                <i>{{ coin[0] }}</i
+                <i>{{ tr(coin[0]) }}</i
                 ><span
-                  >{{ coin[1] }} <em v-if="coin[3]">{{ coin[3] }}</em
-                  ><small>{{ coin[2] }}</small></span
+                  >{{ tr(coin[1]) }} <em v-if="coin[3]">{{ tr(coin[3]) }}</em
+                  ><small>{{ tr(coin[2]) }}</small></span
                 >
               </div>
               <b>0.00000000</b><b>0.00000000</b><b>0.00000000<small>≈USD 0.0000</small></b>
-              <div><a class="disabled">存款</a><a>取款</a><a>划转</a></div>
+              <div>
+                <a class="disabled">{{ $t('text275') }}</a
+                ><a>{{ $t('text276') }}</a
+                ><a>{{ $t('text309') }}</a>
+              </div>
             </div>
           </section></template
         >

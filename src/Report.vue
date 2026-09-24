@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown, Tickets, Calendar } from '@element-plus/icons-vue'
@@ -51,19 +53,21 @@ const tabs = [
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="user-right">
         <a
           class="active"
           href="/bge/hk/zh-CN/user/report/spot"
-          >订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
-        ><span
+          >{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span>
@@ -73,7 +77,7 @@ const tabs = [
     <div class="user-layout">
       <aside
         class="order-sidebar"
-        aria-label="订单导航"
+        :aria-label="$t('text293')"
       >
         <a
           v-for="tab in tabs"
@@ -81,59 +85,91 @@ const tabs = [
           :href="tab[2]"
           :class="{ sel: type === tab[0] }"
           :aria-current="type === tab[0] ? 'page' : undefined"
-          ><el-icon><Tickets /></el-icon>{{ tab[1] }}</a
+          ><el-icon><Tickets /></el-icon>{{ tr(tab[1]) }}</a
         >
       </aside>
       <main class="report-main">
         <section class="report-box">
-          <h1 class="order-title">{{ tabs.find((tab) => tab[0] === type)[1] }}</h1>
+          <h1 class="order-title">{{ tr(tabs.find((tab) => tab[0] === type)[1]) }}</h1>
           <template v-if="type === 'spot'"
-            ><div class="sub-tabs"><b>当前委托</b><span>历史委托</span><span>历史成交</span></div>
+            ><div class="sub-tabs">
+              <b>{{ $t('text294') }}</b
+              ><span>{{ $t('text295') }}</span
+              ><span>{{ $t('text296') }}</span>
+            </div>
             <div class="filters">
-              <button>交易对⌄</button><button>订单类型⌄</button><button class="yellow">搜索</button
-              ><button>重置</button>
+              <button>{{ $t('text297') }}</button><button>{{ $t('text298') }}</button
+              ><button class="yellow">{{ $t('text283') }}</button
+              ><button>{{ $t('text299') }}</button>
             </div>
             <div class="table-head spot-head">
-              <span>委托时间</span><span>交易对</span><span>订单类型</span><span>买卖方向</span
-              ><span>当前价格</span><span>委托价格</span><span>委托数量</span><span>成交数量</span
-              ><span>操作</span>
+              <span>{{ $t('text300') }}</span
+              ><span>{{ $t('text247') }}</span
+              ><span>{{ $t('text301') }}</span
+              ><span>{{ $t('text302') }}</span
+              ><span>{{ $t('text303') }}</span
+              ><span>{{ $t('text304') }}</span
+              ><span>{{ $t('text305') }}</span
+              ><span>{{ $t('text306') }}</span
+              ><span>{{ $t('text065') }}</span>
             </div></template
           ><template v-else-if="type === 'wallet'"
             ><div class="sub-tabs">
-              <b>数字资产</b><span>法币</span><span>划转</span><span>跨账号快速划转</span>
+              <b>{{ $t('text307') }}</b
+              ><span>{{ $t('text308') }}</span
+              ><span>{{ $t('text309') }}</span
+              ><span>{{ $t('text310') }}</span>
             </div>
             <div class="filters">
-              <button>存款⌄</button><button>全部币种⌄</button><button>全部状态⌄</button
+              <button>{{ $t('text311') }}</button><button>{{ $t('text280') }}</button
+              ><button>{{ $t('text281') }}</button
               ><button class="date">
-                <el-icon><Calendar /></el-icon>2026-06-26　至　2026-09-23</button
-              ><button class="yellow">搜索</button><button>重置</button>
+                <el-icon><Calendar /></el-icon>{{ $t('text312') }}</button
+              ><button class="yellow">{{ $t('text283') }}</button
+              ><button>{{ $t('text299') }}</button>
             </div>
             <div class="table-head wallet-head">
-              <span>时间</span><span>数字货币</span><span>网络</span><span>数量</span
-              ><span>状态</span><span>发起方地址</span><span>地址备注</span>
+              <span>{{ $t('text313') }}</span
+              ><span>{{ $t('text314') }}</span
+              ><span>{{ $t('text285') }}</span
+              ><span>{{ $t('text315') }}</span
+              ><span>{{ $t('text063') }}</span
+              ><span>{{ $t('text316') }}</span
+              ><span>{{ $t('text286') }}</span>
             </div></template
           ><template v-else-if="type === 'otc'"
-            ><div class="sub-tabs"><b>买卖意向单</b><span>OTC匹配单</span></div>
+            ><div class="sub-tabs">
+              <b>{{ $t('text317') }}</b
+              ><span>{{ $t('text318') }}</span>
+            </div>
             <div class="filters">
-              <button>交易对⌄</button><button>状态⌄</button
-              ><button class="date">▣　2026-06-26　至　2026-09-23</button
-              ><button class="yellow">搜索</button><button>重置</button>
+              <button>{{ $t('text297') }}</button><button>{{ $t('text319') }}</button
+              ><button class="date">{{ $t('text320') }}</button
+              ><button class="yellow">{{ $t('text283') }}</button
+              ><button>{{ $t('text299') }}</button>
             </div>
             <div class="table-head otc-head">
-              <span>时间</span><span>买卖方向</span><span>支付币种</span><span>获得币种</span
-              ><span>购买/出售数量</span><span>状态</span>
+              <span>{{ $t('text313') }}</span
+              ><span>{{ $t('text302') }}</span
+              ><span>{{ $t('text321') }}</span
+              ><span>{{ $t('text322') }}</span
+              ><span>{{ $t('text323') }}</span
+              ><span>{{ $t('text063') }}</span>
             </div></template
           ><template v-else
             ><div class="sub-tabs">
-              <b>全部</b><span>日结单</span><span>月结单</span
-              ><em>我们建议使用Adobe Acrobat Reader查看结单。使用浏览器可能会导致显示问题。</em
-              ><button>结单密码</button>
+              <b>{{ $t('text165') }}</b
+              ><span>{{ $t('text324') }}</span
+              ><span>{{ $t('text325') }}</span
+              ><em>{{ $t('text326') }}</em
+              ><button>{{ $t('text020') }}</button>
             </div>
             <div class="table-head settle-head">
-              <span>结单名称</span><span>操作</span>
+              <span>{{ $t('text327') }}</span
+              ><span>{{ $t('text065') }}</span>
             </div></template
           >
-          <div class="no-data">暂无数据</div>
+          <div class="no-data">{{ $t('text066') }}</div>
           <div class="pager">‹　›</div>
         </section>
       </main>
@@ -151,20 +187,22 @@ const tabs = [
             height="28"
         /></a>
         <div>
-          <h4>公司</h4>
-          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+          <h4>{{ $t('text004') }}</h4>
+          <a href="/bge/hk/zh-CN/about">{{ $t('text067') }}</a
+          ><a href="/bge/hk/zh-CN/security">{{ $t('text068') }}</a>
         </div>
         <div>
-          <h4>产品</h4>
-          <a href="/bge/hk/zh-CN/otc">场外</a>
+          <h4>{{ $t('text069') }}</h4>
+          <a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
         </div>
         <div>
-          <h4>条款</h4>
-          <a>条款及细则</a><a>隐私政策</a>
+          <h4>{{ $t('text070') }}</h4>
+          <a>{{ $t('text071') }}</a
+          ><a>{{ $t('text110') }}</a>
         </div>
         <div>
-          <h4>关于我们</h4>
-          <a>邮箱：cs@bg.exchange</a>
+          <h4>{{ $t('text067') }}</h4>
+          <a>{{ $t('text072') }}</a>
         </div>
       </div>
     </footer>

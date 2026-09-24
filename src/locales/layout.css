@@ -1,0 +1,70 @@
+/* Keep translated copy within the existing layouts. */
+html[lang='en'] :is(.nav, .user-nav, .company-nav, .otc-nav) {
+  gap: 24px;
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 72px;
+}
+html[lang='en'] :is(.main-links, .user-nav nav, .company-nav nav, .otc-nav nav) {
+  gap: 22px;
+  min-height: 72px;
+}
+html[lang='en'] :is(.right-links, .user-right, .company-account, .otc-right) {
+  gap: 20px;
+  min-height: 72px;
+  margin-left: auto;
+}
+html[lang='en'] .user-layout aside {
+  flex: 0 0 230px;
+  width: 230px;
+}
+html[lang='en'] .user-layout aside a {
+  padding: 0 20px;
+}
+html[lang='en'] .user-main {
+  min-width: 0;
+}
+html[lang='en'] .hero-inner {
+  max-width: 1280px;
+  gap: 28px;
+  padding: 0 32px;
+}
+html[lang='en'] .hero h1 {
+  font-size: 48px;
+  letter-spacing: 0;
+}
+html[lang='en'] .hero-art {
+  flex-shrink: 0;
+  margin-right: 0;
+}
+html[lang='en'] .company-hero {
+  height: auto;
+  min-height: 466px;
+  padding-bottom: 40px;
+}
+html[lang='en'] .company-intro {
+  padding: 0 24px;
+}
+html[lang='en'] .security-card {
+  height: auto;
+}
+html[lang='en'] .service-card {
+  height: auto;
+  min-height: 200px;
+}
+html[lang='en'] .sub-tabs {
+  gap: 24px;
+  flex-wrap: wrap;
+}
+html[lang='en'] .filters {
+  flex-wrap: wrap;
+}
+html[lang='en'] .asset-banner strong {
+  font-size: 36px;
+}
+html[lang='en'] .coin-row a {
+  margin-right: 10px;
+}
+html[lang='en'] .kyc-options button {
+  max-width: 100%;
+}

@@ -1,4 +1,5 @@
 <script setup>
+import { tr } from './i18n'
 const links = [
   ['总览', 'dashboard'],
   ['身份认证', 'kyc'],
@@ -14,7 +15,7 @@ const links = [
     <a
       class="avatar"
       href="/bge/hk/zh-CN/user/dashboard"
-      aria-label="个人中心"
+      :aria-label="$t('text184')"
       ><img
         src="/avatar.png"
         alt=""
@@ -29,9 +30,9 @@ const links = [
         v-for="[label, path] in links"
         :key="path"
         :href="'/bge/hk/zh-CN/user/' + path"
-        >{{ label }}</a
+        >{{ tr(label) }}</a
       >
-      <a href="/bge/hk/zh-CN/">退出登录</a>
+      <a href="/bge/hk/zh-CN/">{{ $t('text349') }}</a>
     </div>
   </div>
 </template>

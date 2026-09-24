@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import {
@@ -27,16 +29,18 @@ const crypto = window.location.pathname.includes('/crypto')
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
-        ><span
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span>
@@ -46,19 +50,19 @@ const crypto = window.location.pathname.includes('/crypto')
     <div class="user-layout">
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>总览</a
+          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
         ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>身份认证</a
+          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
         ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>账户安全</a
+          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a
           class="sel"
           href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>收付款管理</a
+          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
         ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>参数查询</a
+          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>API管理</a
+          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
       </aside>
       <main class="payment-main">
@@ -67,36 +71,50 @@ const crypto = window.location.pathname.includes('/crypto')
             <a
               :class="{ active: !crypto }"
               href="/bge/hk/zh-CN/user/payment/fiat"
-              >银行卡管理</a
+              >{{ $t('text268') }}</a
             ><a
               :class="{ active: crypto }"
               href="/bge/hk/zh-CN/user/payment/crypto"
-              >数字资产钱包</a
+              >{{ $t('text269') }}</a
             >
           </div>
           <template v-if="!crypto"
-            ><h2>银行卡管理 (0)</h2>
-            <button class="add-btn">＋ 添加银行卡</button>
+            ><h2>{{ $t('text270') }}</h2>
+            <button class="add-btn">{{ $t('text271') }}</button>
             <div class="payment-head">
-              <span>银行卡账号/卡号</span><span>银行名称</span><span>SWIFT号码</span
-              ><span>存款</span><span>取款</span><span>状态</span><span>操作</span>
+              <span>{{ $t('text272') }}</span
+              ><span>{{ $t('text273') }}</span
+              ><span>{{ $t('text274') }}</span
+              ><span>{{ $t('text275') }}</span
+              ><span>{{ $t('text276') }}</span
+              ><span>{{ $t('text063') }}</span
+              ><span>{{ $t('text065') }}</span>
             </div>
-            <div class="payment-empty">♨<small>暂无数据</small></div></template
+            <div class="payment-empty">
+              ♨<small>{{ $t('text066') }}</small>
+            </div></template
           ><template v-else
-            ><div class="notice-bar">
-              ●　根据监管要求，数字资产存款发起地址和提现的到账地址必须为已认证且有效地址，任何非认证地址或认证后过期地址的转账均无法通过，当前地址认证有效期为1年
-            </div>
-            <h2>钱包地址管理</h2>
-            <button class="add-btn">＋ 添加钱包</button>
+            ><div class="notice-bar">{{ $t('text277') }}</div>
+            <h2>{{ $t('text278') }}</h2>
+            <button class="add-btn">{{ $t('text279') }}</button>
             <div class="wallet-filters">
-              <button>全部币种⌄</button><button>全部状态⌄</button
-              ><input placeholder="请输入查询地址" /><button class="search-btn">搜索</button>
+              <button>{{ $t('text280') }}</button><button>{{ $t('text281') }}</button
+              ><input :placeholder="$t('text282')" /><button class="search-btn">
+                {{ $t('text283') }}
+              </button>
             </div>
             <div class="payment-head wallet-columns">
-              <span>地址</span><span>网络</span><span>地址备注</span><span>适用币种</span
-              ><span>状态</span><span>地址有效期</span><span>操作</span>
+              <span>{{ $t('text284') }}</span
+              ><span>{{ $t('text285') }}</span
+              ><span>{{ $t('text286') }}</span
+              ><span>{{ $t('text287') }}</span
+              ><span>{{ $t('text063') }}</span
+              ><span>{{ $t('text288') }}</span
+              ><span>{{ $t('text065') }}</span>
             </div>
-            <div class="payment-empty">♨<small>暂无数据</small></div></template
+            <div class="payment-empty">
+              ♨<small>{{ $t('text066') }}</small>
+            </div></template
           >
         </section>
       </main>

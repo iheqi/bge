@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 const services = [
@@ -40,19 +42,20 @@ const faqs = [
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
         ><a
           class="on"
           href="/bge/hk/zh-CN/otc"
-          >场外</a
-        ><a href="#">现货交易</a
+          >{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="otc-right">
-        <MessageBell /><a href="#">登录</a><button>注册</button><a href="#">简体中文</a
-        ><span
+        <MessageBell /><a href="#">{{ $t('text212') }}</a
+        ><button>{{ $t('text213') }}</button><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span
@@ -61,69 +64,71 @@ const faqs = [
     </header>
     <main>
       <section class="service-section">
-        <h1>提供安全可信赖的OTC服务</h1>
+        <h1>{{ $t('text214') }}</h1>
         <div class="service-grid">
           <article
             v-for="item in services"
             :key="item[0]"
             class="service-card"
           >
-            <span class="badge">{{ item[0] }}</span>
-            <h3>{{ item[1] }}</h3>
-            <p>{{ item[2] }}</p>
+            <span class="badge">{{ tr(item[0]) }}</span>
+            <h3>{{ tr(item[1]) }}</h3>
+            <p>{{ tr(item[2]) }}</p>
           </article>
-          <article class="service-card more"><h3>了解更多</h3></article>
+          <article class="service-card more">
+            <h3>{{ $t('text215') }}</h3>
+          </article>
         </div>
-        <button class="contact-btn">联系我们</button>
+        <button class="contact-btn">{{ $t('text216') }}</button>
       </section>
       <section class="steps-section">
-        <h2>OTC流程指引</h2>
+        <h2>{{ $t('text217') }}</h2>
         <div class="steps-grid">
           <article
             v-for="item in steps"
             :key="item[0]"
             class="service-card"
           >
-            <span class="badge">{{ item[0] }}</span>
-            <h3>{{ item[1] }}</h3>
-            <p>{{ item[2] }}</p>
+            <span class="badge">{{ tr(item[0]) }}</span>
+            <h3>{{ tr(item[1]) }}</h3>
+            <p>{{ tr(item[2]) }}</p>
           </article>
         </div>
       </section>
       <section class="group-section">
-        <h2>HKBGE集团简介</h2>
+        <h2>{{ $t('text218') }}</h2>
         <div class="group-grid">
           <article>
             <div class="laurel">❧ HKF HOLDINGS ❧<small>1726.HK</small></div>
-            <h3>香港上市公司旗下成员</h3>
-            <p>我们是香港上市公司HKE Holdings Limited 旗下虚拟资产交易平台。</p>
+            <h3>{{ $t('text121') }}</h3>
+            <p>{{ $t('text219') }}</p>
           </article>
           <article>
             <div class="laurel">❧ Audit ❧<small>Insurance</small></div>
-            <h3>审计与保险</h3>
-            <p>我们的财务报表有专业会计师事务所审计，且已根据证监会要求投保。</p>
+            <h3>{{ $t('text220') }}</h3>
+            <p>{{ $t('text221') }}</p>
           </article>
           <article>
             <div class="laurel">❧ SFC ❧<small>Licensed</small></div>
-            <h3>合规运营，持牌经营</h3>
-            <p>BGE 获香港证监会发出的第1类证券交易及第7类提供自动化交易服务牌照。</p>
+            <h3>{{ $t('text222') }}</h3>
+            <p>{{ $t('text223') }}</p>
           </article>
           <article>
             <div class="laurel">❧ Professional ❧<small>Team</small></div>
-            <h3>行业资深团队</h3>
-            <p>团队具备强大技术支持能力，开发专有产品和服务，服务超高净值客户。</p>
+            <h3>{{ $t('text224') }}</h3>
+            <p>{{ $t('text225') }}</p>
           </article>
         </div>
       </section>
       <section class="faq-section">
-        <h2>常见问题</h2>
+        <h2>{{ $t('text226') }}</h2>
         <div class="faq-list">
           <article
             v-for="item in faqs"
             :key="item[0]"
           >
-            <h3>{{ item[0] }}</h3>
-            <p>{{ item[1] }}</p>
+            <h3>{{ tr(item[0]) }}</h3>
+            <p>{{ tr(item[1]) }}</p>
           </article>
         </div>
       </section>
@@ -141,24 +146,29 @@ const faqs = [
             height="28"
         /></a>
         <div>
-          <h4>公司</h4>
-          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+          <h4>{{ $t('text004') }}</h4>
+          <a href="/bge/hk/zh-CN/about">{{ $t('text067') }}</a
+          ><a href="/bge/hk/zh-CN/security">{{ $t('text068') }}</a>
         </div>
         <div>
-          <h4>产品</h4>
-          <a href="#">现货交易</a><a href="/bge/hk/zh-CN/otc">场外</a>
-          <h4>服务</h4>
-          <a href="#">帮助中心</a>
+          <h4>{{ $t('text069') }}</h4>
+          <a href="#">{{ $t('text003') }}</a
+          ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
+          <h4>{{ $t('text108') }}</h4>
+          <a href="#">{{ $t('text109') }}</a>
         </div>
         <div>
-          <h4>条款</h4>
-          <a href="#">条款及细则</a><a href="#">隐私政策</a><a href="#">免责声明</a
-          ><a href="#">交易规则</a><a href="#">Cookie政策</a>
+          <h4>{{ $t('text070') }}</h4>
+          <a href="#">{{ $t('text071') }}</a
+          ><a href="#">{{ $t('text110') }}</a
+          ><a href="#">{{ $t('text111') }}</a
+          ><a href="#">{{ $t('text112') }}</a
+          ><a href="#">{{ $t('text113') }}</a>
         </div>
         <div>
-          <h4>关于我们</h4>
-          <a href="mailto:cs@bg.exchange">邮箱：cs@bg.exchange</a
-          ><a href="#">地址：香港上环干诺道中168-200号信德中心<br />招商局大厦24楼2414-2416室</a>
+          <h4>{{ $t('text067') }}</h4>
+          <a href="mailto:cs@bg.exchange">{{ $t('text072') }}</a
+          ><a href="#">{{ $t('text115') }}<br />{{ $t('text116') }}</a>
         </div>
       </div>
     </footer>

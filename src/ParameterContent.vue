@@ -1,4 +1,5 @@
 <script setup>
+import { tr, formatCell } from './i18n'
 import { ref } from 'vue'
 const active = ref('fees')
 const detail = ref(null)
@@ -34,65 +35,70 @@ const summaries = [
 
 <template>
   <main class="parameter-main">
-    <h1>参数查询</h1>
-    <p class="parameter-description">查看您的费率、可交易品种和交易限额</p>
+    <h1>{{ $t('text012') }}</h1>
+    <p class="parameter-description">{{ $t('text245') }}</p>
     <el-tabs
       v-model="active"
       class="parameter-tabs"
     >
       <el-tab-pane
-        label="费率查询"
+        :label="$t('text246')"
         name="fees"
       >
         <el-table :data="fees">
           <el-table-column
+            :formatter="formatCell"
             v-for="(label, i) in ['交易对', 'Maker 费率', 'Taker 费率', '提币费率', '生效时间']"
             :key="label"
-            :label="label"
+            :label="tr(label)"
             :prop="String(i)"
             min-width="150"
           />
         </el-table>
-        <p class="parameter-note">* 费率以平台最新公告为准，专业投资者可享受费率优惠</p>
+        <p class="parameter-note">{{ $t('text252') }}</p>
       </el-tab-pane>
       <el-tab-pane
-        label="可参与交易类型查询"
+        :label="$t('text253')"
         name="types"
       >
         <p class="investor-summary">
-          <el-tag size="small">专业投资者</el-tag> 您当前可参与以下交易类型
+          <el-tag size="small">{{ $t('text131') }}</el-tag
+          >{{ $t('text254') }}
         </p>
         <el-table :data="types">
           <el-table-column
-            label="交易类型"
+            :formatter="formatCell"
+            :label="$t('text255')"
             prop="0"
             min-width="130"
           />
           <el-table-column
-            label="状态"
+            :label="$t('text063')"
             min-width="120"
             ><template #default="{ row }"
               ><el-tag
                 :type="row[1] ? 'success' : 'danger'"
                 size="small"
-                >{{ row[1] ? '已开通' : '未开通' }}</el-tag
+                >{{ tr(row[1] ? '已开通' : '未开通') }}</el-tag
               ></template
             ></el-table-column
           >
           <el-table-column
-            label="可交易币对"
+            :formatter="formatCell"
+            :label="$t('text258')"
             prop="2"
             min-width="390"
           />
           <el-table-column
-            label="说明"
+            :formatter="formatCell"
+            :label="$t('text053')"
             prop="3"
             min-width="260"
           />
         </el-table>
       </el-tab-pane>
       <el-tab-pane
-        label="限额查询"
+        :label="$t('text259')"
         name="limits"
       >
         <div class="limit-summaries">
@@ -100,20 +106,21 @@ const summaries = [
             v-for="item in summaries"
             :key="item.title"
           >
-            <p>{{ item.title }}</p>
-            <strong>Total: {{ item.total }} | Used: 0%</strong>
+            <p>{{ tr(item.title) }}</p>
+            <strong>{{ tr('Total:') }} {{ tr(item.total) }} | {{ tr('Used:') }} 0%</strong>
             <el-button
               link
               @click="detail = item"
-              >Details</el-button
+              >{{ tr('Details') }}</el-button
             >
           </div>
         </div>
         <el-table :data="limits">
           <el-table-column
+            :formatter="formatCell"
             v-for="(label, i) in ['限额类型', '单笔限额', '日累计限额', '月累计限额', '当前已用']"
             :key="label"
-            :label="label"
+            :label="tr(label)"
             :prop="String(i)"
             min-width="150"
           />
@@ -122,7 +129,7 @@ const summaries = [
     </el-tabs>
     <el-dialog
       :model-value="!!detail"
-      :title="detail?.title"
+      :title="tr(detail?.title)"
       width="480px"
       @close="detail = null"
     >
@@ -130,10 +137,10 @@ const summaries = [
         v-if="detail"
         :column="1"
         border
-        ><el-descriptions-item label="总限额">{{ detail.total }}</el-descriptions-item
-        ><el-descriptions-item label="已用">0 HKD (0%)</el-descriptions-item
-        ><el-descriptions-item label="剩余额度">{{
-          detail.total
+        ><el-descriptions-item :label="$t('text265')">{{ tr(detail.total) }}</el-descriptions-item
+        ><el-descriptions-item :label="$t('text266')">0 HKD (0%)</el-descriptions-item
+        ><el-descriptions-item :label="$t('text267')">{{
+          tr(detail.total)
         }}</el-descriptions-item></el-descriptions
       >
     </el-dialog>

@@ -1,4 +1,6 @@
 <script setup>
+import LanguageSwitcher from './LanguageSwitcher.vue'
+import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import {
@@ -26,16 +28,18 @@ import {
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
-        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
+        ><a href="#">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
-          >公司 <el-icon><ArrowDown /></el-icon
+          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
       </nav>
       <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
-        ><span
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
           class="account-divider"
           aria-hidden="true"
         ></span>
@@ -45,102 +49,102 @@ import {
     <div class="user-layout">
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>总览</a
+          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
         ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>身份认证</a
+          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
         ><a
           class="sel"
           href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>账户安全</a
+          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>收付款管理</a
+          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
         ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>参数查询</a
+          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>API管理</a
+          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
       </aside>
       <main class="security-main">
         <section class="security-setting">
           <div>
-            <h3>登录密码</h3>
-            <p>用于账户登录，请定期修改密码保障账户安全</p>
+            <h3>{{ $t('text014') }}</h3>
+            <p>{{ $t('text015') }}</p>
           </div>
-          <a>更改密码</a>
+          <a>{{ $t('text016') }}</a>
         </section>
         <section class="security-setting">
           <div>
-            <h3>交易密码</h3>
-            <p>用户现货交易下单前的验证，保障下单环境安全</p>
+            <h3>{{ $t('text017') }}</h3>
+            <p>{{ $t('text018') }}</p>
           </div>
-          <a>设置交易密码</a>
+          <a>{{ $t('text019') }}</a>
         </section>
         <section class="security-setting">
           <div>
-            <h3>结单密码</h3>
-            <p>结单需要通过系统生成的密码解密才能查看（第一次生成结单和重置结单密码时发送）</p>
+            <h3>{{ $t('text020') }}</h3>
+            <p>{{ $t('text021') }}</p>
           </div>
-          <div><a>查看密码</a><a>重置密码</a><a>接收方式</a></div>
+          <div>
+            <a>{{ $t('text022') }}</a
+            ><a>{{ $t('text023') }}</a
+            ><a>{{ $t('text024') }}</a>
+          </div>
         </section>
         <section class="security-setting twofa">
-          <h3>双重验证（2FA）</h3>
-          <p>这些设备/软件正在保护您的账户安全，账户的关键操作均需通过它们的验证方可执行</p>
+          <h3>{{ $t('text025') }}</h3>
+          <p>{{ $t('text026') }}</p>
           <div class="verify-grid">
-            <div>◎　邮箱验证<small>更改邮箱</small></div>
-            <div>▢　手机验证<small>未绑定</small></div>
-            <div>Ⓖ　谷歌验证<small>更改GA</small></div>
+            <div>
+              {{ $t('text027') }}<small>{{ $t('text028') }}</small>
+            </div>
+            <div>
+              {{ $t('text029') }}<small>{{ $t('text030') }}</small>
+            </div>
+            <div>
+              {{ $t('text031') }}<small>{{ $t('text032') }}</small>
+            </div>
           </div>
         </section>
         <section class="security-setting">
           <div>
-            <h3>防钓鱼码</h3>
-            <p>通过设置防钓鱼码，您能够辨别您收到的邮件是否来自 BGE</p>
+            <h3>{{ $t('text033') }}</h3>
+            <p>{{ $t('text034') }}</p>
           </div>
-          <a>修改防钓鱼码</a>
+          <a>{{ $t('text035') }}</a>
         </section>
         <section class="security-setting">
           <div>
-            <h3>营销通知</h3>
-            <p>开启则代表接受我们的营销推广/类内容</p>
+            <h3>{{ $t('text036') }}</h3>
+            <p>{{ $t('text037') }}</p>
           </div>
-          <div class="checks">☑ 短信　 ☑ 站内信　 ☑ 邮件</div>
+          <div class="checks">{{ $t('text038') }}</div>
         </section>
         <section class="security-setting">
           <div>
-            <h3>通知语言</h3>
-            <p>此项设置会影响Email，SMS、站内信的发送语言</p>
+            <h3>{{ $t('text039') }}</h3>
+            <p>{{ $t('text040') }}</p>
           </div>
-          <div>◯ 繁體中文　 ◯ 简体中文　 <b>◉ English</b></div>
+          <div>{{ $t('text041') }}<b>◉ English</b></div>
         </section>
         <section class="security-setting devices">
           <div>
-            <h3>已授权设备</h3>
-            <p>
-              以下设备是通过您的2FA授权验证的设备，如果移除某个设备，则下次使用该设备登录时需重新授权（验证所有2FA）
-            </p>
+            <h3>{{ $t('text042') }}</h3>
+            <p>{{ $t('text043') }}</p>
           </div>
-          <a>移除所有</a>
-          <div class="device-row">
-            ●　 OSX Chrome 152.0.0　　2026-09-23 15:55:22　 IP地址: 116.149.145.110　 中国香港
-          </div>
-          <div class="device-row">
-            ●　 OSX Chrome 152.0.0　　2026-09-15 17:04:54　 IP地址: 10.23.6.129
-          </div>
+          <a>{{ $t('text044') }}</a>
+          <div class="device-row">{{ $t('text045') }}</div>
+          <div class="device-row">{{ $t('text046') }}</div>
         </section>
         <section class="security-setting activity">
-          <h3>账户活动</h3>
-          <p>您的账户登录、密码修改、2FA变更等操作历史</p>
-          <div class="activity-head">
-            创建时间　　　　　　　活动　　　　　　　　　设备　　　　　　　　　　　　　　
-            IP地址　　　　　　　　　地区
-          </div>
+          <h3>{{ $t('text047') }}</h3>
+          <p>{{ $t('text048') }}</p>
+          <div class="activity-head">{{ $t('text049') }}</div>
           <div
             v-for="i in 5"
             :key="i"
             class="activity-row"
           >
-            2026-09-23 15:55:22　　　 登录　　　　　　　　　 OSX Chrome
-            152.0.0　　　　　　　　　116.49.145.110　　　　　 中国香港
+            {{ $t('text050') }}
           </div>
         </section>
       </main>

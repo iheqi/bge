@@ -1,4 +1,6 @@
 <script setup>
+import { tr, formatCell } from './i18n'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ref, computed } from 'vue'
@@ -72,7 +74,7 @@ function toggleFavorite(pair) {
   } catch {}
 }
 function trade() {
-  ElMessage.info('现货交易页面尚未开放')
+  ElMessage.info(tr('现货交易页面尚未开放'))
 }
 </script>
 <template>
@@ -88,16 +90,19 @@ function trade() {
           height="28"
       /></a>
       <nav>
-        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/otc">场外</a
+        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
+        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
         ><a
           class="active"
           href="/bge/hk/zh-CN/market"
-          >行情</a
-        ><a href="#">现货交易</a><a href="/bge/hk/zh-CN/about">公司</a>
+          >{{ $t('text001') }}</a
+        ><a href="#">{{ $t('text003') }}</a
+        ><a href="/bge/hk/zh-CN/about">{{ $t('text004') }}</a>
       </nav>
       <div class="market-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
-        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu />
+        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
+        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
+        ><MessageBell /><UserMenu /><LanguageSwitcher />
       </div>
     </header>
     <section class="market-tickers">
@@ -111,23 +116,23 @@ function trade() {
             <span
               class="coin-symbol"
               :class="{ ethereum: index === 1 }"
-              >{{ index === 0 ? '₿' : '♦' }}</span
-            >{{ coin[0]
+              >{{ tr(index === 0 ? '₿' : '♦') }}</span
+            >{{ tr(coin[0])
             }}<span
               class="ticker-change"
               :class="{ negative: index === 0 }"
-              >{{ coin[3] }}</span
+              >{{ tr(coin[3]) }}</span
             >
           </div>
           <div class="ticker-price">
-            <strong>{{ coin[1] }}</strong
-            ><small>{{ coin[2] }}</small>
+            <strong>{{ tr(coin[1]) }}</strong
+            ><small>{{ tr(coin[2]) }}</small>
           </div>
           <div class="ticker-volume">
-            24H Vol {{ index === 0 ? '2,405.25206' : '0.00000'
+            24H Vol {{ tr(index === 0 ? '2,405.25206' : '0.00000')
             }}<button
-              title="交易"
-              aria-label="交易"
+              :title="$t('text145')"
+              :aria-label="$t('text145')"
               @click="trade"
             >
               <el-icon><ArrowRight /></el-icon>
@@ -137,12 +142,12 @@ function trade() {
       </div>
     </section>
     <main class="market-container market-main">
-      <h1>行情</h1>
+      <h1>{{ $t('text001') }}</h1>
       <div class="market-toolbar">
         <div
           class="market-modes"
           role="tablist"
-          aria-label="市场类型"
+          :aria-label="$t('text146')"
         >
           <button
             v-for="mode in [
@@ -156,22 +161,22 @@ function trade() {
             :class="{ selected: tab === mode[0] }"
             @click="tab = mode[0]"
           >
-            <el-icon v-if="mode[0] === 'favorites'"><StarFilled /></el-icon>{{ mode[1] }}
+            <el-icon v-if="mode[0] === 'favorites'"><StarFilled /></el-icon>{{ tr(mode[1]) }}
           </button>
         </div>
         <el-input
           v-model="search"
           class="market-search"
           :prefix-icon="Search"
-          placeholder="搜索币种"
-          aria-label="搜索币种"
+          :placeholder="$t('text150')"
+          :aria-label="$t('text150')"
           clearable
         />
       </div>
       <div
         class="quote-tabs"
         role="tablist"
-        aria-label="报价币"
+        :aria-label="$t('text151')"
       >
         <button
           v-for="item in [
@@ -185,24 +190,27 @@ function trade() {
           :class="{ active: quote === item[0] }"
           @click="quote = item[0]"
         >
-          {{ item[1] }}
+          {{ tr(item[1]) }}
         </button>
       </div>
       <el-table
         :data="filtered"
         class="market-table"
         :empty-text="
-          tab === 'contract'
-            ? '暂无合约行情'
-            : tab === 'favorites'
-              ? '暂无符合条件的自选行情'
-              : '暂无匹配行情'
+          tr(
+            tab === 'contract'
+              ? '暂无合约行情'
+              : tab === 'favorites'
+                ? '暂无符合条件的自选行情'
+                : '暂无匹配行情',
+          )
         "
         @sort-change="({ prop, order }) => (sort = { key: prop, order })"
       >
         <el-table-column
+          :formatter="formatCell"
           prop="pair"
-          label="市场"
+          :label="$t('text156')"
           sortable="custom"
           min-width="180"
           ><template #default="{ row }"
@@ -211,64 +219,71 @@ function trade() {
                 class="favorite-toggle"
                 :class="{ saved: favorites.includes(row.pair) }"
                 :aria-pressed="favorites.includes(row.pair)"
-                :aria-label="(favorites.includes(row.pair) ? '取消自选 ' : '添加自选 ') + row.pair"
-                :title="favorites.includes(row.pair) ? '取消自选' : '添加自选'"
+                :aria-label="
+                  tr(favorites.includes(row.pair) ? '取消自选' : '添加自选') + ' ' + row.pair
+                "
+                :title="tr(favorites.includes(row.pair) ? '取消自选' : '添加自选')"
                 @click="toggleFavorite(row.pair)"
               >
                 <el-icon><StarFilled /></el-icon></button
-              ><span>{{ row.pair }}</span
+              ><span>{{ tr(row.pair) }}</span
               ><small
                 v-if="row.hot"
                 class="hot-label"
-                >热门</small
+                >{{ $t('text159') }}</small
               >
             </div></template
           ></el-table-column
         >
         <el-table-column
+          :formatter="formatCell"
           prop="price"
-          label="最新价"
+          :label="$t('text160')"
           sortable="custom"
           min-width="230"
           ><template #default="{ row }"
-            >{{ row.price
+            >{{ tr(row.price)
             }}<span
               v-if="row.fiat !== '--'"
               class="fiat-price"
-              >/ {{ row.fiat }}</span
+              >/ {{ tr(row.fiat) }}</span
             ></template
           ></el-table-column
         >
         <el-table-column
+          :formatter="formatCell"
           prop="change"
-          label="涨跌幅"
+          :label="$t('text161')"
           sortable="custom"
           min-width="115"
           ><template #default="{ row }"
             ><span :class="{ negative: row.change.startsWith('-') }">{{
-              row.change
+              tr(row.change)
             }}</span></template
           ></el-table-column
         >
         <el-table-column
+          :formatter="formatCell"
           prop="high"
-          label="最高价"
+          :label="$t('text162')"
           sortable="custom"
           min-width="170"
         />
         <el-table-column
+          :formatter="formatCell"
           prop="low"
-          label="最低价"
+          :label="$t('text163')"
           sortable="custom"
           min-width="170"
         />
         <el-table-column
+          :formatter="formatCell"
           prop="turnover"
-          label="24H成交额"
+          :label="$t('text164')"
           min-width="200"
         />
         <el-table-column
-          label="操作"
+          :label="$t('text065')"
           align="right"
           width="80"
           ><template #default
@@ -276,7 +291,7 @@ function trade() {
               class="market-trade"
               @click="trade"
             >
-              交易
+              {{ $t('text145') }}
             </button></template
           ></el-table-column
         >
