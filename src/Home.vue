@@ -26,7 +26,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
           >{{ $t('text000') }}</a
         ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
         ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
-        ><a href="#">{{ $t('text003') }}</a
+        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
         ><a
           class="company"
           href="/bge/hk/zh-CN/about"
@@ -113,7 +113,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
         </div>
         <div>
           <h4>{{ $t('text069') }}</h4>
-          <a href="#">{{ $t('text003') }}</a
+          <a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
           <h4 class="service">{{ $t('text108') }}</h4>
           <a href="#">{{ $t('text109') }}</a>

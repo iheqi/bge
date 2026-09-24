@@ -3,6 +3,7 @@ import { elementLocale } from './i18n'
 import UserMenu from './UserMenu.vue'
 import { computed } from 'vue'
 import Home from './Home.vue'
+import Spot from './Spot.vue'
 import Otc from './Otc.vue'
 import Company from './Company.vue'
 import UserCenter from './UserCenter.vue'
@@ -45,6 +46,7 @@ const page = computed(() =>
 <template>
   <el-config-provider :locale="elementLocale">
     <MessageCenter v-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
+    <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
     <Otc v-else-if="page === 'otc'" />
     <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters')" />
     <Market v-else-if="page === 'market'" />

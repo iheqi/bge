@@ -365,5 +365,6 @@
   "text363": "{count}天前",
   "rewardCompleted": "恭喜您完成任务，请前往奖励中心领取或查看奖励。",
   "currencyLabel": "显示币种",
-  "currencyRate": "参考汇率"
+  "currencyRate": "参考汇率",
+  "spotPlaceholder": "交易页面（Demo中略，参考BGE现有现货交易页）"
 }

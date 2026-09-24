@@ -52,7 +52,7 @@ const cards = [
           <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
           ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
-          ><a>{{ $t('text003') }}</a>
+          ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a>
           <div
             ref="root"
             class="company-menu"
@@ -195,7 +195,7 @@ const cards = [
         </div>
         <div>
           <h4>{{ $t('text069') }}</h4>
-          <a>{{ $t('text003') }}</a
+          <a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
           <h4 class="service">{{ $t('text108') }}</h4>
           <a>{{ $t('text109') }}</a>

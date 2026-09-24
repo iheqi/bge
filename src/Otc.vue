@@ -49,7 +49,7 @@ const faqs = [
           class="on"
           href="/bge/hk/zh-CN/otc"
           >{{ $t('text002') }}</a
-        ><a href="#">{{ $t('text003') }}</a
+        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
           >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>
@@ -153,7 +153,7 @@ const faqs = [
         </div>
         <div>
           <h4>{{ $t('text069') }}</h4>
-          <a href="#">{{ $t('text003') }}</a
+          <a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
           <h4>{{ $t('text108') }}</h4>
           <a href="#">{{ $t('text109') }}</a>

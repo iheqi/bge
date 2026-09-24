@@ -47,7 +47,7 @@ const coins = [
         <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
         ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
         ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
-        ><a>{{ $t('text003') }}</a
+        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about"
           >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
         ></a>

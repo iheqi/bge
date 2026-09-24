@@ -7,7 +7,6 @@ import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ref, computed } from 'vue'
 import { Search, StarFilled, ArrowRight } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
@@ -109,7 +108,7 @@ function toggleFavorite(pair) {
   } catch {}
 }
 function trade() {
-  ElMessage.info(tr('现货交易页面尚未开放'))
+  window.location.href = '/bge/hk/zh-CN/spot'
 }
 </script>
 <template>
@@ -131,7 +130,7 @@ function trade() {
           class="active"
           href="/bge/hk/zh-CN/market"
           >{{ $t('text001') }}</a
-        ><a href="#">{{ $t('text003') }}</a
+        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
         ><a href="/bge/hk/zh-CN/about">{{ $t('text004') }}</a>
       </nav>
       <div class="market-right">

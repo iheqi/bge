@@ -365,5 +365,6 @@
   "text363": "{count} days ago",
   "rewardCompleted": "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.",
   "currencyLabel": "Display currency",
-  "currencyRate": "Reference rate"
+  "currencyRate": "Reference rate",
+  "spotPlaceholder": "Trading page (omitted in this demo; refer to the existing BGE spot trading page)"
 }
