@@ -1,11 +1,12 @@
 <script setup>
 import { useClickDropdown } from './useClickDropdown'
 import { computed } from 'vue'
-import { i18n, languages, setLanguage, tr } from './i18n'
+import { tr } from './i18n'
+import { currency, currencies, setCurrency } from './currency'
 const { root, open } = useClickDropdown()
-const current = computed(() => languages.find((item) => item.value === i18n.global.locale.value))
+const current = computed(() => ({ value: currency.value, label: currency.value }))
 function select(value) {
-  setLanguage(value)
+  setCurrency(value)
   open.value = false
 }
 function leave(event) {
@@ -15,14 +16,14 @@ function leave(event) {
 
 <template>
   <div
-    class="language-switcher"
+    class="currency-switcher"
     ref="root"
     @focusout="leave"
   >
     <button
-      class="language-trigger"
+      class="currency-trigger"
       type="button"
-      :aria-label="tr('语言')"
+      :aria-label="tr('显示币种')"
       :aria-expanded="open"
       aria-haspopup="menu"
       @click="open = !open"
@@ -32,36 +33,36 @@ function leave(event) {
     </button>
     <div
       v-show="open"
-      class="language-options"
+      class="currency-options"
       role="menu"
-      :aria-label="tr('语言')"
+      :aria-label="tr('显示币种')"
     >
       <button
-        v-for="item in languages"
-        :key="item.value"
-        class="language-option"
+        v-for="value in currencies"
+        :key="value"
+        class="currency-option"
         type="button"
         role="menuitemradio"
-        :aria-checked="current.value === item.value"
-        :class="{ selected: current.value === item.value }"
-        :lang="item.value"
-        @click="select(item.value)"
+        :aria-checked="current.value === value"
+        :class="{ selected: current.value === value }"
+        @click="select(value)"
       >
-        {{ item.label }}
+        {{ value }}
       </button>
+      <small class="currency-rate">{{ tr('参考汇率') }}<br />1 USD = 7.80 HKD</small>
     </div>
   </div>
 </template>
 
 <style scoped>
-.language-switcher {
+.currency-switcher {
   position: relative;
   display: flex;
   align-items: center;
   align-self: stretch;
   z-index: 40;
 }
-.language-switcher .language-trigger {
+.currency-switcher .currency-trigger {
   height: auto;
   border: 0;
   border-radius: 0;
@@ -72,18 +73,18 @@ function leave(event) {
   white-space: nowrap;
   cursor: pointer;
 }
-.language-options {
+.currency-options {
   position: absolute;
   top: 100%;
   right: 0;
-  width: 120px;
+  width: 180px;
   padding: 8px 0;
   background: #2d3443;
   border-radius: 16px;
   box-shadow: 0 6px 16px #0002;
   overflow: hidden;
 }
-.language-switcher .language-option {
+.currency-switcher .currency-option {
   display: block;
   width: 100%;
   height: 36px;
@@ -96,13 +97,20 @@ function leave(event) {
   font-size: 13px;
   cursor: pointer;
 }
-.language-switcher .language-option:hover,
-.language-switcher .language-option.selected {
+.currency-switcher .currency-option:hover,
+.currency-switcher .currency-option.selected {
   background: #3a4355;
   color: #f4ff19;
 }
-.language-switcher button:focus-visible {
+.currency-switcher button:focus-visible {
   outline: 2px solid #f4ff19;
   outline-offset: -2px;
+}
+.currency-rate {
+  display: block;
+  padding: 8px 16px;
+  color: #b8c0cf;
+  font-size: 11px;
+  line-height: 1.6;
 }
 </style>

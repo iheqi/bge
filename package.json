@@ -8,7 +8,8 @@
     "build": "vite build",
     "format": "prettier --write src index.html vite.config.js package.json .prettierrc.json",
     "format:check": "prettier --check src index.html vite.config.js package.json .prettierrc.json",
-    "test:i18n": "node scripts/check-i18n.mjs"
+    "test:i18n": "node scripts/check-i18n.mjs",
+    "test:currency": "node scripts/check-currency.mjs"
   },
   "dependencies": {
     "@element-plus/icons-vue": "latest",

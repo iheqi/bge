@@ -1,4 +1,5 @@
 <script setup>
+import { formatMoney, formatFiatText } from './currency'
 import { tr, formatCell } from './i18n'
 import { ref } from 'vue'
 const active = ref('fees')
@@ -107,7 +108,9 @@ const summaries = [
             :key="item.title"
           >
             <p>{{ tr(item.title) }}</p>
-            <strong>{{ tr('Total:') }} {{ tr(item.total) }} | {{ tr('Used:') }} 0%</strong>
+            <strong
+              >{{ tr('Total:') }} {{ formatFiatText(item.total) }} | {{ tr('Used:') }} 0%</strong
+            >
             <el-button
               link
               @click="detail = item"
@@ -117,7 +120,7 @@ const summaries = [
         </div>
         <el-table :data="limits">
           <el-table-column
-            :formatter="formatCell"
+            :formatter="(_row, _column, value) => tr(formatFiatText(value))"
             v-for="(label, i) in ['限额类型', '单笔限额', '日累计限额', '月累计限额', '当前已用']"
             :key="label"
             :label="tr(label)"
@@ -137,10 +140,13 @@ const summaries = [
         v-if="detail"
         :column="1"
         border
-        ><el-descriptions-item :label="$t('text265')">{{ tr(detail.total) }}</el-descriptions-item
-        ><el-descriptions-item :label="$t('text266')">0 HKD (0%)</el-descriptions-item
+        ><el-descriptions-item :label="$t('text265')">{{
+          formatFiatText(detail.total)
+        }}</el-descriptions-item
+        ><el-descriptions-item :label="$t('text266')"
+          >{{ formatMoney(0, 'HKD') }} (0%)</el-descriptions-item
         ><el-descriptions-item :label="$t('text267')">{{
-          tr(detail.total)
+          formatFiatText(detail.total)
         }}</el-descriptions-item></el-descriptions
       >
     </el-dialog>

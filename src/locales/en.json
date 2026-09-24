@@ -363,5 +363,7 @@
   "text361": "{count} minutes ago",
   "text362": "{count} hours ago",
   "text363": "{count} days ago",
-  "rewardCompleted": "Congratulations on completing the task, please go to the Reward Center to claim or view the reward."
+  "rewardCompleted": "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.",
+  "currencyLabel": "Display currency",
+  "currencyRate": "Reference rate"
 }

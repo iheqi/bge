@@ -1,9 +1,10 @@
 <script setup>
+import { useClickDropdown } from './useClickDropdown'
 import { computed, ref } from 'vue'
 import { Bell } from '@element-plus/icons-vue'
 import { tr, i18n } from './i18n'
 import { messages, unreadCount, markRead } from './messages'
-const open = ref(false)
+const { root, open } = useClickDropdown()
 const category = ref('all')
 const categories = [
   { id: 'all', label: '全部', value: null },
@@ -52,11 +53,8 @@ function leave(event) {
 <template>
   <div
     class="message-bell"
-    @mouseenter="open = true"
-    @mouseleave="open = false"
-    @focusin="open = true"
+    ref="root"
     @focusout="leave"
-    @keydown.esc="open = false"
   >
     <button
       class="message-trigger"

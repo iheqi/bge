@@ -1,5 +1,8 @@
 <script setup>
+import { useClickDropdown } from './useClickDropdown'
+const { root, open } = useClickDropdown()
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
@@ -50,11 +53,22 @@ const cards = [
           ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
           ><a>{{ $t('text003') }}</a>
-          <div class="company-menu">
-            <a
-              >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
-            ></a>
-            <div class="company-dropdown">
+          <div
+            ref="root"
+            class="company-menu"
+          >
+            <button
+              type="button"
+              class="company-menu-trigger"
+              :aria-expanded="open"
+              @click="open = !open"
+            >
+              {{ $t('text004') }}<el-icon><ArrowDown /></el-icon>
+            </button>
+            <div
+              v-show="open"
+              class="company-dropdown"
+            >
               <a
                 href="/bge/hk/zh-CN/about"
                 :class="{ selected: !security }"
@@ -74,7 +88,7 @@ const cards = [
             class="account-divider"
             aria-hidden="true"
           ></span
-          ><a>USD</a>
+          ><CurrencySwitcher />
         </div>
       </header>
       <div class="company-intro">

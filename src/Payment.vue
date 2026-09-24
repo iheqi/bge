@@ -1,5 +1,6 @@
 <script setup>
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
@@ -44,7 +45,7 @@ const crypto = window.location.pathname.includes('/crypto')
           class="account-divider"
           aria-hidden="true"
         ></span>
-        <a>USD</a>
+        <CurrencySwitcher />
       </div>
     </header>
     <div class="user-layout">

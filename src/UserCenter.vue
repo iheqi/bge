@@ -1,5 +1,7 @@
 <script setup>
+import { formatMoney } from './currency'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
@@ -60,7 +62,7 @@ const coins = [
           class="account-divider"
           aria-hidden="true"
         ></span>
-        <a>USD</a>
+        <CurrencySwitcher />
       </div>
     </header>
     <div class="user-layout">
@@ -124,7 +126,7 @@ const coins = [
               ><span>{{ $t('text334') }}</span>
             </div>
             <p class="label">{{ $t('text339') }}</p>
-            <strong>0.00000000</strong>
+            <strong>{{ formatMoney(0, 'USD', 4) }}</strong>
             <div>
               <button>{{ $t('text275') }}</button><button class="muted">{{ $t('text276') }}</button>
             </div>
@@ -146,7 +148,8 @@ const coins = [
         ><template v-else
           ><section class="asset-banner">
             <span>{{ $t('text341') }}</span
-            ><strong>0.00000000 BTC <small>≈ USD 0.0000</small></strong
+            ><strong
+              >0.00000000 BTC <small>≈ {{ formatMoney(0, 'USD', 4) }}</small></strong
             ><a>{{ $t('text342') }}</a>
           </section>
           <section class="asset-box">
@@ -156,7 +159,9 @@ const coins = [
             <p class="label">
               {{ tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text343') }}
             </p>
-            <strong>0.00000000 BTC <small>≈ USD 0.0000</small></strong>
+            <strong
+              >0.00000000 BTC <small>≈ {{ formatMoney(0, 'USD', 4) }}</small></strong
+            >
             <div class="asset-tools">
               <label>{{ $t('text344') }}</label>
               <div class="search">
@@ -182,7 +187,10 @@ const coins = [
                   ><small>{{ tr(coin[2]) }}</small></span
                 >
               </div>
-              <b>0.00000000</b><b>0.00000000</b><b>0.00000000<small>≈USD 0.0000</small></b>
+              <b>0.00000000</b><b>0.00000000</b
+              ><b
+                >0.00000000<small>≈ {{ formatMoney(0, 'USD', 4) }}</small></b
+              >
               <div>
                 <a class="disabled">{{ $t('text275') }}</a
                 ><a>{{ $t('text276') }}</a

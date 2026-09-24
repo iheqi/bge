@@ -363,5 +363,7 @@
   "{count}分钟前": "text361",
   "{count}小时前": "text362",
   "{count}天前": "text363",
-  "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.": "rewardCompleted"
+  "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.": "rewardCompleted",
+  "显示币种": "currencyLabel",
+  "参考汇率": "currencyRate"
 }

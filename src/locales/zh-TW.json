@@ -363,5 +363,7 @@
   "text361": "{count}分鐘前",
   "text362": "{count}小時前",
   "text363": "{count}天前",
-  "rewardCompleted": "恭喜您完成任務，請前往獎勵中心領取或查看獎勵。"
+  "rewardCompleted": "恭喜您完成任務，請前往獎勵中心領取或查看獎勵。",
+  "currencyLabel": "顯示幣種",
+  "currencyRate": "參考匯率"
 }

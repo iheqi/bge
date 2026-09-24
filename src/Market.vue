@@ -1,6 +1,8 @@
 <script setup>
+import { formatMoney } from './currency'
 import { tr, formatCell } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ref, computed } from 'vue'
@@ -9,25 +11,66 @@ import { ElMessage } from 'element-plus'
 const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
+// Quote prices remain immutable; USDT is valued at 1 USD in this demo dataset.
 const markets = [
-  [
-    'BTC/USDT',
-    '84,106.6420',
-    '¥ 564,474.11',
-    '-2.77%',
-    '86,542.9629',
-    '83,516.9365',
-    '¥ 13.69亿',
-    true,
-  ],
-  ['ETH/USDT', '4,981.810', '¥ 33,434.97', '0.00%', '4,981.810', '4,981.810', '¥ 0.00', true],
-  ['SOL/USDT', '175.49605', '¥ 1,177.83', '0.00%', '175.49605', '175.49605', '¥ 0.00'],
-  ['DOGE/USDT', '0.18128', '¥ 1.22', '0.00%', '0.18128', '0.18128', '¥ 0.00'],
-  ['ADA/USDT', '0.895476', '¥ 6.01', '0.00%', '0.895476', '0.895476', '¥ 0.00'],
-  ['ETH/BTC', '0.03348402', '¥ 18,911.19', '0.00%', '0.03348402', '0.03348402', '¥ 0.00', true],
-  ['EOS/USDT', '--/--', '--', '--', '--', '--', '--'],
-  ['ABCA/USDT', '1.0000', '¥ 6.71', '0.00%', '1.0000', '1.0000', '¥ 0.00'],
+  {
+    pair: 'BTC/USDT',
+    price: 84106.642,
+    change: '-2.77%',
+    high: 86542.9629,
+    low: 83516.9365,
+    // Legacy screenshot turnover was CNY 1.369 billion at approximately 6.7114 CNY/USD.
+    turnover: 1369000000 / 6.7114094,
+    hot: true,
+  },
+  {
+    pair: 'ETH/USDT',
+    price: 4981.81,
+    change: '0.00%',
+    high: 4981.81,
+    low: 4981.81,
+    turnover: 0,
+    hot: true,
+  },
+  {
+    pair: 'SOL/USDT',
+    price: 175.49605,
+    change: '0.00%',
+    high: 175.49605,
+    low: 175.49605,
+    turnover: 0,
+  },
+  { pair: 'DOGE/USDT', price: 0.18128, change: '0.00%', high: 0.18128, low: 0.18128, turnover: 0 },
+  {
+    pair: 'ADA/USDT',
+    price: 0.895476,
+    change: '0.00%',
+    high: 0.895476,
+    low: 0.895476,
+    turnover: 0,
+  },
+  {
+    pair: 'ETH/BTC',
+    price: 0.03348402,
+    change: '0.00%',
+    high: 0.03348402,
+    low: 0.03348402,
+    turnover: 0,
+    hot: true,
+  },
+  { pair: 'EOS/USDT', price: null, change: '--', high: null, low: null, turnover: null },
+  { pair: 'ABCA/USDT', price: 1, change: '0.00%', high: 1, low: 1, turnover: 0 },
 ]
+function usdPrice(row, value) {
+  return value === null ? null : value * (row.pair.endsWith('/BTC') ? markets[0].price : 1)
+}
+function priceCell(row, column, value) {
+  return formatMoney(
+    column.property === 'turnover' ? value : usdPrice(row, value),
+    'USD',
+    column.property === 'turnover' ? 2 : 6,
+  )
+}
 let saved = ['ETH/USDT']
 try {
   const value = JSON.parse(localStorage.getItem('bge-market-favorites'))
@@ -35,16 +78,7 @@ try {
 } catch {}
 const favorites = ref(saved)
 const sort = ref({ key: '', order: '' })
-const rows = markets.map((m) => ({
-  pair: m[0],
-  price: m[1],
-  fiat: m[2],
-  change: m[3],
-  high: m[4],
-  low: m[5],
-  turnover: m[6],
-  hot: m[7],
-}))
+const rows = markets
 const filtered = computed(() => {
   if (tab.value === 'contract') return []
   const result = rows.filter(
@@ -59,8 +93,9 @@ const filtered = computed(() => {
       const value =
         key === 'pair'
           ? a.pair.localeCompare(b.pair)
-          : (parseFloat(a[key].replaceAll(',', '')) || 0) -
-            (parseFloat(b[key].replaceAll(',', '')) || 0)
+          : key === 'change'
+            ? parseFloat(a[key]) - parseFloat(b[key])
+            : (usdPrice(a, a[key]) ?? -Infinity) - (usdPrice(b, b[key]) ?? -Infinity)
       return sort.value.order === 'ascending' ? value : -value
     })
   return result
@@ -102,14 +137,14 @@ function trade() {
       <div class="market-right">
         <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
         ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
-        ><MessageBell /><UserMenu /><LanguageSwitcher />
+        ><MessageBell /><UserMenu /><LanguageSwitcher /><CurrencySwitcher />
       </div>
     </header>
     <section class="market-tickers">
       <div class="market-container ticker-cards">
         <article
           v-for="(coin, index) in markets.slice(0, 2)"
-          :key="coin[0]"
+          :key="coin.pair"
           class="ticker-card"
         >
           <div class="ticker-title">
@@ -117,16 +152,16 @@ function trade() {
               class="coin-symbol"
               :class="{ ethereum: index === 1 }"
               >{{ tr(index === 0 ? '₿' : '♦') }}</span
-            >{{ tr(coin[0])
+            >{{ coin.pair
             }}<span
               class="ticker-change"
               :class="{ negative: index === 0 }"
-              >{{ tr(coin[3]) }}</span
+              >{{ coin.change }}</span
             >
           </div>
           <div class="ticker-price">
-            <strong>{{ tr(coin[1]) }}</strong
-            ><small>{{ tr(coin[2]) }}</small>
+            <strong>{{ formatMoney(usdPrice(coin, coin.price), 'USD', 6) }}</strong
+            ><small>{{ coin.price + ' ' + coin.pair.split('/')[1] }}</small>
           </div>
           <div class="ticker-volume">
             24H Vol {{ tr(index === 0 ? '2,405.25206' : '0.00000')
@@ -242,11 +277,11 @@ function trade() {
           sortable="custom"
           min-width="230"
           ><template #default="{ row }"
-            >{{ tr(row.price)
+            >{{ formatMoney(usdPrice(row, row.price), 'USD', 6)
             }}<span
-              v-if="row.fiat !== '--'"
+              v-if="row.price !== null"
               class="fiat-price"
-              >/ {{ tr(row.fiat) }}</span
+              >/ {{ row.price }} {{ row.pair.split('/')[1] }}</span
             ></template
           ></el-table-column
         >
@@ -263,21 +298,21 @@ function trade() {
           ></el-table-column
         >
         <el-table-column
-          :formatter="formatCell"
+          :formatter="priceCell"
           prop="high"
           :label="$t('text162')"
           sortable="custom"
           min-width="170"
         />
         <el-table-column
-          :formatter="formatCell"
+          :formatter="priceCell"
           prop="low"
           :label="$t('text163')"
           sortable="custom"
           min-width="170"
         />
         <el-table-column
-          :formatter="formatCell"
+          :formatter="priceCell"
           prop="turnover"
           :label="$t('text164')"
           min-width="200"

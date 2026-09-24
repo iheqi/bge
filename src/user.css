@@ -309,10 +309,7 @@
   z-index: 10;
   box-shadow: 0 8px 18px #0002;
 }
-.user-nav:hover + .global-avatar-menu,
-.global-avatar-menu:hover {
-  display: block;
-}
+
 .global-avatar-menu a {
   display: flex;
   align-items: center;

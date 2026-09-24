@@ -1,4 +1,6 @@
 <script setup>
+import { useClickDropdown } from './useClickDropdown'
+const { root, open } = useClickDropdown()
 import { tr } from './i18n'
 const links = [
   ['总览', 'dashboard'],
@@ -11,18 +13,28 @@ const links = [
 </script>
 
 <template>
-  <div class="account-menu">
-    <a
+  <div
+    ref="root"
+    class="account-menu"
+  >
+    <button
+      type="button"
       class="avatar"
-      href="/bge/hk/zh-CN/user/dashboard"
+      :aria-expanded="open"
+      @click="open = !open"
       :aria-label="$t('text184')"
-      ><img
+    >
+      <img
         src="/avatar.png"
         alt=""
         width="30"
         height="30"
-    /></a>
-    <div class="account-menu-panel">
+      />
+    </button>
+    <div
+      v-show="open"
+      class="account-menu-panel"
+    >
       <div class="account-menu-profile">
         <b>heqi**gic@gmail.com</b><small>UID: 8395618828</small>
       </div>
@@ -46,7 +58,6 @@ const links = [
   z-index: 31;
 }
 .account-menu-panel {
-  display: none;
   position: absolute;
   top: 100%;
   right: 0;
@@ -57,9 +68,11 @@ const links = [
   border-radius: 0 0 6px 6px;
   box-shadow: 0 8px 18px #0002;
 }
-.account-menu:hover .account-menu-panel,
-.account-menu:focus-within .account-menu-panel {
-  display: block;
+.account-menu > .avatar {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 .account-menu-profile {
   padding: 8px 12px 16px;

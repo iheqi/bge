@@ -1,6 +1,7 @@
 <script setup>
 import { tr } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import { computed, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
 import MessageBell from './MessageBell.vue'
@@ -72,7 +73,7 @@ async function deleteAll() {
             alt=""
             width="30"
             height="30" /></a
-        ><LanguageSwitcher />
+        ><LanguageSwitcher /><CurrencySwitcher />
       </div>
     </header>
     <main class="message-layout">

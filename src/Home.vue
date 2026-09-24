@@ -1,5 +1,6 @@
 <script setup>
 import LanguageSwitcher from './LanguageSwitcher.vue'
+import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
@@ -39,7 +40,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
           class="account-divider"
           aria-hidden="true"
         ></span
-        ><a href="#">USD</a>
+        ><CurrencySwitcher />
       </div>
     </header>
 

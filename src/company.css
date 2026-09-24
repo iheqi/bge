@@ -42,11 +42,15 @@
   background: #30394b;
   border-radius: 15px;
   overflow: hidden;
-  display: none;
   z-index: 3;
 }
-.company-menu:hover .company-dropdown {
-  display: block;
+.company-menu-trigger {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 .company-dropdown a {
   display: block;
