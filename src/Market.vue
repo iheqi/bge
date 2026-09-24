@@ -38,7 +38,7 @@ function trade() { ElMessage.info('现货交易页面尚未开放') }
 </script>
 <template>
   <div class="market-page">
-    <header class="market-nav"><a class="market-brand" href="/hk/zh-CN/"><img src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a><nav><a href="/hk/zh-CN/">首页</a><a href="/hk/zh-CN/otc">场外</a><a class="active" href="/hk/zh-CN/market">行情</a><a href="#">现货交易</a><a href="/hk/zh-CN/about">公司</a></nav><div class="market-right"><a href="/hk/zh-CN/user/report/spot">账户记录</a><a href="/hk/zh-CN/user/assets">资产管理</a><MessageBell/><UserMenu/></div></header>
+    <header class="market-nav"><a class="market-brand" href="/bge/hk/zh-CN/"><img src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a><nav><a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/otc">场外</a><a class="active" href="/bge/hk/zh-CN/market">行情</a><a href="#">现货交易</a><a href="/bge/hk/zh-CN/about">公司</a></nav><div class="market-right"><a href="/bge/hk/zh-CN/user/report/spot">订单</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell/><UserMenu/></div></header>
     <section class="market-tickers"><div class="market-container ticker-cards">
       <article v-for="(coin, index) in markets.slice(0,2)" :key="coin[0]" class="ticker-card">
         <div class="ticker-title"><span class="coin-symbol" :class="{ethereum:index===1}">{{ index === 0 ? '₿' : '♦' }}</span>{{coin[0]}}<span class="ticker-change" :class="{negative:index===0}">{{coin[3]}}</span></div>

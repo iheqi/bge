@@ -15,10 +15,10 @@ function leave(event) {
     </button>
     <div v-show="open" id="message-preview" class="message-preview">
       <div class="preview-body">
-        <a v-for="message in messages.slice(0, 4)" :key="message.id" class="preview-message" href="/hk/zh-CN/user/messages" @click="markRead(message.id)">{{ message.text }}</a>
+        <a v-for="message in messages.slice(0, 4)" :key="message.id" class="preview-message" href="/bge/hk/zh-CN/user/messages" @click="markRead(message.id)">{{ message.text }}</a>
         <p v-if="!messages.length" class="preview-empty">暂无消息</p>
       </div>
-      <a class="preview-more" href="/hk/zh-CN/user/messages">查看所有消息</a>
+      <a class="preview-more" href="/bge/hk/zh-CN/user/messages">查看所有消息</a>
     </div>
   </div>
 </template>

@@ -10,11 +10,11 @@ const links = [
 
 <template>
   <div class="account-menu">
-    <a class="avatar" href="/hk/zh-CN/user/dashboard" aria-label="个人中心"><img src="/avatar.png" alt="" width="30" height="30" /></a>
+    <a class="avatar" href="/bge/hk/zh-CN/user/dashboard" aria-label="个人中心"><img src="/avatar.png" alt="" width="30" height="30" /></a>
     <div class="account-menu-panel">
       <div class="account-menu-profile"><b>heqi**gic@gmail.com</b><small>UID: 8395618828</small></div>
-      <a v-for="[label, path] in links" :key="path" :href="'/hk/zh-CN/user/' + path">{{ label }}</a>
-      <a href="/hk/zh-CN/">退出登录</a>
+      <a v-for="[label, path] in links" :key="path" :href="'/bge/hk/zh-CN/user/' + path">{{ label }}</a>
+      <a href="/bge/hk/zh-CN/">退出登录</a>
     </div>
   </div>
 </template>
