@@ -1,4 +1,14 @@
 /* Stretch the bell's hover target to the header edge, keeping its panel reachable. */
-.user-right,.right-links,.company-account,.otc-right{align-self:stretch}
-.user-page .user-nav:hover + .global-avatar-menu{display:none}
-.user-page .user-nav:has(.user-right>.avatar:hover) + .global-avatar-menu,.user-page .global-avatar-menu:hover{display:block}
+.user-right,
+.right-links,
+.company-account,
+.otc-right {
+  align-self: stretch;
+}
+.user-page .user-nav:hover + .global-avatar-menu {
+  display: none;
+}
+.user-page .user-nav:has(.user-right > .avatar:hover) + .global-avatar-menu,
+.user-page .global-avatar-menu:hover {
+  display: block;
+}

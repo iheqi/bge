@@ -2,14 +2,171 @@
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown, Tickets, Calendar } from '@element-plus/icons-vue'
-const path=window.location.pathname
-const type=path.includes('/wallet')?'wallet':path.includes('/otc-orders')?'otc':path.includes('/settle')?'settle':'spot'
-const tabs=[['spot','现货交易记录','/bge/hk/zh-CN/user/report/spot'],['wallet','钱包操作记录','/bge/hk/zh-CN/user/report/wallet'],['otc','OTC 订单','/bge/hk/zh-CN/user/report/otc-orders'],['settle','结单记录','/bge/hk/zh-CN/user/report/settle']]
+const path = window.location.pathname
+const type = path.includes('/wallet')
+  ? 'wallet'
+  : path.includes('/otc-orders')
+    ? 'otc'
+    : path.includes('/settle')
+      ? 'settle'
+      : 'spot'
+const tabs = [
+  ['spot', '现货交易记录', '/bge/hk/zh-CN/user/report/spot'],
+  ['wallet', '钱包操作记录', '/bge/hk/zh-CN/user/report/wallet'],
+  ['otc', 'OTC 订单', '/bge/hk/zh-CN/user/report/otc-orders'],
+  ['settle', '结单记录', '/bge/hk/zh-CN/user/report/settle'],
+]
 </script>
 <style scoped>
-.user-layout .order-sidebar{flex:0 0 220px;width:220px}
-.user-layout .order-sidebar a{padding:0 24px;white-space:nowrap}
-.report-main{min-width:0}
-.order-title{margin:0;padding:0 0 22px;border-bottom:1px solid #dce2eb;font-size:22px;font-weight:500}
+.user-layout .order-sidebar {
+  flex: 0 0 220px;
+  width: 220px;
+}
+.user-layout .order-sidebar a {
+  padding: 0 24px;
+  white-space: nowrap;
+}
+.report-main {
+  min-width: 0;
+}
+.order-title {
+  margin: 0;
+  padding: 0 0 22px;
+  border-bottom: 1px solid #dce2eb;
+  font-size: 22px;
+  font-weight: 500;
+}
 </style>
-<template><div class="user-page report-page"><header class="user-nav"><a class="brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a><nav><a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a><a href="/bge/hk/zh-CN/about">公司 <el-icon><ArrowDown/></el-icon></a></nav><div class="user-right"><a class="active" href="/bge/hk/zh-CN/user/report/spot">订单</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a><span class="account-divider" aria-hidden="true"></span> <a>USD</a></div></header><div class="user-layout"><aside class="order-sidebar" aria-label="订单导航"><a v-for="tab in tabs" :key="tab[0]" :href="tab[2]" :class="{sel:type===tab[0]}" :aria-current="type===tab[0] ? 'page' : undefined"><el-icon><Tickets /></el-icon>{{tab[1]}}</a></aside><main class="report-main"><section class="report-box"><h1 class="order-title">{{ tabs.find(tab => tab[0] === type)[1] }}</h1><template v-if="type==='spot'"><div class="sub-tabs"><b>当前委托</b><span>历史委托</span><span>历史成交</span></div><div class="filters"><button>交易对⌄</button><button>订单类型⌄</button><button class="yellow">搜索</button><button>重置</button></div><div class="table-head spot-head"><span>委托时间</span><span>交易对</span><span>订单类型</span><span>买卖方向</span><span>当前价格</span><span>委托价格</span><span>委托数量</span><span>成交数量</span><span>操作</span></div></template><template v-else-if="type==='wallet'"><div class="sub-tabs"><b>数字资产</b><span>法币</span><span>划转</span><span>跨账号快速划转</span></div><div class="filters"><button>存款⌄</button><button>全部币种⌄</button><button>全部状态⌄</button><button class="date"><el-icon><Calendar/></el-icon>2026-06-26　至　2026-09-23</button><button class="yellow">搜索</button><button>重置</button></div><div class="table-head wallet-head"><span>时间</span><span>数字货币</span><span>网络</span><span>数量</span><span>状态</span><span>发起方地址</span><span>地址备注</span></div></template><template v-else-if="type==='otc'"><div class="sub-tabs"><b>买卖意向单</b><span>OTC匹配单</span></div><div class="filters"><button>交易对⌄</button><button>状态⌄</button><button class="date">▣　2026-06-26　至　2026-09-23</button><button class="yellow">搜索</button><button>重置</button></div><div class="table-head otc-head"><span>时间</span><span>买卖方向</span><span>支付币种</span><span>获得币种</span><span>购买/出售数量</span><span>状态</span></div></template><template v-else><div class="sub-tabs"><b>全部</b><span>日结单</span><span>月结单</span><em>我们建议使用Adobe Acrobat Reader查看结单。使用浏览器可能会导致显示问题。</em><button>结单密码</button></div><div class="table-head settle-head"><span>结单名称</span><span>操作</span></div></template><div class="no-data">暂无数据</div><div class="pager">‹　›</div></section></main></div><footer><div class="footer-inner"><a class="brand footer-brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge.svg" alt="BGE" width="116" height="28" /></a><div><h4>公司</h4><a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a></div><div><h4>产品</h4><a href="/bge/hk/zh-CN/otc">场外</a></div><div><h4>条款</h4><a>条款及细则</a><a>隐私政策</a></div><div><h4>关于我们</h4><a>邮箱：cs@bg.exchange</a></div></div></footer></div></template>
+<template>
+  <div class="user-page report-page">
+    <header class="user-nav">
+      <a
+        class="brand"
+        href="/bge/hk/zh-CN/"
+        ><img
+          class="brand-logo brand-logo-full"
+          src="/logo-bge-light.svg"
+          alt="BGE"
+          width="116"
+          height="28"
+      /></a>
+      <nav>
+        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
+        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        ><a href="/bge/hk/zh-CN/about"
+          >公司 <el-icon><ArrowDown /></el-icon
+        ></a>
+      </nav>
+      <div class="user-right">
+        <a
+          class="active"
+          href="/bge/hk/zh-CN/user/report/spot"
+          >订单</a
+        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
+        ><span
+          class="account-divider"
+          aria-hidden="true"
+        ></span>
+        <a>USD</a>
+      </div>
+    </header>
+    <div class="user-layout">
+      <aside
+        class="order-sidebar"
+        aria-label="订单导航"
+      >
+        <a
+          v-for="tab in tabs"
+          :key="tab[0]"
+          :href="tab[2]"
+          :class="{ sel: type === tab[0] }"
+          :aria-current="type === tab[0] ? 'page' : undefined"
+          ><el-icon><Tickets /></el-icon>{{ tab[1] }}</a
+        >
+      </aside>
+      <main class="report-main">
+        <section class="report-box">
+          <h1 class="order-title">{{ tabs.find((tab) => tab[0] === type)[1] }}</h1>
+          <template v-if="type === 'spot'"
+            ><div class="sub-tabs"><b>当前委托</b><span>历史委托</span><span>历史成交</span></div>
+            <div class="filters">
+              <button>交易对⌄</button><button>订单类型⌄</button><button class="yellow">搜索</button
+              ><button>重置</button>
+            </div>
+            <div class="table-head spot-head">
+              <span>委托时间</span><span>交易对</span><span>订单类型</span><span>买卖方向</span
+              ><span>当前价格</span><span>委托价格</span><span>委托数量</span><span>成交数量</span
+              ><span>操作</span>
+            </div></template
+          ><template v-else-if="type === 'wallet'"
+            ><div class="sub-tabs">
+              <b>数字资产</b><span>法币</span><span>划转</span><span>跨账号快速划转</span>
+            </div>
+            <div class="filters">
+              <button>存款⌄</button><button>全部币种⌄</button><button>全部状态⌄</button
+              ><button class="date">
+                <el-icon><Calendar /></el-icon>2026-06-26　至　2026-09-23</button
+              ><button class="yellow">搜索</button><button>重置</button>
+            </div>
+            <div class="table-head wallet-head">
+              <span>时间</span><span>数字货币</span><span>网络</span><span>数量</span
+              ><span>状态</span><span>发起方地址</span><span>地址备注</span>
+            </div></template
+          ><template v-else-if="type === 'otc'"
+            ><div class="sub-tabs"><b>买卖意向单</b><span>OTC匹配单</span></div>
+            <div class="filters">
+              <button>交易对⌄</button><button>状态⌄</button
+              ><button class="date">▣　2026-06-26　至　2026-09-23</button
+              ><button class="yellow">搜索</button><button>重置</button>
+            </div>
+            <div class="table-head otc-head">
+              <span>时间</span><span>买卖方向</span><span>支付币种</span><span>获得币种</span
+              ><span>购买/出售数量</span><span>状态</span>
+            </div></template
+          ><template v-else
+            ><div class="sub-tabs">
+              <b>全部</b><span>日结单</span><span>月结单</span
+              ><em>我们建议使用Adobe Acrobat Reader查看结单。使用浏览器可能会导致显示问题。</em
+              ><button>结单密码</button>
+            </div>
+            <div class="table-head settle-head">
+              <span>结单名称</span><span>操作</span>
+            </div></template
+          >
+          <div class="no-data">暂无数据</div>
+          <div class="pager">‹　›</div>
+        </section>
+      </main>
+    </div>
+    <footer>
+      <div class="footer-inner">
+        <a
+          class="brand footer-brand"
+          href="/bge/hk/zh-CN/"
+          ><img
+            class="brand-logo brand-logo-full"
+            src="/logo-bge.svg"
+            alt="BGE"
+            width="116"
+            height="28"
+        /></a>
+        <div>
+          <h4>公司</h4>
+          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+        </div>
+        <div>
+          <h4>产品</h4>
+          <a href="/bge/hk/zh-CN/otc">场外</a>
+        </div>
+        <div>
+          <h4>条款</h4>
+          <a>条款及细则</a><a>隐私政策</a>
+        </div>
+        <div>
+          <h4>关于我们</h4>
+          <a>邮箱：cs@bg.exchange</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>

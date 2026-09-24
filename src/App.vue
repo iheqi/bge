@@ -14,7 +14,31 @@ import MessageCenter from './MessageCenter.vue'
 import Market from './Market.vue'
 import Parameters from './Parameters.vue'
 const path = window.location.pathname
-const page = computed(() => path.includes('/market') ? 'market' : path.includes('/user/payment') ? 'payment' : path.includes('/user/api') ? 'api' : path.includes('/user/security') ? 'user-security' : path.includes('/user/report') ? 'report' : path.includes('/user/kyc') ? 'kyc' : path.includes('/user/assets') ? 'assets' : path.includes('/user/dashboard') ? 'dashboard' : path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
+const page = computed(() =>
+  path.includes('/market')
+    ? 'market'
+    : path.includes('/user/payment')
+      ? 'payment'
+      : path.includes('/user/api')
+        ? 'api'
+        : path.includes('/user/security')
+          ? 'user-security'
+          : path.includes('/user/report')
+            ? 'report'
+            : path.includes('/user/kyc')
+              ? 'kyc'
+              : path.includes('/user/assets')
+                ? 'assets'
+                : path.includes('/user/dashboard')
+                  ? 'dashboard'
+                  : path.includes('/otc')
+                    ? 'otc'
+                    : path.includes('/security')
+                      ? 'security'
+                      : path.includes('/about')
+                        ? 'about'
+                        : 'home',
+)
 </script>
 
 <template>
@@ -22,15 +46,21 @@ const page = computed(() => path.includes('/market') ? 'market' : path.includes(
   <Otc v-else-if="page === 'otc'" />
   <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters')" />
   <Market v-else-if="page === 'market'" />
-  <UserCenter v-else-if="page === 'assets' || page === 'dashboard'" :assets="page === 'assets'" />
+  <UserCenter
+    v-else-if="page === 'assets' || page === 'dashboard'"
+    :assets="page === 'assets'"
+  />
   <Kyc v-else-if="page === 'kyc'" />
   <Report v-else-if="page === 'report'" />
   <AccountSecurity v-else-if="page === 'user-security'" />
   <ApiPage v-else-if="page === 'api'" />
   <Payment v-else-if="page === 'payment'" />
-  <Company v-else-if="page === 'about' || page === 'security'" :security="page === 'security'" />
+  <Company
+    v-else-if="page === 'about' || page === 'security'"
+    :security="page === 'security'"
+  />
   <Home v-else />
-<!--
+  <!--
       <div class="brand"><img class="brand-logo brand-logo-full" src="/logo-bge.svg" alt="BGE" width="116" height="28" /></div>
       <nav class="main-links"><a class="active">首页</a><a>场外</a><a>现货交易</a><a class="company">公司 <el-icon><ArrowDown /></el-icon></a></nav>
       <div class="right-links"><a href="/bge/hk/zh-CN/user/report/spot">订单</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><UserMenu /><a>简体中文</a><i></i><a>USD</a></div>

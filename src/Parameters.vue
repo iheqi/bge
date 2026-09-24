@@ -2,6 +2,96 @@
 import ParameterContent from './ParameterContent.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
-import { ArrowDown, Grid, Wallet, Tickets, User, Lock, Briefcase, Connection } from '@element-plus/icons-vue'
+import {
+  ArrowDown,
+  Grid,
+  Wallet,
+  Tickets,
+  User,
+  Lock,
+  Briefcase,
+  Connection,
+} from '@element-plus/icons-vue'
 </script>
-<template><div class="user-page parameter-page"><header class="user-nav"><a class="brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a><nav><a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a><a href="/bge/hk/zh-CN/about">公司 <el-icon><ArrowDown/></el-icon></a></nav><div class="user-right"><a href="/bge/hk/zh-CN/user/report/spot">订单</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a><span class="account-divider" aria-hidden="true"></span> <a>USD</a></div></header><div class="user-layout"><aside><a href="/bge/hk/zh-CN/user/dashboard"><el-icon><Grid/></el-icon>总览</a><a href="/bge/hk/zh-CN/user/kyc"><el-icon><User/></el-icon>身份认证</a><a href="/bge/hk/zh-CN/user/security"><el-icon><Lock/></el-icon>账户安全</a><a href="/bge/hk/zh-CN/user/payment/fiat"><el-icon><Briefcase/></el-icon>收付款管理</a><a class="sel" href="/bge/hk/zh-CN/user/parameters"><el-icon><Tickets/></el-icon>参数查询</a><a href="/bge/hk/zh-CN/user/api"><el-icon><Connection/></el-icon>API管理</a></aside><ParameterContent /></div><footer><div class="footer-inner"><a class="brand footer-brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge.svg" alt="BGE" width="116" height="28" /></a><div><h4>公司</h4><a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a></div><div><h4>产品</h4><a href="/bge/hk/zh-CN/otc">场外</a></div><div><h4>条款</h4><a>条款及细则</a></div><div><h4>关于我们</h4><a>邮箱：cs@bg.exchange</a></div></div></footer></div></template>
+<template>
+  <div class="user-page parameter-page">
+    <header class="user-nav">
+      <a
+        class="brand"
+        href="/bge/hk/zh-CN/"
+        ><img
+          class="brand-logo brand-logo-full"
+          src="/logo-bge-light.svg"
+          alt="BGE"
+          width="116"
+          height="28"
+      /></a>
+      <nav>
+        <a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a
+        ><a href="/bge/hk/zh-CN/otc">场外</a><a href="#">现货交易</a
+        ><a href="/bge/hk/zh-CN/about"
+          >公司 <el-icon><ArrowDown /></el-icon
+        ></a>
+      </nav>
+      <div class="user-right">
+        <a href="/bge/hk/zh-CN/user/report/spot">订单</a
+        ><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a>简体中文</a
+        ><span
+          class="account-divider"
+          aria-hidden="true"
+        ></span>
+        <a>USD</a>
+      </div>
+    </header>
+    <div class="user-layout">
+      <aside>
+        <a href="/bge/hk/zh-CN/user/dashboard"
+          ><el-icon><Grid /></el-icon>总览</a
+        ><a href="/bge/hk/zh-CN/user/kyc"
+          ><el-icon><User /></el-icon>身份认证</a
+        ><a href="/bge/hk/zh-CN/user/security"
+          ><el-icon><Lock /></el-icon>账户安全</a
+        ><a href="/bge/hk/zh-CN/user/payment/fiat"
+          ><el-icon><Briefcase /></el-icon>收付款管理</a
+        ><a
+          class="sel"
+          href="/bge/hk/zh-CN/user/parameters"
+          ><el-icon><Tickets /></el-icon>参数查询</a
+        ><a href="/bge/hk/zh-CN/user/api"
+          ><el-icon><Connection /></el-icon>API管理</a
+        >
+      </aside>
+      <ParameterContent />
+    </div>
+    <footer>
+      <div class="footer-inner">
+        <a
+          class="brand footer-brand"
+          href="/bge/hk/zh-CN/"
+          ><img
+            class="brand-logo brand-logo-full"
+            src="/logo-bge.svg"
+            alt="BGE"
+            width="116"
+            height="28"
+        /></a>
+        <div>
+          <h4>公司</h4>
+          <a href="/bge/hk/zh-CN/about">关于我们</a><a href="/bge/hk/zh-CN/security">安全</a>
+        </div>
+        <div>
+          <h4>产品</h4>
+          <a href="/bge/hk/zh-CN/otc">场外</a>
+        </div>
+        <div>
+          <h4>条款</h4>
+          <a>条款及细则</a>
+        </div>
+        <div>
+          <h4>关于我们</h4>
+          <a>邮箱：cs@bg.exchange</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>
