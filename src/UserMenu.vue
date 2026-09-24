@@ -10,7 +10,7 @@ const links = [
 
 <template>
   <div class="account-menu">
-    <a class="avatar" href="/hk/zh-CN/user/dashboard" aria-label="个人中心"><span /></a>
+    <a class="avatar" href="/hk/zh-CN/user/dashboard" aria-label="个人中心"><img src="/avatar.png" alt="" width="30" height="30" /></a>
     <div class="account-menu-panel">
       <div class="account-menu-profile"><b>heqi**gic@gmail.com</b><small>UID: 8395618828</small></div>
       <a v-for="[label, path] in links" :key="path" :href="'/hk/zh-CN/user/' + path">{{ label }}</a>

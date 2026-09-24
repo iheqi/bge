@@ -23,8 +23,8 @@ async function deleteAll() {
   <div class="message-page">
     <header class="user-nav">
       <a class="brand" href="/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a>
-      <nav><a href="/hk/zh-CN/">首页</a><a href="/hk/zh-CN/otc">场外</a><a href="/hk/zh-CN/about">公司</a></nav>
-      <div class="user-right"><a href="/hk/zh-CN/user/report/spot">账户记录</a><a href="/hk/zh-CN/user/assets">资产管理</a><MessageBell /><a class="avatar" href="/hk/zh-CN/user/dashboard" aria-label="个人中心"><span /></a><span>简体中文</span></div>
+      <nav><a href="/hk/zh-CN/">首页</a><a href="/hk/zh-CN/market">行情</a><a href="/hk/zh-CN/otc">场外</a><a href="/hk/zh-CN/about">公司</a></nav>
+      <div class="user-right"><a href="/hk/zh-CN/user/report/spot">账户记录</a><a href="/hk/zh-CN/user/assets">资产管理</a><MessageBell /><a class="avatar" href="/hk/zh-CN/user/dashboard" aria-label="个人中心"><img src="/avatar.png" alt="" width="30" height="30" /></a><span>简体中文</span></div>
     </header>
     <main class="message-layout">
       <aside class="message-sidebar">
