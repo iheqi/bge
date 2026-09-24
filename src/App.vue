@@ -12,6 +12,7 @@ import ApiPage from './ApiPage.vue'
 import Payment from './Payment.vue'
 import MessageCenter from './MessageCenter.vue'
 import Market from './Market.vue'
+import Parameters from './Parameters.vue'
 const path = window.location.pathname
 const page = computed(() => path.includes('/market') ? 'market' : path.includes('/user/payment') ? 'payment' : path.includes('/user/api') ? 'api' : path.includes('/user/security') ? 'user-security' : path.includes('/user/report') ? 'report' : path.includes('/user/kyc') ? 'kyc' : path.includes('/user/assets') ? 'assets' : path.includes('/user/dashboard') ? 'dashboard' : path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
 </script>
@@ -19,6 +20,7 @@ const page = computed(() => path.includes('/market') ? 'market' : path.includes(
 <template>
   <MessageCenter v-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
   <Otc v-else-if="page === 'otc'" />
+  <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters')" />
   <Market v-else-if="page === 'market'" />
   <UserCenter v-else-if="page === 'assets' || page === 'dashboard'" :assets="page === 'assets'" />
   <Kyc v-else-if="page === 'kyc'" />
