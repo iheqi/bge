@@ -159,8 +159,11 @@ function trade() {
             >
           </div>
           <div class="ticker-price">
-            <strong>{{ formatMoney(usdPrice(coin, coin.price), 'USD', 6) }}</strong
-            ><small>{{ coin.price + ' ' + coin.pair.split('/')[1] }}</small>
+            <strong>{{ formatMoney(usdPrice(coin, coin.price), 'USD', 6).split(' ')[0] }}</strong>
+            <b>{{
+              formatMoney(usdPrice(coin, coin.price), 'USD', 6).split(' ').slice(1).join(' ')
+            }}</b>
+            <small>{{ coin.price }} {{ coin.pair.split('/')[1] }}</small>
           </div>
           <div class="ticker-volume">
             24H Vol {{ tr(index === 0 ? '2,405.25206' : '0.00000')
