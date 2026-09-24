@@ -1,4 +1,5 @@
 <script setup>
+import UserMenu from './UserMenu.vue'
 import { computed } from 'vue'
 import Home from './Home.vue'
 import Otc from './Otc.vue'
@@ -28,7 +29,7 @@ const page = computed(() => path.includes('/user/payment') ? 'payment' : path.in
 <!--
       <div class="brand"><img class="brand-logo brand-logo-full" src="/logo-bge.svg" alt="BGE" width="116" height="28" /></div>
       <nav class="main-links"><a class="active">首页</a><a>场外</a><a>现货交易</a><a class="company">公司 <el-icon><ArrowDown /></el-icon></a></nav>
-      <div class="right-links"><a>账户记录</a><a>资产管理</a><span class="avatar"><span></span></span><a>简体中文</a><i></i><a>USD</a></div>
+      <div class="right-links"><a href="/hk/zh-CN/user/report/spot">账户记录</a><a href="/hk/zh-CN/user/assets">资产管理</a><UserMenu /><a>简体中文</a><i></i><a>USD</a></div>
     </header>
 
     <main>

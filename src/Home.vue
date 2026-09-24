@@ -1,4 +1,5 @@
 <script setup>
+import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 </script>
@@ -8,7 +9,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
     <header class="nav">
       <div class="brand"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></div>
       <nav class="main-links"><a class="active" href="/hk/zh-CN/">首页</a><a href="/hk/zh-CN/otc">场外</a><a href="#">现货交易</a><a class="company" href="/hk/zh-CN/about">公司 <el-icon><ArrowDown /></el-icon></a></nav>
-      <div class="right-links"><a href="#">账户记录</a><a href="#">资产管理</a><MessageBell /><span class="avatar"><span></span></span><a href="#">简体中文</a><span class="account-divider" aria-hidden="true"></span><a href="#">USD</a></div>
+      <div class="right-links"><a href="/hk/zh-CN/user/report/spot">账户记录</a><a href="/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><a href="#">简体中文</a><span class="account-divider" aria-hidden="true"></span><a href="#">USD</a></div>
     </header>
 
     <main>
