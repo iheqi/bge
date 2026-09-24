@@ -1,4 +1,5 @@
 <script setup>
+import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 const services = [
   ['a', '专属客户经理', '享受机构级专属服务'], ['b', '深度流动性', '大宗交易小滑点'], ['c', '定价透明', '零隐藏费用'],
@@ -9,7 +10,7 @@ const faqs = [['什么是OTC交易？', 'OTC（场外交易）支持直接协商
 </script>
 <template>
 <div class="otc-page">
-  <header class="otc-nav"><a class="otc-brand" href="/hk/zh-CN/"><span>╱</span><b>BGE</b></a><nav><a href="/hk/zh-CN/">首页</a><a class="on" href="/hk/zh-CN/otc">场外</a><a href="#">现货交易</a><a href="/hk/zh-CN/about">公司 <el-icon><ArrowDown/></el-icon></a></nav><div class="otc-right"><a href="#">登录</a><button>注册</button><a href="#">简体中文</a><i></i><a href="#">USD</a></div></header>
+  <header class="otc-nav"><a class="otc-brand" href="/hk/zh-CN/"><span>╱</span><b>BGE</b></a><nav><a href="/hk/zh-CN/">首页</a><a class="on" href="/hk/zh-CN/otc">场外</a><a href="#">现货交易</a><a href="/hk/zh-CN/about">公司 <el-icon><ArrowDown/></el-icon></a></nav><div class="otc-right"><MessageBell /><a href="#">登录</a><button>注册</button><a href="#">简体中文</a><i></i><a href="#">USD</a></div></header>
   <main>
     <section class="service-section"><h1>提供安全可信赖的OTC服务</h1><div class="service-grid"><article v-for="item in services" :key="item[0]" class="service-card"><span class="badge">{{item[0]}}</span><h3>{{item[1]}}</h3><p>{{item[2]}}</p></article><article class="service-card more"><h3>了解更多</h3></article></div><button class="contact-btn">联系我们</button></section>
     <section class="steps-section"><h2>OTC流程指引</h2><div class="steps-grid"><article v-for="item in steps" :key="item[0]" class="service-card"><span class="badge">{{item[0]}}</span><h3>{{item[1]}}</h3><p>{{item[2]}}</p></article></div></section>

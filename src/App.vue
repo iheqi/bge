@@ -9,12 +9,14 @@ import Report from './Report.vue'
 import AccountSecurity from './AccountSecurity.vue'
 import ApiPage from './ApiPage.vue'
 import Payment from './Payment.vue'
+import MessageCenter from './MessageCenter.vue'
 const path = window.location.pathname
 const page = computed(() => path.includes('/user/payment') ? 'payment' : path.includes('/user/api') ? 'api' : path.includes('/user/security') ? 'user-security' : path.includes('/user/report') ? 'report' : path.includes('/user/kyc') ? 'kyc' : path.includes('/user/assets') ? 'assets' : path.includes('/user/dashboard') ? 'dashboard' : path.includes('/otc') ? 'otc' : path.includes('/security') ? 'security' : path.includes('/about') ? 'about' : 'home')
 </script>
 
 <template>
-  <Otc v-if="page === 'otc'" />
+  <MessageCenter v-if="path.replace(/\/$/, '') === '/hk/zh-CN/user/messages'" />
+  <Otc v-else-if="page === 'otc'" />
   <UserCenter v-else-if="page === 'assets' || page === 'dashboard'" :assets="page === 'assets'" />
   <Kyc v-else-if="page === 'kyc'" />
   <Report v-else-if="page === 'report'" />
