@@ -129,7 +129,21 @@
 .tabs b {
   height: 54px;
   padding-top: 4px;
-  border-bottom: 2px solid #ffd500;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.tabs b.active {
+  border-bottom-color: #ffd500;
+  color: #1a202c;
+}
+.tabs span {
+  height: 54px;
+  padding-top: 4px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.tabs span.active {
+  border-bottom-color: #ffd500;
   color: #1a202c;
 }
 .label {
@@ -175,10 +189,41 @@
   color: #a0a7b1;
   margin-top: 150px;
 }
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: 1.25fr 1.25fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+.dashboard-card {
+  min-height: 202px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 5px;
+}
+.dashboard-card header,
+.quick-links a,
+.activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dashboard-card h2 { margin: 0 0 26px; font-size: 20px; }
+.dashboard-card header a { color: #9aa8bb; font-size: 13px; text-decoration: none; }
+.activity-row { margin: 20px 0; font-size: 14px; }
+.activity-row small, .security-grid small { display: block; color: #9aa8bb; font-size: 12px; margin-top: 5px; font-weight: normal; }
+.activity-row b { text-align: right; }
+.security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 40px; }
+.security-grid a, .quick-links a { color: #1a202c; text-decoration: none; }
+.security-grid .warning { color: #ff5c5c; }
+.quick-links { padding: 0 25px; }
+.quick-links a { min-height: 100px; border-bottom: 1px solid #eef0f4; }
+.quick-links a:last-child { border-bottom: 0; }
+.quick-links span { font-size: 22px; }
 .asset-banner {
   height: 178px;
   background: #ffd632;
-  border-radius: 10px;
+  border-radius: 5px;
   padding: 38px 48px;
   position: relative;
 }

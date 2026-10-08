@@ -17,10 +17,15 @@ import {
   Search,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+const accountParam = new URLSearchParams(window.location.search).get('account')
+const props = defineProps({ assets: Boolean })
 const accountTab = ref(
-  new URLSearchParams(window.location.search).get('account') === 'trade' ? 'trade' : 'fund',
+  accountParam === 'trade' || accountParam === 'fund'
+    ? accountParam
+    : props.assets
+      ? 'fund'
+      : 'total',
 )
-defineProps({ assets: Boolean })
 const coins = [
   ['$', 'USD', '美元', '法币'],
   ['◆', 'ETH', '以太坊', ''],
@@ -121,11 +126,31 @@ const coins = [
           ><section class="overview">
             <h2>{{ $t('text337') }}</h2>
             <div class="tabs">
-              <b>{{ $t('text338') }}</b
-              ><span>{{ $t('text333') }}</span
-              ><span>{{ $t('text334') }}</span>
+              <b
+                :class="{ active: accountTab === 'total' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'total'"
+                @keydown.enter="accountTab = 'total'"
+              >{{ $t('text338') }}</b
+              ><span
+                :class="{ active: accountTab === 'fund' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'fund'"
+                @keydown.enter="accountTab = 'fund'"
+              >{{ $t('text333') }}</span
+              ><span
+                :class="{ active: accountTab === 'trade' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'trade'"
+                @keydown.enter="accountTab = 'trade'"
+              >{{ $t('text334') }}</span>
             </div>
-            <p class="label">{{ $t('text339') }}</p>
+            <p class="label">
+              {{ accountTab === 'total' ? $t('text338') : tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text339') }}
+            </p>
             <strong>{{ formatMoney(0, 'USD', 4) }}</strong>
             <div>
               <button>{{ $t('text275') }}</button><button class="muted">{{ $t('text276') }}</button>
@@ -143,6 +168,20 @@ const coins = [
                 {{ $t('text005') }}<small>{{ $t('text340') }}</small>
               </h2>
               <div class="empty">{{ $t('text066') }}</div>
+            </section>
+          </div><div v-if="!assets" class="dashboard-cards">
+            <section class="dashboard-card activity-card">
+              <header><h2>{{ $t('text047') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
+              <div class="activity-row"><span>OSX Chrome 154.0.0.0<small>2026-10-08 15:33:28</small></span><b>116.49.145.110<small>登录</small></b></div>
+              <div class="activity-row"><span>OSX Chrome 152.0.0.0<small>2026-09-23 15:55:22</small></span><b>116.49.145.110<small>登录</small></b></div>
+            </section>
+            <section class="dashboard-card security-card">
+              <header><h2>{{ $t('text010').replace('账户安全', '安全中心') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
+              <div class="security-grid"><a href="/bge/hk/zh-CN/user/security"><b>邮箱验证</b><small>更改邮箱</small></a><a href="/bge/hk/zh-CN/user/security"><b>手机验证</b><small class="warning">未绑定</small></a><a href="/bge/hk/zh-CN/user/security"><b>谷歌验证</b><small>更改GA</small></a><a href="/bge/hk/zh-CN/user/security"><b>登录密码</b><small>更改密码</small></a></div>
+            </section>
+            <section class="dashboard-card quick-links">
+              <a href="/bge/hk/zh-CN/user/api"><b>{{ $t('text013') }}</b><span>›</span></a>
+              <a href="/bge/hk/zh-CN/user/kyc"><b>{{ $t('text009') }}</b><span>›</span></a>
             </section>
           </div></template
         ><template v-else
