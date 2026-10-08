@@ -5,6 +5,7 @@ import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
+import Footer from './Footer.vue'
 import {
   ArrowDown,
   Grid,
@@ -240,5 +241,6 @@ const coins = [
         >
       </main>
     </div>
+    <Footer />
   </div>
 </template>
