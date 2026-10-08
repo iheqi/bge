@@ -4,6 +4,8 @@ import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
+import Footer from './Footer.vue'
+import { ref } from 'vue'
 import {
   ArrowDown,
   Grid,
@@ -14,6 +16,12 @@ import {
   Briefcase,
   Connection,
 } from '@element-plus/icons-vue'
+const bindPhone = new URLSearchParams(window.location.search).get('bind') === 'phone'
+const phone = ref('')
+const code = ref('')
+const submitted = ref(false)
+const sendCode = () => { if (phone.value) submitted.value = true }
+const confirmBind = () => { if (phone.value && code.value) window.location.href = '/bge/hk/zh-CN/user/security' }
 </script>
 <template>
   <div class="user-page account-security">
@@ -47,7 +55,29 @@ import {
         <CurrencySwitcher />
       </div>
     </header>
-    <div class="user-layout">
+    <div v-if="bindPhone" class="user-layout">
+      <aside>
+        <a href="/bge/hk/zh-CN/user/dashboard"><el-icon><Grid /></el-icon>{{ $t('text008') }}</a>
+        <a href="/bge/hk/zh-CN/user/kyc"><el-icon><User /></el-icon>{{ $t('text009') }}</a>
+        <a class="sel" href="/bge/hk/zh-CN/user/security"><el-icon><Lock /></el-icon>{{ $t('text010') }}</a>
+        <a href="/bge/hk/zh-CN/user/payment/fiat"><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a>
+        <a href="/bge/hk/zh-CN/user/parameters"><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a>
+        <a href="/bge/hk/zh-CN/user/api"><el-icon><Connection /></el-icon>{{ $t('text013') }}</a>
+      </aside>
+      <main class="phone-binding">
+      <div class="binding-breadcrumb"><b>账户安全</b><span>/</span><span>绑定手机</span></div>
+      <form class="binding-form" @submit.prevent="confirmBind">
+        <label>手机</label>
+        <div class="phone-input" :class="{ invalid: !phone && submitted }"><span>✤</span><b>+852</b><input v-model="phone" type="tel" placeholder="请输入手机号" /></div>
+        <small v-if="!phone && submitted">请输入手机号</small>
+        <label><i>*</i>验证码</label>
+        <div class="phone-input" :class="{ invalid: !code && submitted }"><input v-model="code" placeholder="请输入验证码" /><button type="button" @click="sendCode">获取验证码</button></div>
+        <small v-if="!code && submitted">请输入验证码</small>
+        <button class="binding-submit" type="submit">确认</button>
+      </form>
+      </main>
+    </div>
+    <div v-else class="user-layout">
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
           ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
@@ -98,9 +128,9 @@ import {
             <div>
               {{ $t('text027') }}<small>{{ $t('text028') }}</small>
             </div>
-            <div>
+            <a href="/bge/hk/zh-CN/user/security?bind=phone">
               {{ $t('text029') }}<small>{{ $t('text030') }}</small>
-            </div>
+            </a>
             <div>
               {{ $t('text031') }}<small>{{ $t('text032') }}</small>
             </div>
@@ -150,5 +180,6 @@ import {
         </section>
       </main>
     </div>
+    <Footer />
   </div>
 </template>
