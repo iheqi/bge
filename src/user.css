@@ -528,6 +528,17 @@
   font-weight: 500;
   color: #e1b300;
 }
+.sub-tabs span {
+  cursor: pointer;
+}
+.sub-tabs span.active {
+  color: #e1b300;
+  font-size: 22px;
+}
+.report-box > .table-head { display: none; }
+.report-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #6f7783; }
+.report-table th { height: 40px; background: #f4f6f9; font-weight: normal; text-align: center; }
+.report-table td { height: 290px; text-align: center; color: #9aa2ad; }
 .sub-tabs em {
   font-style: normal;
   font-size: 12px;
@@ -546,6 +557,22 @@
   gap: 16px;
   margin-bottom: 22px;
   align-items: center;
+}
+.filters .filter-select {
+  width: 140px;
+  flex: 0 0 140px;
+  height: 40px;
+}
+.filters .filter-select .el-select__wrapper {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  box-shadow: 0 0 0 1px #d8dfeb inset;
+  border-radius: 4px;
+}
+.filters .filter-select .el-select__selected-item {
+  color: #6d7785;
+  font-size: 14px;
 }
 .filters button {
   height: 40px;

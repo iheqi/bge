@@ -5,6 +5,7 @@ import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown, Tickets, Calendar } from '@element-plus/icons-vue'
+import { computed, ref, watch } from 'vue'
 const path = window.location.pathname
 const type = path.includes('/wallet')
   ? 'wallet'
@@ -19,6 +20,43 @@ const tabs = [
   ['otc', 'OTC 订单', '/bge/hk/zh-CN/user/report/otc-orders'],
   ['settle', '结单记录', '/bge/hk/zh-CN/user/report/settle'],
 ]
+const walletTab = ref('fiat')
+const spotTab = ref('history')
+const otcTab = ref('match')
+const otcPair = ref('all')
+const otcStatus = ref('all')
+const settleTab = ref('all')
+const walletDirection = ref('deposit')
+const walletCoin = ref('all')
+const walletStatus = ref('all')
+const spotPair = ref('all')
+const spotOrderType = ref('all')
+const spotSide = ref('all')
+const walletCoins = computed(() => walletTab.value === 'fiat'
+  ? ['USD', 'HKD', 'CNY']
+  : walletTab.value === 'digital'
+    ? ['BTC', 'ETH', 'USDT', 'USDC']
+    : ['USD', 'HKD', 'BTC', 'ETH', 'USDT', 'USDC'])
+function resetWalletFilters() {
+  walletCoin.value = 'all'
+  walletStatus.value = 'all'
+}
+watch(walletTab, resetWalletFilters)
+watch(walletDirection, () => { walletStatus.value = 'all' })
+const columns = () => {
+  if (type === 'spot') {
+    if (spotTab.value === 'deals') return ['成交时间', '交易对', '买卖方向', '成交价格', '成交数量', '成交金额', '手续费', '成交角色']
+    if (spotTab.value === 'history') return ['委托时间', '交易对', '订单类型', '买卖方向', '委托价格', '委托数量', '成交均价', '成交数量', '成交金额', '成交状态', '详情']
+  }
+  if (type === 'wallet') {
+    if (walletTab.value === 'fiat') return ['时间', '法币', '汇款金额', '汇款银行卡', '银行卡标签', '状态', '操作']
+    if (walletTab.value === 'transfer') return ['时间', '币种', '数量', '从', '到', '状态']
+    return ['时间', '数字货币', '数量', '发起方地址', '状态']
+  }
+  if (type === 'otc') return otcTab.value === 'match' ? ['时间', '买卖方向', '支付金额', '获得金额', '手续费', '成交单价', '状态'] : ['时间', '支付币种', '获得币种', '购买/出售数量', '状态']
+  if (type === 'settle') return ['结单名称', '操作']
+  return ['委托时间', '交易对', '订单类型', '买卖方向', '委托价格', '委托数量', '成交状态', '详情']
+}
 </script>
 <style scoped>
 .user-layout .order-sidebar {
@@ -94,16 +132,19 @@ const tabs = [
           <h1 class="order-title">{{ tr(tabs.find((tab) => tab[0] === type)[1]) }}</h1>
           <template v-if="type === 'spot'"
             ><div class="sub-tabs">
-              <b>{{ $t('text294') }}</b
-              ><span>{{ $t('text295') }}</span
-              ><span>{{ $t('text296') }}</span>
+              <span :class="{ active: spotTab === 'current' }" @click="spotTab = 'current'">{{ $t('text294') }}</span
+              ><span :class="{ active: spotTab === 'history' }" @click="spotTab = 'history'">{{ $t('text295') }}</span
+              ><span :class="{ active: spotTab === 'deals' }" @click="spotTab = 'deals'">{{ $t('text296') }}</span>
             </div>
-            <div class="filters">
-              <button>{{ $t('text297') }}</button><button>{{ $t('text298') }}</button
+            <div v-if="spotTab !== 'deals'" class="filters">
+              <el-select v-model="spotPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotOrderType" class="filter-select" aria-label="订单类型"><el-option label="全部订单类型" value="all" /><el-option label="限价单" value="limit" /><el-option label="市价单" value="market" /></el-select
               ><button class="yellow">{{ $t('text283') }}</button
               ><button>{{ $t('text299') }}</button>
             </div>
-            <div class="table-head spot-head">
+            <div v-else class="filters">
+              <el-select v-model="spotPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotSide" class="filter-select" aria-label="买卖方向"><el-option label="全部方向" value="all" /><el-option label="买入" value="buy" /><el-option label="卖出" value="sell" /></el-select><button class="yellow">{{ $t('text283') }}</button><button>{{ $t('text299') }}</button>
+            </div>
+            <div v-if="spotTab === 'current'" class="table-head spot-head">
               <span>{{ $t('text300') }}</span
               ><span>{{ $t('text247') }}</span
               ><span>{{ $t('text301') }}</span
@@ -113,23 +154,41 @@ const tabs = [
               ><span>{{ $t('text305') }}</span
               ><span>{{ $t('text306') }}</span
               ><span>{{ $t('text065') }}</span>
+            </div>
+            <div v-else-if="spotTab === 'history'" class="table-head spot-head">
+              <span>委托时间</span><span>交易对</span><span>订单类型</span><span>买卖方向</span><span>委托价格</span><span>委托数量</span><span>成交均价</span><span>成交数量</span><span>成交金额</span><span>成交状态</span><span>详情</span>
+            </div>
+            <div v-else class="table-head spot-head">
+              <span>成交时间</span><span>交易对</span><span>买卖方向</span><span>成交价格</span><span>成交数量</span><span>成交金额</span><span>手续费</span><span>成交角色</span>
             </div></template
           ><template v-else-if="type === 'wallet'"
             ><div class="sub-tabs">
-              <b>{{ $t('text307') }}</b
-              ><span>{{ $t('text308') }}</span
-              ><span>{{ $t('text309') }}</span
-              ><span>{{ $t('text310') }}</span>
+              <span :class="{ active: walletTab === 'digital' }" @click="walletTab = 'digital'">{{ $t('text307') }}</span
+              ><span :class="{ active: walletTab === 'fiat' }" @click="walletTab = 'fiat'">{{ $t('text308') }}</span
+              ><span :class="{ active: walletTab === 'transfer' }" @click="walletTab = 'transfer'">{{ $t('text309') }}</span
+              ><span :class="{ active: walletTab === 'quick' }" @click="walletTab = 'quick'">{{ $t('text310') }}</span>
             </div>
             <div class="filters">
-              <button>{{ $t('text311') }}</button><button>{{ $t('text280') }}</button
-              ><button>{{ $t('text281') }}</button
-              ><button class="date">
+              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletDirection" aria-label="存取款类型" class="filter-select">
+                <el-option :label="tr('存款')" value="deposit" />
+                <el-option :label="tr('取款')" value="withdraw" />
+              </el-select>
+              <el-select v-model="walletCoin" aria-label="币种" class="filter-select">
+                <el-option :label="tr('全部币种')" value="all" />
+                <el-option v-for="coin in walletCoins" :key="coin" :label="coin" :value="coin" />
+              </el-select>
+              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletStatus" aria-label="状态" class="filter-select">
+                <el-option :label="tr('全部状态')" value="all" />
+                <el-option :label="tr('处理中')" value="pending" />
+                <el-option :label="tr('已完成')" value="completed" />
+                <el-option v-if="walletDirection === 'withdraw'" :label="tr('已取消')" value="cancelled" />
+              </el-select>
+              <button class="date">
                 <el-icon><Calendar /></el-icon>{{ $t('text312') }}</button
               ><button class="yellow">{{ $t('text283') }}</button
-              ><button>{{ $t('text299') }}</button>
+              ><button @click="resetWalletFilters">{{ $t('text299') }}</button>
             </div>
-            <div class="table-head wallet-head">
+            <div v-if="walletTab === 'fiat'" class="table-head wallet-head">
               <span>{{ $t('text313') }}</span
               ><span>{{ $t('text314') }}</span
               ><span>{{ $t('text285') }}</span
@@ -137,14 +196,17 @@ const tabs = [
               ><span>{{ $t('text063') }}</span
               ><span>{{ $t('text316') }}</span
               ><span>{{ $t('text286') }}</span>
+            </div>
+            <div v-else class="table-head wallet-head transfer-head">
+              <span>{{ $t('text313') }}</span><span>{{ $t('text314') }}</span><span>{{ $t('text285') }}</span><span>{{ $t('text315') }}</span><span>{{ $t('text316') }}</span>
             </div></template
           ><template v-else-if="type === 'otc'"
             ><div class="sub-tabs">
-              <b>{{ $t('text317') }}</b
-              ><span>{{ $t('text318') }}</span>
+              <span :class="{ active: otcTab === 'intent' }" @click="otcTab = 'intent'">{{ $t('text317') }}</span
+              ><span :class="{ active: otcTab === 'match' }" @click="otcTab = 'match'">{{ $t('text318') }}</span>
             </div>
             <div class="filters">
-              <button>{{ $t('text297') }}</button><button>{{ $t('text319') }}</button
+              <el-select v-model="otcPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /></el-select><el-select v-model="otcStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待处理" value="pending" /><el-option label="已完成" value="completed" /><el-option label="已取消" value="cancelled" /></el-select
               ><button class="date">{{ $t('text320') }}</button
               ><button class="yellow">{{ $t('text283') }}</button
               ><button>{{ $t('text299') }}</button>
@@ -159,9 +221,9 @@ const tabs = [
             </div></template
           ><template v-else
             ><div class="sub-tabs">
-              <b>{{ $t('text165') }}</b
-              ><span>{{ $t('text324') }}</span
-              ><span>{{ $t('text325') }}</span
+              <span :class="{ active: settleTab === 'all' }" @click="settleTab = 'all'">{{ $t('text165') }}</span
+              ><span :class="{ active: settleTab === 'daily' }" @click="settleTab = 'daily'">{{ $t('text324') }}</span
+              ><span :class="{ active: settleTab === 'monthly' }" @click="settleTab = 'monthly'">{{ $t('text325') }}</span
               ><em>{{ $t('text326') }}</em
               ><button>{{ $t('text020') }}</button>
             </div>
@@ -170,7 +232,7 @@ const tabs = [
               ><span>{{ $t('text065') }}</span>
             </div></template
           >
-          <div class="no-data">{{ $t('text066') }}</div>
+          <table class="report-table"><thead><tr><th v-for="column in columns()" :key="column">{{ column }}</th></tr></thead><tbody><tr><td :colspan="columns().length">{{ $t('text066') }}</td></tr></tbody></table>
           <div class="pager">‹　›</div>
         </section>
       </main>
