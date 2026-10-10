@@ -571,7 +571,7 @@
 .report-box > .table-head { display: none; }
 .report-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; color: #6f7783; }
 .report-table th { height: 40px; background: #f4f6f9; font-weight: normal; text-align: center; }
-.report-table td { height: 290px; text-align: center; color: #9aa2ad; }
+.report-table td { height: 56px; text-align: center; color: #697585; }
 .sub-tabs em {
   font-style: normal;
   font-size: 12px;

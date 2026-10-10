@@ -3,6 +3,7 @@ import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import ParameterContent from './ParameterContent.vue'
+import FeeContent from './FeeContent.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import {
@@ -15,6 +16,7 @@ import {
   Briefcase,
   Connection,
 } from '@element-plus/icons-vue'
+const props = defineProps({ fees: Boolean })
 </script>
 <template>
   <div class="user-page parameter-page">
@@ -58,15 +60,16 @@ import {
           ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
           ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
+        ><a :class="{ sel: props.fees }" href="/bge/hk/zh-CN/user/fees"><el-icon><Tickets /></el-icon>费率查询</a
         ><a
-          class="sel"
+          :class="{ sel: !props.fees }"
           href="/bge/hk/zh-CN/user/parameters"
           ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a href="/bge/hk/zh-CN/user/api"
           ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
       </aside>
-      <ParameterContent />
+      <FeeContent v-if="props.fees" /><ParameterContent v-else />
     </div>
     <footer>
       <div class="footer-inner">

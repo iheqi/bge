@@ -57,6 +57,7 @@ import {
           ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
           ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
+        ><a href="/bge/hk/zh-CN/user/fees">费率查询</a
         ><a href="/bge/hk/zh-CN/user/parameters"
           ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a

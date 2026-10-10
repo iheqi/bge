@@ -7,6 +7,7 @@ const links = [
   ['身份认证', 'kyc'],
   ['账户安全', 'security'],
   ['收付款管理', 'payment/fiat'],
+  ['费率查询', 'fees'],
   ['参数查询', 'parameters'],
   ['API管理', 'api'],
 ]

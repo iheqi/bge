@@ -37,6 +37,23 @@ const walletCoins = computed(() => walletTab.value === 'fiat'
   : walletTab.value === 'digital'
     ? ['BTC', 'ETH', 'USDT', 'USDC']
     : ['USD', 'HKD', 'BTC', 'ETH', 'USDT', 'USDC'])
+const mockRows = computed(() => {
+  if (type === 'spot') {
+    if (spotTab.value === 'deals') return [['2026-10-09 14:32:08', 'BTC/USDT', '买入', '84,106.64', '0.125 BTC', '10,513.33 USDT', '10.51 USDT', '主动成交']]
+    if (spotTab.value === 'current') return [['2026-10-09 15:06:21', 'ETH/USDT', '限价单', '卖出', '4,982.00', '2.000 ETH', '--', '--', '--', '未成交', '详情']]
+    return [['2026-10-08 11:18:42', 'BTC/USDT', '限价单', '买入', '83,800.00', '0.250 BTC', '83,812.40', '0.250 BTC', '20,953.10 USDT', '完全成交', '详情'], ['2026-10-07 09:44:10', 'ETH/USDT', '市价单', '卖出', '4,910.20', '1.500 ETH', '4,910.20', '1.500 ETH', '7,365.30 USDT', '完全成交', '详情']]
+  }
+  if (type === 'wallet') {
+    if (walletTab.value === 'fiat') return [['2026-10-08 10:25:16', 'USD', '10,000.00', 'HSBC **** 2861', '主要银行卡', '已完成', '查看']]
+    if (walletTab.value === 'transfer' || walletTab.value === 'quick') return [['2026-10-07 16:42:03', 'USDT', '2,500.00', '资金账户', '交易账户', '已完成']]
+    return [['2026-10-06 12:08:44', 'BTC', '0.18000000', 'bc1q...9x2k', '已完成']]
+  }
+  if (type === 'otc') {
+    if (otcTab.value === 'match') return [['2026-10-08 15:20:12', '买入', '10,000 HKD', '1,278.40 USDT', '12.00 HKD', '7.8220', '已完成']]
+    return [['2026-10-05 13:10:09', 'USDT', 'HKD', '1,000.00', '已完成']]
+  }
+  return settleTab.value === 'monthly' ? [['2026年09月结单', '下载']] : [['2026年10月08日日结单', '下载']]
+})
 function resetWalletFilters() {
   walletCoin.value = 'all'
   walletStatus.value = 'all'
@@ -232,7 +249,9 @@ const columns = () => {
               ><span>{{ $t('text065') }}</span>
             </div></template
           >
-          <table class="report-table"><thead><tr><th v-for="column in columns()" :key="column">{{ column }}</th></tr></thead><tbody><tr><td :colspan="columns().length">{{ $t('text066') }}</td></tr></tbody></table>
+          <el-table :data="mockRows.map(row => Object.fromEntries(row.map((cell, index) => [String(index), cell])))" class="report-table" :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }" empty-text="暂无数据">
+            <el-table-column v-for="(column, index) in columns()" :key="column" :prop="String(index)" :label="column" min-width="130" align="center" />
+          </el-table>
           <div class="pager">‹　›</div>
         </section>
       </main>

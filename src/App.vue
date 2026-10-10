@@ -52,7 +52,7 @@ const page = computed(() =>
     <MessageCenter v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
     <Otc v-else-if="page === 'otc'" />
-    <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters')" />
+    <Parameters :fees="path.replace(/\/$/, '').endsWith('/user/fees')" v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters') || path.replace(/\/$/, '').endsWith('/user/fees')" />
     <Market v-else-if="page === 'market'" />
     <UserCenter
       v-else-if="page === 'assets' || page === 'dashboard'"

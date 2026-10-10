@@ -2,7 +2,7 @@
 import { formatMoney, formatFiatText } from './currency'
 import { tr, formatCell } from './i18n'
 import { ref } from 'vue'
-const active = ref('fees')
+const active = ref('types')
 const detail = ref(null)
 const fees = [
   ['BTC/USDT', '0.10%', '0.10%', '0.0005 BTC', '2026-01-01'],
@@ -42,22 +42,6 @@ const summaries = [
       v-model="active"
       class="parameter-tabs"
     >
-      <el-tab-pane
-        :label="$t('text246')"
-        name="fees"
-      >
-        <el-table :data="fees">
-          <el-table-column
-            :formatter="formatCell"
-            v-for="(label, i) in ['交易对', 'Maker 费率', 'Taker 费率', '提币费率', '生效时间']"
-            :key="label"
-            :label="tr(label)"
-            :prop="String(i)"
-            min-width="150"
-          />
-        </el-table>
-        <p class="parameter-note">{{ $t('text252') }}</p>
-      </el-tab-pane>
       <el-tab-pane
         :label="$t('text253')"
         name="types"
