@@ -683,6 +683,21 @@
   padding: 24px;
   flex: 1;
 }
+.reset-password-page { min-height: 660px; background: #fff; padding: 24px; }
+.reset-breadcrumb { display: flex; gap: 12px; color: #666; font-size: 14px; }
+.reset-breadcrumb span:nth-child(2) { color: #c4c8d0; }
+.password-form { width: 376px; margin: 40px auto 0; }
+.password-warning { display: flex; align-items: center; gap: 6px; height: 52px; margin-bottom: 28px; padding: 0 16px; border: 1px solid #f2cf7a; background: #fffaf0; color: #6e6e6e; font-size: 12px; }
+.password-warning:first-letter { color: #f1a91b; }
+.password-form label { display: block; margin-bottom: 18px; font-size: 16px; font-weight: 600; }
+.password-form label i { color: #f25757; font-style: normal; }
+.password-input { display: flex; height: 48px; margin-top: 10px; border: 1px solid #d9dfe9; border-radius: 4px; overflow: hidden; }
+.password-input.invalid { border-color: #ff4d4f; }
+.password-input input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 0 14px; font-size: 14px; }
+.password-input button { width: 42px; border: 0; background: #fff; color: #c5ccd7; cursor: pointer; }
+.email-page .password-input button { width: 96px; border-left: 1px solid #d9dfe9; color: #606978; font-size: 14px; }
+.password-form label small { display: block; margin-top: 5px; color: #ff4d4f; font-size: 12px; font-weight: normal; }
+.password-submit { width: 100%; height: 50px; margin-top: 20px; border: 0; border-radius: 8px; background: #f7ff16; font-size: 16px; font-weight: 600; cursor: pointer; }
 .phone-binding {
   flex: 1;
   min-height: 530px;
