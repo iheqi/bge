@@ -1,5 +1,5 @@
 <script setup>
-import { formatMoney } from './currency'
+import { formatMoney, HKD_PER_USD } from './currency'
 import { tr, formatCell } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
@@ -11,58 +11,20 @@ import SiteHeader from './SiteHeader.vue'
 const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
-// Quote prices remain immutable; USDT is valued at 1 USD in this demo dataset.
+// Demo quotes; USDC/USDT are valued at 1 USD. Turnover is stored in USD.
 const markets = [
-  {
-    pair: 'BTC/USDT',
-    price: 84106.642,
-    change: '-2.77%',
-    high: 86542.9629,
-    low: 83516.9365,
-    // Legacy screenshot turnover was CNY 1.369 billion at approximately 6.7114 CNY/USD.
-    turnover: 1369000000 / 6.7114094,
-    hot: true,
-  },
-  {
-    pair: 'ETH/USDT',
-    price: 4981.81,
-    change: '0.00%',
-    high: 4981.81,
-    low: 4981.81,
-    turnover: 0,
-    hot: true,
-  },
-  {
-    pair: 'SOL/USDT',
-    price: 175.49605,
-    change: '0.00%',
-    high: 175.49605,
-    low: 175.49605,
-    turnover: 0,
-  },
-  { pair: 'DOGE/USDT', price: 0.18128, change: '0.00%', high: 0.18128, low: 0.18128, turnover: 0 },
-  {
-    pair: 'ADA/USDT',
-    price: 0.895476,
-    change: '0.00%',
-    high: 0.895476,
-    low: 0.895476,
-    turnover: 0,
-  },
-  {
-    pair: 'ETH/BTC',
-    price: 0.03348402,
-    change: '0.00%',
-    high: 0.03348402,
-    low: 0.03348402,
-    turnover: 0,
-    hot: true,
-  },
-  { pair: 'EOS/USDT', price: null, change: '--', high: null, low: null, turnover: null },
-  { pair: 'ABCA/USDT', price: 1, change: '0.00%', high: 1, low: 1, turnover: 0 },
-]
+  ['BTC/USDC', 84106.64, '+1.82%', 85880.12, 82410.55, 18650000, true],
+  ['ETH/USDC', 4981.81, '+0.64%', 5098.22, 4876.34, 8420000, true],
+  ['BTC/HKD', 654320.18, '-0.73%', 662800.45, 648210.12, 3150000, false],
+  ['ETH/HKD', 38762.26, '+0.18%', 39420.6, 37980.15, 1760000, false],
+  ['USDC/USD', 1.0002, '+0.02%', 1.0012, 0.9991, 420000, true],
+  ['BTC/USDT', 84112.38, '-2.77%', 86542.96, 83516.94, 1369000000, true],
+  ['ETH/USDT', 4981.81, '+0.91%', 5072.2, 4810.5, 286000000, true],
+  ['USDT/USD', 0.9998, '-0.01%', 1.0004, 0.9992, 1180000, true],
+  ['USDT/HKD', 7.8124, '+0.03%', 7.8241, 7.8012, 630000, true],
+].map(([pair, price, change, high, low, turnover, hot]) => ({ pair, price, change, high, low, turnover, hot }))
 function usdPrice(row, value) {
-  return value === null ? null : value * (row.pair.endsWith('/BTC') ? markets[0].price : 1)
+  return value === null ? null : value / (row.pair.endsWith('/HKD') ? HKD_PER_USD : 1)
 }
 function priceCell(row, column, value) {
   return formatMoney(
@@ -80,7 +42,6 @@ const favorites = ref(saved)
 const sort = ref({ key: '', order: '' })
 const rows = markets
 const filtered = computed(() => {
-  if (tab.value === 'contract') return []
   const result = rows.filter(
     (m) =>
       m.pair.includes(search.value.trim().toUpperCase()) &&
@@ -157,7 +118,7 @@ function trade() {
             >{{ coin.pair
             }}<span
               class="ticker-change"
-              :class="{ negative: index === 0 }"
+              :class="{ negative: coin.change.startsWith('-'), positive: coin.change.startsWith('+') }"
               >{{ coin.change }}</span
             >
           </div>
@@ -169,7 +130,7 @@ function trade() {
             <small>{{ coin.price }} {{ coin.pair.split('/')[1] }}</small>
           </div>
           <div class="ticker-volume">
-            24H Vol {{ tr(index === 0 ? '2,405.25206' : '0.00000')
+            24H Vol {{ (coin.turnover / usdPrice(coin, coin.price)).toFixed(4) }} {{ coin.pair.split('/')[0]
             }}<button
               :title="$t('text145')"
               :aria-label="$t('text145')"
@@ -193,7 +154,6 @@ function trade() {
             v-for="mode in [
               ['favorites', '自选'],
               ['spot', '现货'],
-              ['contract', '合约'],
             ]"
             :key="mode[0]"
             role="tab"
@@ -221,8 +181,10 @@ function trade() {
         <button
           v-for="item in [
             ['all', '全部行情'],
+            ['USDC', 'USDC'],
             ['USDT', 'USDT'],
-            ['BTC', 'BTC'],
+            ['HKD', 'HKD'],
+            ['USD', 'USD'],
           ]"
           :key="item[0]"
           role="tab"
@@ -237,13 +199,7 @@ function trade() {
         :data="filtered"
         class="market-table"
         :empty-text="
-          tr(
-            tab === 'contract'
-              ? '暂无合约行情'
-              : tab === 'favorites'
-                ? '暂无符合条件的自选行情'
-                : '暂无匹配行情',
-          )
+          tr(tab === 'favorites' ? '暂无符合条件的自选行情' : '暂无匹配行情')
         "
         @sort-change="({ prop, order }) => (sort = { key: prop, order })"
       >
@@ -270,7 +226,7 @@ function trade() {
               ><small
                 v-if="row.hot"
                 class="hot-label"
-                >{{ $t('text159') }}</small
+                >{{ tr('仅PI') }}</small
               >
             </div></template
           ></el-table-column
@@ -297,7 +253,7 @@ function trade() {
           sortable="custom"
           min-width="115"
           ><template #default="{ row }"
-            ><span :class="{ negative: row.change.startsWith('-') }">{{
+            ><span :class="{ negative: row.change.startsWith('-'), positive: row.change.startsWith('+') }">{{
               tr(row.change)
             }}</span></template
           ></el-table-column
@@ -325,7 +281,7 @@ function trade() {
         <el-table-column
           :label="$t('text065')"
           align="right"
-          width="80"
+          width="100"
           ><template #default
             ><button
               class="market-trade"
@@ -345,7 +301,7 @@ function trade() {
   min-height: 100vh;
   background: #fff;
   color: #101114;
-  --market-accent: #0ab99f;
+  --market-accent: #d9aa00;
 }
 .market-nav {
   min-height: 72px;
@@ -397,7 +353,7 @@ function trade() {
   height: 123px;
   padding: 16px;
   background: #fff;
-  border-radius: 8px;
+  border-radius: 5px;
   font-size: 14px;
 }
 .ticker-title {
@@ -427,6 +383,7 @@ function trade() {
 .negative {
   color: #fa3557;
 }
+.positive { color: #169c74; }
 .ticker-price {
   display: flex;
   align-items: baseline;
@@ -491,17 +448,17 @@ function trade() {
   font-size: 14px;
 }
 .market-modes button.selected {
-  color: var(--market-accent);
-  background: #dff6f1;
+  color: #151923;
+  background: #f5ff18;
 }
 .market-search {
   width: 300px;
   flex-shrink: 0;
 }
 .market-search :deep(.el-input__wrapper) {
-  border-radius: 24px;
-  background: #f7f7f7;
-  box-shadow: none;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #d8dfeb inset;
   padding: 4px 16px;
 }
 .market-search :deep(.el-input__icon) {
@@ -533,10 +490,10 @@ function trade() {
   color: var(--market-accent);
 }
 .market-table {
-  --el-table-border-color: #eee;
-  --el-table-header-text-color: #9da1ac;
-  --el-table-text-color: #101114;
-  --el-table-row-hover-bg-color: #f8fcfb;
+  --el-table-border-color: #e7e8eb;
+  --el-table-header-text-color: #858b96;
+  --el-table-text-color: #20242b;
+  --el-table-row-hover-bg-color: #fffdf0;
   font-size: 14px;
 }
 .market-table :deep(th.el-table__cell) {
@@ -580,21 +537,25 @@ function trade() {
   color: var(--market-accent);
 }
 .hot-label {
-  background: #e3f8f3;
+  background: #fff5a8;
   color: var(--market-accent);
   font-size: 11px;
   line-height: 14px;
+  padding: 3px 6px;
+  border-radius: 5px;
 }
 .fiat-price {
   color: #60636b;
 }
 .market-trade {
   border: 0;
-  padding: 0;
-  background: none;
-  color: var(--market-accent);
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: #f5ff18;
+  color: #151923;
   font-size: 14px;
   cursor: pointer;
+  white-space: nowrap;
 }
 @media (max-width: 1000px) {
   .market-nav {
