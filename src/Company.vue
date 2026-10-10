@@ -198,7 +198,7 @@ const cards = [
           <a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
           ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
           <h4 class="service">{{ $t('text108') }}</h4>
-          <a>{{ $t('text109') }}</a>
+          <a href="/bge/hk/zh-CN/support/announcement">{{ $t('text109') }}</a>
         </div>
         <div>
           <h4>{{ $t('text070') }}</h4>

@@ -15,9 +15,12 @@ import Payment from './Payment.vue'
 import MessageCenter from './MessageCenter.vue'
 import Market from './Market.vue'
 import Parameters from './Parameters.vue'
+import Announcement from './Announcement.vue'
 const path = window.location.pathname
 const page = computed(() =>
-  path.includes('/market')
+  path.includes('/support/announcement')
+    ? 'announcement'
+    : path.includes('/market')
     ? 'market'
     : path.includes('/user/payment')
       ? 'payment'
@@ -45,7 +48,8 @@ const page = computed(() =>
 
 <template>
   <el-config-provider :locale="elementLocale">
-    <MessageCenter v-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
+    <Announcement v-if="page === 'announcement'" />
+    <MessageCenter v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
     <Otc v-else-if="page === 'otc'" />
     <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters')" />
