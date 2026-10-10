@@ -1,4 +1,5 @@
 <script setup>
+import UserSidebar from './UserSidebar.vue'
 import { tr } from './i18n'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
@@ -77,18 +78,7 @@ async function deleteAll() {
       </div>
     </header>
     <main class="message-layout">
-      <aside class="message-sidebar">
-        <h1>{{ $t('text174') }}</h1>
-        <button
-          v-for="item in messageCategories"
-          :key="item"
-          :class="{ selected: category === item }"
-          :aria-pressed="category === item"
-          @click="category = item"
-        >
-          {{ tr(item) }}
-        </button>
-      </aside>
+      <UserSidebar />
       <div class="message-content">
         <section
           class="message-list"

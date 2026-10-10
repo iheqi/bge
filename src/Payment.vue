@@ -1,4 +1,5 @@
 <script setup>
+import UserSidebar from './UserSidebar.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
@@ -55,24 +56,7 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
       </div>
     </header>
     <div class="user-layout">
-      <aside>
-        <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
-        ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
-        ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
-        ><a
-          class="sel"
-          href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
-        ><a href="/bge/hk/zh-CN/user/fees">费率查询</a
-        ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
-        ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
-        >
-      </aside>
+      <UserSidebar />
       <main class="payment-main">
         <section class="payment-box">
           <div class="payment-tabs">

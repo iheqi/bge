@@ -1,5 +1,6 @@
 <script setup>
 import ApiKeyRecords from './ApiKeyRecords.vue'
+import UserSidebar from './UserSidebar.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
@@ -49,6 +50,8 @@ import {
       </div>
     </header>
     <div class="user-layout">
+      <UserSidebar />
+      <!--
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
           ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
@@ -66,7 +69,7 @@ import {
           href="/bge/hk/zh-CN/user/api"
           ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
-      </aside>
+      </aside> -->
       <main class="api-main">
         <section class="api-create">
           <div class="api-title">{{ $t('text051') }}</div>

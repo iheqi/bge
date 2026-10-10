@@ -4,6 +4,7 @@ import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import ParameterContent from './ParameterContent.vue'
 import FeeContent from './FeeContent.vue'
+import UserSidebar from './UserSidebar.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import {
@@ -51,6 +52,8 @@ const props = defineProps({ fees: Boolean })
       </div>
     </header>
     <div class="user-layout">
+      <UserSidebar />
+      <!--
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
           ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
@@ -68,7 +71,7 @@ const props = defineProps({ fees: Boolean })
         ><a href="/bge/hk/zh-CN/user/api"
           ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
         >
-      </aside>
+      </aside> -->
       <FeeContent v-if="props.fees" /><ParameterContent v-else />
     </div>
     <footer>

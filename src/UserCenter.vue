@@ -1,4 +1,5 @@
 <script setup>
+import UserSidebar from './UserSidebar.vue'
 import { formatMoney } from './currency'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
@@ -88,24 +89,7 @@ const coins = [
           ><el-icon><Tickets /></el-icon>{{ $t('text334') }}</a
         >
       </aside>
-      <aside v-else>
-        <a
-          href="/bge/hk/zh-CN/user/dashboard"
-          :class="{ sel: !assets }"
-          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
-        ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
-        ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
-        ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
-        ><a href="/bge/hk/zh-CN/user/fees">费率查询</a
-        ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
-        ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
-        >
-      </aside>
+      <UserSidebar v-else />
       <main class="user-main">
         <section
           v-if="!assets"
