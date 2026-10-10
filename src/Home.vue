@@ -5,10 +5,13 @@ import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
+import SiteHeader from './SiteHeader.vue'
 </script>
 
 <template>
   <div class="page">
+    <SiteHeader active="home" />
+    <!--
     <header class="nav">
       <div class="brand">
         <img
@@ -42,7 +45,7 @@ import { ArrowDown } from '@element-plus/icons-vue'
         ></span
         ><CurrencySwitcher />
       </div>
-    </header>
+    </header> -->
 
     <main>
       <section class="hero">

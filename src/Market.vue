@@ -7,6 +7,7 @@ import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ref, computed } from 'vue'
 import { Search, StarFilled, ArrowRight } from '@element-plus/icons-vue'
+import SiteHeader from './SiteHeader.vue'
 const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
@@ -113,6 +114,8 @@ function trade() {
 </script>
 <template>
   <div class="market-page">
+    <SiteHeader active="market" />
+    <!--
     <header class="market-nav">
       <a
         class="market-brand"
@@ -138,7 +141,7 @@ function trade() {
         ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
         ><MessageBell /><UserMenu /><LanguageSwitcher /><CurrencySwitcher />
       </div>
-    </header>
+    </header> -->
     <section class="market-tickers">
       <div class="market-container ticker-cards">
         <article

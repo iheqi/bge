@@ -1,12 +1,6 @@
 <script setup>
-import { useClickDropdown } from './useClickDropdown'
-const { root, open } = useClickDropdown()
-import LanguageSwitcher from './LanguageSwitcher.vue'
-import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
-import UserMenu from './UserMenu.vue'
-import MessageBell from './MessageBell.vue'
-import { ArrowDown } from '@element-plus/icons-vue'
+import SiteHeader from './SiteHeader.vue'
 defineProps({ security: Boolean })
 const cards = [
   [
@@ -37,6 +31,8 @@ const cards = [
       class="company-hero"
       :class="{ security }"
     >
+      <SiteHeader active="about" />
+      <!--
       <header class="company-nav">
         <a
           class="otc-brand"
@@ -90,7 +86,7 @@ const cards = [
           ></span
           ><CurrencySwitcher />
         </div>
-      </header>
+      </header> -->
       <div class="company-intro">
         <h1>{{ tr(security ? '安全' : '关于我们') }}</h1>
         <template v-if="!security"
