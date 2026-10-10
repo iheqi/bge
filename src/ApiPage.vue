@@ -1,4 +1,5 @@
 <script setup>
+import ApiKeyRecords from './ApiKeyRecords.vue'
 import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
@@ -83,17 +84,7 @@ import {
             </div>
           </div>
         </section>
-        <section class="api-record">
-          <div class="api-title">{{ $t('text060') }}</div>
-          <div class="api-head">
-            <span>{{ $t('text061') }}</span
-            ><span>{{ $t('text062') }}</span
-            ><span>{{ $t('text063') }}</span
-            ><span>{{ $t('text064') }}</span
-            ><span>{{ $t('text065') }}</span>
-          </div>
-          <div class="api-empty">{{ $t('text066') }}</div>
-        </section>
+        <ApiKeyRecords />
       </main>
     </div>
     <footer>
