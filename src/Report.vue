@@ -49,8 +49,8 @@ const mockRows = computed(() => {
     return [['2026-10-06 12:08:44', 'BTC', '0.18000000', 'bc1q...9x2k', '已完成']]
   }
   if (type === 'otc') {
-    if (otcTab.value === 'match') return [['2026-10-08 15:20:12', '买入', '10,000 HKD', '1,278.40 USDT', '12.00 HKD', '7.8220', '已完成']]
-    return [['2026-10-05 13:10:09', 'USDT', 'HKD', '1,000.00', '已完成']]
+    if (otcTab.value === 'match') return [['2026-10-08 15:20:12', '买入', '10,000 HKD', '1,278.40 USDT', '12.00 HKD', '7.8220', '8.0000 HKD', '自行下单', '24', '已完成']]
+    return [['2026-10-05 13:10:09', 'USDT', 'HKD', '1,000.00', '8.0000 HKD', '电邮联系', '12', '已完成']]
   }
   return settleTab.value === 'monthly' ? [['2026年09月结单', '下载']] : [['2026年10月08日日结单', '下载']]
 })
@@ -70,7 +70,9 @@ const columns = () => {
     if (walletTab.value === 'transfer') return ['时间', '币种', '数量', '从', '到', '状态']
     return ['时间', '数字货币', '数量', '发起方地址', '状态']
   }
-  if (type === 'otc') return otcTab.value === 'match' ? ['时间', '买卖方向', '支付金额', '获得金额', '手续费', '成交单价', '状态'] : ['时间', '支付币种', '获得币种', '购买/出售数量', '状态']
+  if (type === 'otc') return otcTab.value === 'match'
+    ? ['时间', '买卖方向', '支付金额', '获得金额', '手续费', '成交单价', '最高购买单价', '委托类型', '有效期（小时）', '状态']
+    : ['时间', '支付币种', '获得币种', '购买/出售数量', '最高购买单价', '委托类型', '有效期（小时）', '状态']
   if (type === 'settle') return ['结单名称', '操作']
   return ['委托时间', '交易对', '订单类型', '买卖方向', '委托价格', '委托数量', '成交状态', '详情']
 }
@@ -234,7 +236,7 @@ const columns = () => {
               ><span>{{ $t('text321') }}</span
               ><span>{{ $t('text322') }}</span
               ><span>{{ $t('text323') }}</span
-              ><span>{{ $t('text063') }}</span>
+              ><span>最高购买单价</span><span>委托类型</span><span>有效期（小时）</span><span>{{ $t('text063') }}</span>
             </div></template
           ><template v-else
             ><div class="sub-tabs">

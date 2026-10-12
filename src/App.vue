@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import Home from './Home.vue'
 import Spot from './Spot.vue'
 import Otc from './Otc.vue'
+import OtcTrade from './OtcTrade.vue'
 import Company from './Company.vue'
 import UserCenter from './UserCenter.vue'
 import Kyc from './Kyc.vue'
@@ -36,7 +37,9 @@ const page = computed(() =>
                 ? 'assets'
                 : path.includes('/user/dashboard')
                   ? 'dashboard'
-                  : path.includes('/otc')
+    : path.includes('/otc/trade')
+                    ? 'otc-trade'
+                    : path.includes('/otc')
                     ? 'otc'
                     : path.includes('/security')
                       ? 'security'
@@ -51,6 +54,7 @@ const page = computed(() =>
     <Announcement v-if="page === 'announcement'" />
     <MessageCenter v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
+    <OtcTrade v-else-if="page === 'otc-trade'" />
     <Otc v-else-if="page === 'otc'" />
     <Parameters :fees="path.replace(/\/$/, '').endsWith('/user/fees')" v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters') || path.replace(/\/$/, '').endsWith('/user/fees')" />
     <Market v-else-if="page === 'market'" />

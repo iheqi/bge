@@ -80,7 +80,7 @@ const faqs = [
             <h3>{{ $t('text215') }}</h3>
           </article>
         </div>
-        <button class="contact-btn">{{ $t('text216') }}</button>
+        <div class="otc-actions"><button class="contact-btn">{{ $t('text216') }}</button><a class="otc-trade-btn" href="/bge/hk/zh-CN/otc/trade">去交易</a></div>
       </section>
       <section class="steps-section">
         <h2>{{ $t('text217') }}</h2>
@@ -175,3 +175,9 @@ const faqs = [
     </footer>
   </div>
 </template>
+<style scoped>
+.otc-actions{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:80px}
+.otc-actions .contact-btn{margin:0;width:200px;cursor:pointer}
+.otc-trade-btn{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;width:200px;height:42px;border:1px solid #f7ff18;border-radius:9px;background:#f7ff18;color:#111;text-decoration:none;font-size:14px}
+.otc-trade-btn:hover{background:#e8ef18}
+</style>
