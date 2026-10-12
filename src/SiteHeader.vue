@@ -3,7 +3,7 @@ import LanguageSwitcher from './LanguageSwitcher.vue'
 import CurrencySwitcher from './CurrencySwitcher.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
-import { ArrowDown } from '@element-plus/icons-vue'
+import { CaretBottom } from '@element-plus/icons-vue'
 defineProps({ active: { type: String, default: '' } })
 </script>
 <template>
@@ -14,7 +14,29 @@ defineProps({ active: { type: String, default: '' } })
       <a :class="{ active: active === 'market' }" href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a>
       <a :class="{ active: active === 'otc' }" href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a>
       <a :class="{ active: active === 'spot' }" href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a>
-      <a :class="{ active: active === 'about' }" href="/bge/hk/zh-CN/about">{{ $t('text004') }}<el-icon><ArrowDown /></el-icon></a>
+      <el-popover
+        placement="bottom"
+        trigger="hover"
+        :show-after="0"
+        :hide-after="100"
+        :offset="1"
+        :width="100"
+        :show-arrow="false"
+        popper-class="site-header-company-popper"
+        :teleported="false"
+      >
+        <template #reference>
+          <div class="site-header-company-reference">
+            <a :class="{ active: active === 'about' }" href="/bge/hk/zh-CN/about" class="site-header-company-trigger">
+              {{ $t('text004') }}<el-icon><CaretBottom /></el-icon>
+            </a>
+          </div>
+        </template>
+        <nav class="site-header-company-menu" aria-label="公司菜单">
+          <a :class="{ active: active === 'about' }" href="/bge/hk/zh-CN/about">{{ $t('text067') }}</a>
+          <a href="/bge/hk/zh-CN/security">{{ $t('text068') }}</a>
+        </nav>
+      </el-popover>
     </nav>
     <div class="site-header-right"><a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a><MessageBell /><UserMenu /><LanguageSwitcher /><span class="site-header-divider"></span><CurrencySwitcher /></div>
   </header>
@@ -24,9 +46,16 @@ defineProps({ active: { type: String, default: '' } })
 .site-header-brand { flex:0 0 auto; display:flex; align-items:center; }
 .site-header-brand img { display:block; width:116px; height:28px; }
 .site-header-nav, .site-header-right { display:flex; align-items:center; flex-wrap:nowrap; white-space:nowrap; }
-.site-header-nav { gap:38px; }
+.site-header-nav { align-self:stretch; gap:38px; }
 .site-header-right { gap:29px; margin-left:auto; align-self:stretch; }
 .site-header a { color:inherit; text-decoration:none; }
 .site-header-nav a.active { color:#fff; }
+.site-header-company-reference { display:flex; align-items:center; align-self:stretch; }
+.site-header-company-trigger { display:flex; align-items:center; gap:4px; }
+.site-header-company-trigger .el-icon { font-size:12px; }
+.site-header-company-menu { display:flex; flex-direction:column; }
+.site-header .site-header-company-menu a { display:flex; align-items:center; height:36px; padding:0 8px; border-radius:6px; color:#fff; font-size:14px; }
+.site-header .site-header-company-menu a:hover, .site-header .site-header-company-menu a.active { background:#343b49; color:#fff; }
 .site-header-divider { height:16px; border-left:1px solid #41464d; }
+.site-header-company-popper.el-popover { min-width:0; padding:8px; border:0; background:#272c37; border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,.28); }
 </style>
