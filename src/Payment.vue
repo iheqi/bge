@@ -5,31 +5,27 @@ import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
-import {
-  ArrowDown,
-  Grid,
-  Wallet,
-  Tickets,
-  User,
-  Lock,
-  Briefcase,
-  Connection,
-} from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { ArrowDown, InfoFilled } from '@element-plus/icons-vue'
+import { computed, ref } from 'vue'
 import WalletAdd from './WalletAdd.vue'
+import BankDetail from './BankDetail.vue'
 const crypto = window.location.pathname.includes('/crypto')
 const addWallet = window.location.pathname.includes('/crypto/add')
+const bankDetail = window.location.pathname.includes('/user/payment/fiat/detail')
 const walletRecord = ref(JSON.parse(localStorage.getItem('bge-wallet-record') || 'null') || {
   address: '0x9e3729f5a1c237475d9f6a30ff6cf0f7138c7285',
   network: 'eth-', remark: '123', coin: 'ETH', status: '未认证', expires: '-',
 })
 const walletFilterCoin = ref('all')
 const walletFilterStatus = ref('all')
-const showBankForm = ref(false)
-const bankSaved = ref(false)
-const bankForm = ref({ account: '', name: '', swift: '', branch: '' })
-const openAddBank = () => { showBankForm.value = true }
-const saveBank = () => { if (bankForm.value.account && bankForm.value.name && bankForm.value.swift) { bankSaved.value = true; showBankForm.value = false } }
+// The bank card added on /user/payment/fiat/detail is stored locally, like the wallet records.
+const bankRecord = ref(JSON.parse(localStorage.getItem('bge-bank-record') || 'null'))
+const bankCount = computed(() => (bankRecord.value ? 1 : 0))
+const usageCodes = (usage) =>
+  (bankRecord.value?.cards || [])
+    .filter((card) => card.usage === 'both' || card.usage === usage)
+    .map((card) => card.code)
+    .join(',') || '—'
 </script>
 <template>
   <div class="user-page payment-page">
@@ -67,7 +63,7 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
       <UserSidebar />
       <main class="payment-main">
         <section class="payment-box">
-          <div v-if="!addWallet" class="payment-tabs">
+          <div v-if="!addWallet && !bankDetail" class="payment-tabs">
             <a
               :class="{ active: !crypto }"
               href="/bge/hk/zh-CN/user/payment/fiat"
@@ -78,17 +74,9 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
               >{{ $t('text269') }}</a
             >
           </div>
-          <WalletAdd v-if="addWallet" /><template v-else-if="!crypto"
-            ><h2>{{ $t('text270') }}</h2>
-            <button class="add-btn" type="button" @click="openAddBank">{{ $t('text271') }}</button>
-            <form v-if="showBankForm" class="bank-form" @submit.prevent="saveBank">
-              <h3>添加新的银行卡</h3>
-              <label>银行卡账号/卡号<input v-model="bankForm.account" required placeholder="请输入银行卡账号/卡号" /></label>
-              <label>银行名称<input v-model="bankForm.name" required placeholder="请输入银行名称" /></label>
-              <label>开户行名称<input v-model="bankForm.branch" placeholder="请输入开户行名称" /></label>
-              <label>SWIFT号码<input v-model="bankForm.swift" required placeholder="请输入SWIFT号码" /></label>
-              <div class="bank-form-actions"><button type="button" class="cancel" @click="showBankForm = false">取消</button><button type="submit">提交审核</button></div>
-            </form>
+          <BankDetail v-if="bankDetail" /><WalletAdd v-else-if="addWallet" /><template v-else-if="!crypto"
+            ><h2>{{ $t('text268') }} ({{ bankCount }})</h2>
+            <a class="add-btn" href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add">{{ $t('text271') }}</a>
             <div class="payment-head">
               <span>{{ $t('text272') }}</span
               ><span>{{ $t('text273') }}</span
@@ -98,10 +86,17 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
               ><span>{{ $t('text063') }}</span
               ><span>{{ $t('text065') }}</span>
             </div>
-            <div v-if="!bankSaved" class="payment-empty">
+            <div v-if="!bankRecord" class="payment-empty">
               ♨<small>{{ $t('text066') }}</small>
             </div>
-            <div v-else class="bank-saved-row"><span>{{ bankForm.account }}</span><span>{{ bankForm.name }}</span><span>{{ bankForm.swift }}</span><span>待审核</span><span>—</span><span>—</span><span>—</span></div></template
+            <div v-else class="bank-saved-row"><span>{{ bankRecord.account }}</span><span>{{ bankRecord.name }}</span><span>{{ bankRecord.swift || '—' }}</span><span>{{ usageCodes('deposit') }}</span><span>{{ usageCodes('withdraw') }}</span><span class="bank-pending">{{ $t('text396') }}<el-icon><InfoFilled /></el-icon></span><span><a class="bank-edit" href="/bge/hk/zh-CN/user/payment/fiat/detail?type=edit">{{ $t('text397') }}</a></span></div>
+            <el-pagination
+              class="bank-pagination"
+              :page-size="10"
+              :total="bankCount"
+              layout="prev, pager, next"
+              :hide-on-single-page="false"
+            /></template
           ><template v-else
             ><div class="notice-bar">{{ $t('text277') }}</div>
             <h2>{{ $t('text278') }}</h2>
