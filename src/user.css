@@ -972,6 +972,8 @@
 .wallet-filters input {
   width: 375px;
 }
+.wallet-filter-select { width: 140px; }
+.wallet-filter-select .el-select__wrapper { min-height: 40px; border-radius: 4px; box-shadow: 0 0 0 1px #d8dfeb inset; }
 .wallet-filters .search-btn {
   background: #f5ff18;
   color: #111;
@@ -981,3 +983,8 @@
   grid-template-columns: 1.3fr 1fr 2fr 2fr 1fr 1fr 1fr;
   margin-top: 0;
 }
+.wallet-saved-row { display:grid; grid-template-columns:1.3fr 1fr 2fr 1fr 1fr 1fr 1.4fr; min-height:62px; align-items:center; padding:0 10px; color:#697585; font-size:13px; text-align:center; }
+.wallet-saved-row > span:first-child { text-align:left; font-weight:600; color:#5d6673; }
+.wallet-unverified { color:#f04444; }
+.wallet-action, .wallet-delete { border:0; background:none; color:#d6a500; cursor:pointer; margin:0 7px; font-size:13px; }
+.wallet-delete { color:#d6a500; }

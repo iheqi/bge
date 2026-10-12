@@ -16,7 +16,15 @@ import {
   Connection,
 } from '@element-plus/icons-vue'
 import { ref } from 'vue'
+import WalletAdd from './WalletAdd.vue'
 const crypto = window.location.pathname.includes('/crypto')
+const addWallet = window.location.pathname.includes('/crypto/add')
+const walletRecord = ref(JSON.parse(localStorage.getItem('bge-wallet-record') || 'null') || {
+  address: '0x9e3729f5a1c237475d9f6a30ff6cf0f7138c7285',
+  network: 'eth-', remark: '123', coin: 'ETH', status: '未认证', expires: '-',
+})
+const walletFilterCoin = ref('all')
+const walletFilterStatus = ref('all')
 const showBankForm = ref(false)
 const bankSaved = ref(false)
 const bankForm = ref({ account: '', name: '', swift: '', branch: '' })
@@ -59,7 +67,7 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
       <UserSidebar />
       <main class="payment-main">
         <section class="payment-box">
-          <div class="payment-tabs">
+          <div v-if="!addWallet" class="payment-tabs">
             <a
               :class="{ active: !crypto }"
               href="/bge/hk/zh-CN/user/payment/fiat"
@@ -70,7 +78,7 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
               >{{ $t('text269') }}</a
             >
           </div>
-          <template v-if="!crypto"
+          <WalletAdd v-if="addWallet" /><template v-else-if="!crypto"
             ><h2>{{ $t('text270') }}</h2>
             <button class="add-btn" type="button" @click="openAddBank">{{ $t('text271') }}</button>
             <form v-if="showBankForm" class="bank-form" @submit.prevent="saveBank">
@@ -97,9 +105,9 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
           ><template v-else
             ><div class="notice-bar">{{ $t('text277') }}</div>
             <h2>{{ $t('text278') }}</h2>
-            <button class="add-btn">{{ $t('text279') }}</button>
+            <a class="add-btn" href="/bge/hk/zh-CN/user/payment/crypto/add">{{ $t('text279') }}</a>
             <div class="wallet-filters">
-              <button>{{ $t('text280') }}</button><button>{{ $t('text281') }}</button
+              <el-select v-model="walletFilterCoin" class="wallet-filter-select" aria-label="币种"><el-option label="全部币种" value="all" /><el-option label="ETH" value="ETH" /><el-option label="BTC" value="BTC" /><el-option label="USDT" value="USDT" /><el-option label="USDC" value="USDC" /></el-select><el-select v-model="walletFilterStatus" class="wallet-filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="已认证" value="verified" /><el-option label="未认证" value="unverified" /><el-option label="已过期" value="expired" /></el-select
               ><input :placeholder="$t('text282')" /><button class="search-btn">
                 {{ $t('text283') }}
               </button>
@@ -113,9 +121,10 @@ const saveBank = () => { if (bankForm.value.account && bankForm.value.name && ba
               ><span>{{ $t('text288') }}</span
               ><span>{{ $t('text065') }}</span>
             </div>
-            <div class="payment-empty">
+            <div v-if="!walletRecord" class="payment-empty">
               ♨<small>{{ $t('text066') }}</small>
-            </div></template
+            </div>
+            <div v-else class="wallet-saved-row"><span>{{ walletRecord.address.slice(0, 10) }}...{{ walletRecord.address.slice(-8) }}</span><span>{{ walletRecord.network }}</span><span>{{ walletRecord.remark }} ✎</span><span>{{ walletRecord.coin }}</span><span class="wallet-unverified">{{ walletRecord.status }}</span><span>{{ walletRecord.expires }}</span><span><button class="wallet-action">认证</button><button class="wallet-delete">删除</button></span></div></template
           >
         </section>
       </main>
