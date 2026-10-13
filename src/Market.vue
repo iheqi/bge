@@ -36,6 +36,7 @@ function priceCell(row, column, value) {
     column.property === 'turnover' ? 2 : priceDigits(row.pair),
   )
 }
+// Amount only, so the ticker cards can pair it with their own currency label.
 function basePrice(row, value) {
   return formatMoney(value, 'USD', priceDigits(row.pair)).split(' ').slice(1).join(' ')
 }
@@ -241,14 +242,7 @@ function trade() {
           :label="$t('text160')"
           sortable="custom"
           min-width="230"
-          ><template #default="{ row }"
-            >{{ priceCell(row, { property: 'price' }, row.price)
-            }}<span
-              v-if="row.price !== null"
-              class="fiat-price"
-              >/ {{ basePrice(row, row.price) }} {{ row.pair.split('/')[1] }}</span
-            ></template
-          ></el-table-column
+          ><template #default="{ row }">{{ priceCell(row, { property: 'price' }, row.price) }}</template></el-table-column
         >
         <el-table-column
           :formatter="formatCell"
@@ -513,14 +507,19 @@ function trade() {
   padding: 0 16px;
   white-space: nowrap;
 }
+/* The caret wrapper is 14px tall, so the two carets stack back to back:
+   the ascending one on top, the descending one below it. */
+.market-table {
+  --el-color-primary: #d9a600;
+}
 .market-table :deep(.sort-caret) {
   border-width: 3px;
 }
 .market-table :deep(.sort-caret.ascending) {
-  top: 7px;
+  top: 0;
 }
 .market-table :deep(.sort-caret.descending) {
-  bottom: 9px;
+  bottom: 0;
 }
 .market-pair {
   display: flex;
@@ -547,9 +546,6 @@ function trade() {
   line-height: 14px;
   padding: 3px 6px;
   border-radius: 5px;
-}
-.fiat-price {
-  color: #60636b;
 }
 .market-trade {
   border: 0;
