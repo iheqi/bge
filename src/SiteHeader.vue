@@ -36,8 +36,6 @@ const menus = [
     links: [
       { label: 'text333', href: '/bge/hk/zh-CN/user/assets?account=fund' },
       { label: 'text334', href: '/bge/hk/zh-CN/user/assets?account=trade' },
-      { label: 'text268', href: '/bge/hk/zh-CN/user/payment/fiat' },
-      { label: 'text269', href: '/bge/hk/zh-CN/user/payment/crypto' },
     ],
   },
 ]

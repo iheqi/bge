@@ -15,6 +15,10 @@ const remark = ref('')
 const orders = ref([
   { id: 1, time: '2026-10-10 10:32:18', pair: 'ETH/USDC', side: '买入', quantity: '10.0000 ETH', price: '3,850.00 USDC', validity: '24', status: '待成交' },
 ])
+// The matched orders mirror the OTC 订单 list of /user/report/otc-orders.
+const matchOrders = ref([
+  { time: '2026-10-08 15:20:12', side: '买入', pay: '10,000 HKD', gain: '1,278.40 USDT', fee: '12.00 HKD', dealPrice: '7.8220', maxPrice: '8.0000 HKD', orderType: '自行下单', validity: '24', status: '已完成' },
+])
 const pairOptions = ['ETH/USDC', 'BTC/USDC', 'BTC/USDT', 'ETH/USDT']
 const filterPair = ref('all')
 const filterStatus = ref('all')
@@ -76,6 +80,7 @@ function cancelOrder(order) { order.status = '已撤单' }
           <el-select v-model="filterPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="filterStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待成交" value="待成交" /><el-option label="已撤单" value="已撤单" /></el-select><el-date-picker v-model="filterRange" class="date-picker" type="daterange" value-format="YYYY-MM-DD" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" aria-label="日期范围" /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button><button @click="resetFilters">{{ $t('text299') }}</button>
         </div>
         <el-table
+          v-if="tab === 'intent'"
           :data="visibleOrders"
           class="report-table"
           :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
@@ -91,6 +96,24 @@ function cancelOrder(order) { order.status = '已撤单' }
           <el-table-column :label="$t('text065')" width="100" align="center">
             <template #default="{ row }"><button v-if="row.status === '待成交'" class="otc-cancel" @click="cancelOrder(row)">撤单</button><span v-else>--</span></template>
           </el-table-column>
+        </el-table>
+        <el-table
+          v-else
+          :data="matchOrders"
+          class="report-table"
+          :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+          empty-text="暂无数据"
+        >
+          <el-table-column prop="time" :label="$t('text313')" min-width="170" align="center" />
+          <el-table-column prop="side" :label="$t('text302')" min-width="100" align="center" />
+          <el-table-column prop="pay" label="支付金额" min-width="130" align="center" />
+          <el-table-column prop="gain" label="获得金额" min-width="140" align="center" />
+          <el-table-column prop="fee" label="手续费" min-width="120" align="center" />
+          <el-table-column prop="dealPrice" label="成交单价" min-width="120" align="center" />
+          <el-table-column prop="maxPrice" :label="$t('text407')" min-width="140" align="center" />
+          <el-table-column prop="orderType" label="委托类型" min-width="120" align="center" />
+          <el-table-column prop="validity" label="有效期（小时）" min-width="130" align="center" />
+          <el-table-column prop="status" :label="$t('text063')" min-width="100" align="center" />
         </el-table>
         <div class="pager">‹　›</div>
       </section>
