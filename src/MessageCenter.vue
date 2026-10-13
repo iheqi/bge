@@ -45,7 +45,18 @@ async function deleteAll() {
   <div class="message-page">
     <SiteHeader active="messages" />
     <main class="message-layout">
-      <UserSidebar />
+      <aside class="message-sidebar">
+        <h1>{{ $t('text174') }}</h1>
+        <button
+          v-for="item in messageCategories"
+          :key="item"
+          :class="{ selected: category === item }"
+          :aria-pressed="category === item"
+          @click="category = item"
+        >
+          {{ tr(item) }}
+        </button>
+      </aside>
       <div class="message-content">
         <section
           class="message-list"

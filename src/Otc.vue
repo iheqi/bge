@@ -28,7 +28,7 @@ const faqs = [
 </script>
 <template>
   <div class="otc-page">
-    <SiteHeader active="otc" guest contact />
+    <SiteHeader active="otc" />
     <main>
       <section class="service-section">
         <h1>{{ $t('text214') }}</h1>
