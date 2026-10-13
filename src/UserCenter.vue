@@ -2,8 +2,9 @@
 import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
 import { formatMoney } from './currency'
-import { tr } from './i18n'
+import { i18n, tr } from './i18n'
 import Footer from './Footer.vue'
+import { ElMessage } from 'element-plus'
 import {
   ArrowDown,
   Grid,
@@ -14,8 +15,9 @@ import {
   Briefcase,
   Connection,
   Search,
+  Sort,
 } from '@element-plus/icons-vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 const accountParam = new URLSearchParams(window.location.search).get('account')
 const props = defineProps({ assets: Boolean })
 const accountTab = ref(
@@ -33,6 +35,56 @@ const coins = [
   ['HK$', 'HKD', '港币', '法币'],
   ['₿', 'BTC', 'Bitcoin', ''],
 ]
+// Demo balances and USD prices behind the transfer flow, so a transfer always has funds to move.
+const prices = { USD: 1, HKD: 0.128, ETH: 3450, USDC: 1, USDT: 1, BTC: 96000 }
+const balances = ref({
+  fund: { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08 },
+  trade: { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012 },
+})
+const activeAccount = computed(() => (accountTab.value === 'trade' ? 'trade' : 'fund'))
+const accountName = (account) => tr(account === 'trade' ? '交易账户' : '资金账户')
+const balanceOf = (account, symbol) => balances.value[account][symbol] ?? 0
+const btcValue = (symbol, amount) => (amount * (prices[symbol] ?? 0)) / prices.BTC
+const accountBtc = (account) => coins.reduce((sum, coin) => sum + btcValue(coin[1], balanceOf(account, coin[1])), 0)
+const formatAmount = (value) => Number(value ?? 0).toLocaleString('en-US', { maximumFractionDigits: 8 })
+const withdrawHref = (symbol) =>
+  ['USD', 'HKD'].includes(symbol)
+    ? `/bge/hk/zh-CN/user/fiat/withdraw/${symbol}`
+    : `/bge/hk/zh-CN/user/crypto/withdraw/${symbol}`
+const activeBtc = computed(() => accountBtc(activeAccount.value))
+const totalBtc = computed(() => accountBtc('fund') + accountBtc('trade'))
+
+const transferOpen = ref(false)
+const transferFrom = ref('fund')
+const transferCoin = ref('BTC')
+const transferAmount = ref('')
+const transferTo = computed(() => (transferFrom.value === 'fund' ? 'trade' : 'fund'))
+const transferAvailable = computed(() => balanceOf(transferFrom.value, transferCoin.value))
+const coinOf = (symbol) => coins.find((coin) => coin[1] === symbol) ?? coins[0]
+
+function openTransfer(symbol) {
+  transferFrom.value = activeAccount.value
+  transferCoin.value = symbol
+  transferAmount.value = ''
+  transferOpen.value = true
+}
+function swapTransfer() {
+  transferFrom.value = transferTo.value
+}
+function fillTransferAmount() {
+  transferAmount.value = String(transferAvailable.value)
+}
+function confirmTransfer() {
+  const amount = Number(transferAmount.value)
+  if (!Number.isFinite(amount) || amount <= 0)
+    return ElMessage.warning(i18n.global.t('transferAmountPlaceholder'))
+  if (amount > transferAvailable.value)
+    return ElMessage.warning(i18n.global.t('insufficientBalance'))
+  balances.value[transferFrom.value][transferCoin.value] = transferAvailable.value - amount
+  balances.value[transferTo.value][transferCoin.value] = balanceOf(transferTo.value, transferCoin.value) + amount
+  transferOpen.value = false
+  ElMessage.success(i18n.global.t('transferSuccess'))
+}
 </script>
 <template>
   <div class="user-page">
@@ -139,18 +191,14 @@ const coins = [
           ><section class="asset-banner">
             <span>{{ $t('text341') }}</span
             ><strong
-              >0.00000000 BTC <small>≈ {{ formatMoney(0, 'USD', 4) }}</small></strong
+              >{{ totalBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(totalBtc * prices.BTC, 'USD', 4) }}</small></strong
             ><a>{{ $t('text342') }}</a>
           </section>
           <section class="asset-box">
-            <h2 class="asset-account-title">
-              {{ tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}
-            </h2>
-            <p class="label">
-              {{ tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text343') }}
-            </p>
+            <h2 class="asset-account-title">{{ accountName(activeAccount) }}</h2>
+            <p class="label">{{ accountName(activeAccount) }}{{ $t('text343') }}</p>
             <strong
-              >0.00000000 BTC <small>≈ {{ formatMoney(0, 'USD', 4) }}</small></strong
+              >{{ activeBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(activeBtc * prices.BTC, 'USD', 4) }}</small></strong
             >
             <div class="asset-tools">
               <label>{{ $t('text344') }}</label>
@@ -177,20 +225,169 @@ const coins = [
                   ><small>{{ tr(coin[2]) }}</small></span
                 >
               </div>
-              <b>0.00000000</b><b>0.00000000</b
+              <b>{{ formatAmount(balanceOf(activeAccount, coin[1])) }}</b><b>0</b
               ><b
-                >0.00000000<small>≈ {{ formatMoney(0, 'USD', 4) }}</small></b
+                >{{ btcValue(coin[1], balanceOf(activeAccount, coin[1])).toFixed(8) }}<small>≈ {{ formatMoney(balanceOf(activeAccount, coin[1]) * (prices[coin[1]] ?? 0), 'USD', 4) }}</small></b
               >
               <div>
                 <a class="disabled">{{ $t('text275') }}</a
-                ><a>{{ $t('text276') }}</a
-                ><a>{{ $t('text309') }}</a>
+                ><a :href="withdrawHref(coin[1])">{{ $t('text276') }}</a
+                ><a
+                  href="#"
+                  @click.prevent="openTransfer(coin[1])"
+                  >{{ $t('text309') }}</a
+                >
               </div>
             </div>
           </section></template
         >
       </main>
     </div>
+    <div
+      v-if="transferOpen"
+      class="transfer-mask"
+      @click.self="transferOpen = false"
+    >
+      <section
+        class="transfer-modal"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="$t('text309')"
+      >
+        <h2>{{ $t('text309') }}</h2>
+        <button
+          class="transfer-close"
+          type="button"
+          :aria-label="$t('text183')"
+          @click="transferOpen = false"
+        >
+          ✕
+        </button>
+        <a
+          class="transfer-records"
+          href="/bge/hk/zh-CN/user/report/wallet"
+          >{{ $t('transferRecords') }} ›</a
+        >
+        <div class="transfer-route">
+          <div class="route-item">
+            <i class="route-dot" /><span>{{ $t('transferFrom') }}</span
+            ><b>{{ accountName(transferFrom) }}</b>
+          </div>
+          <div class="route-item">
+            <i class="route-dot dot-to" /><span>{{ $t('transferTo') }}</span
+            ><b>{{ accountName(transferTo) }}</b>
+          </div>
+          <button
+            class="route-swap"
+            type="button"
+            :aria-label="$t('text309')"
+            @click="swapTransfer"
+          >
+            <el-icon><Sort /></el-icon>
+          </button>
+        </div>
+        <p class="transfer-label">{{ $t('text345') }}</p>
+        <el-select
+          v-model="transferCoin"
+          class="transfer-select"
+        >
+          <template #label="{ value }">
+            <span class="transfer-coin"
+              ><i>{{ tr(coinOf(value)[0]) }}</i
+              ><b>{{ tr(value) }}</b
+              ><small>{{ tr(coinOf(value)[2]) }}</small></span
+            >
+          </template>
+          <el-option
+            v-for="coin in coins"
+            :key="coin[1]"
+            :label="coin[1]"
+            :value="coin[1]"
+          >
+            <span class="transfer-coin"
+              ><i>{{ tr(coin[0]) }}</i
+              ><b>{{ tr(coin[1]) }}</b
+              ><small>{{ tr(coin[2]) }}</small></span
+            >
+          </el-option>
+        </el-select>
+        <div class="transfer-qty">
+          <p class="transfer-label">{{ $t('text315') }}</p>
+          <span class="transfer-available"
+            >{{ $t('availableBalance') }} {{ formatAmount(transferAvailable) }} {{ transferCoin }}</span
+          >
+        </div>
+        <el-input
+          v-model="transferAmount"
+          class="transfer-input"
+          :placeholder="$t('transferAmountPlaceholder')"
+        >
+          <template #suffix>
+            <button
+              class="transfer-all"
+              type="button"
+              @click="fillTransferAmount"
+            >
+              {{ $t('text165') }}
+            </button>
+          </template>
+        </el-input>
+        <div class="transfer-actions">
+          <button
+            class="transfer-cancel"
+            type="button"
+            @click="transferOpen = false"
+          >
+            {{ $t('text183') }}
+          </button>
+          <button
+            class="transfer-confirm"
+            type="button"
+            @click="confirmTransfer"
+          >
+            {{ $t('transferConfirm') }}
+          </button>
+        </div>
+      </section>
+    </div>
     <Footer />
   </div>
 </template>
+
+<style scoped>
+.transfer-mask{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:24px;background:rgb(0 0 0 / 50%)}
+.transfer-modal{position:relative;width:484px;max-width:100%;padding:30px 32px 40px;border-radius:4px;background:#fff;box-shadow:0 10px 30px rgb(0 0 0 / 25%)}
+.transfer-modal h2{margin:0;color:#171d27;font-size:20px;font-weight:500;text-align:center}
+.transfer-close{position:absolute;top:16px;right:20px;padding:0;border:0;background:none;color:#b0b6c0;font-size:18px;line-height:1;cursor:pointer}
+.transfer-close:hover{color:#6f7783}
+.transfer-records{display:block;margin:26px 0 8px;color:#e1b600;font-size:13px;text-align:right;text-decoration:none}
+.transfer-records:hover{color:#c9a300}
+.transfer-route{position:relative;display:flex;flex-direction:column;gap:26px;padding:20px;background:#f6f6f6}
+.transfer-route::before{content:'';position:absolute;left:23px;top:33px;bottom:33px;border-left:1px dashed #c4cad4}
+.route-item{position:relative;z-index:1;display:flex;align-items:center;gap:12px;color:#8a94a6;font-size:15px}
+.route-item b{color:#171d27;font-weight:400}
+.route-dot{width:6px;height:6px;border-radius:50%;background:#2c3a52}
+.route-dot.dot-to{background:#f0cf00}
+.route-swap{position:absolute;right:18px;top:50%;display:flex;align-items:center;justify-content:center;width:32px;height:32px;transform:translateY(-50%);border:0;border-radius:50%;background:#f5ff18;color:#111;font-size:16px;cursor:pointer}
+.route-swap:hover{background:#e8f000}
+.transfer-label{margin:26px 0 10px;color:#171d27;font-size:15px}
+.transfer-qty{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:26px 0 10px}
+.transfer-qty .transfer-label{margin:0}
+.transfer-available{color:#8a94a6;font-size:13px}
+.transfer-select,.transfer-input{width:100%}
+.transfer-select :deep(.el-select__wrapper),.transfer-input :deep(.el-input__wrapper){min-height:44px;border-radius:4px;box-shadow:0 0 0 1px #e2e6ed inset}
+.transfer-input :deep(.el-input__inner){font-size:15px}
+.transfer-coin{display:inline-flex;align-items:center;gap:8px}
+.transfer-coin i{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#eceff3;color:#8a94a6;font-size:11px;font-style:normal}
+.transfer-coin b{color:#171d27;font-weight:400;font-size:15px}
+.transfer-coin small{color:#9ba3ae;font-size:13px}
+.transfer-all{padding:0;border:0;background:none;color:#e1b600;font-size:14px;cursor:pointer}
+.transfer-all:hover{color:#c9a300}
+.transfer-actions{display:flex;justify-content:center;gap:80px;margin-top:38px}
+.transfer-cancel,.transfer-confirm{width:136px;height:40px;border:0;border-radius:4px;font-size:15px;cursor:pointer}
+.transfer-cancel{background:#eef0f5;color:#171d27}
+.transfer-cancel:hover{background:#e4e8ee}
+.transfer-confirm{background:#f5ff18;color:#111;font-weight:600}
+.transfer-confirm:hover{background:#e8f000}
+@media (max-width:700px){.transfer-actions{gap:24px}.transfer-modal{padding:24px 20px 30px}}
+</style>

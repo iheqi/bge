@@ -8,6 +8,8 @@ import Otc from './Otc.vue'
 import OtcTrade from './OtcTrade.vue'
 import Company from './Company.vue'
 import UserCenter from './UserCenter.vue'
+import CryptoWithdraw from './CryptoWithdraw.vue'
+import FiatWithdraw from './FiatWithdraw.vue'
 import Kyc from './Kyc.vue'
 import Report from './Report.vue'
 import AccountSecurity from './AccountSecurity.vue'
@@ -24,6 +26,10 @@ const page = computed(() =>
     ? 'announcement'
     : path.includes('/market')
     ? 'market'
+    : path.includes('/user/crypto/withdraw')
+    ? 'crypto-withdraw'
+    : path.includes('/user/fiat/withdraw')
+    ? 'fiat-withdraw'
     : path.includes('/user/payment')
       ? 'payment'
       : path.includes('/user/api')
@@ -65,6 +71,8 @@ const page = computed(() =>
       :assets="page === 'assets'"
     />
     <Kyc v-else-if="page === 'kyc'" />
+    <CryptoWithdraw v-else-if="page === 'crypto-withdraw'" />
+    <FiatWithdraw v-else-if="page === 'fiat-withdraw'" />
     <Report v-else-if="page === 'report'" />
     <AccountSecurity v-else-if="page === 'user-security'" />
     <ApiPage v-else-if="page === 'api'" />

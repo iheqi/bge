@@ -463,5 +463,13 @@
   "rewardCompleted": "恭喜您完成任务，请前往奖励中心领取或查看奖励。",
   "currencyLabel": "显示币种",
   "currencyRate": "参考汇率",
-  "spotPlaceholder": "交易页面（Demo中略，参考BGE现有现货交易页）"
+  "spotPlaceholder": "交易页面（Demo中略，参考BGE现有现货交易页）",
+  "transferRecords": "划转记录",
+  "transferFrom": "从",
+  "transferTo": "到",
+  "availableBalance": "可用余额",
+  "transferAmountPlaceholder": "请输入划转数量",
+  "transferConfirm": "确定",
+  "transferSuccess": "划转成功",
+  "insufficientBalance": "可用余额不足"
 }

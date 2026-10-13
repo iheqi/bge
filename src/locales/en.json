@@ -463,5 +463,13 @@
   "rewardCompleted": "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.",
   "currencyLabel": "Display currency",
   "currencyRate": "Reference rate",
-  "spotPlaceholder": "Trading page (omitted in this demo; refer to the existing BGE spot trading page)"
+  "spotPlaceholder": "Trading page (omitted in this demo; refer to the existing BGE spot trading page)",
+  "transferRecords": "Transfer history",
+  "transferFrom": "From",
+  "transferTo": "To",
+  "availableBalance": "Available",
+  "transferAmountPlaceholder": "Enter the transfer amount",
+  "transferConfirm": "Confirm",
+  "transferSuccess": "Transfer completed",
+  "insufficientBalance": "Insufficient available balance"
 }
