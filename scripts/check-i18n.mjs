@@ -58,7 +58,6 @@ try {
         'Market',
         'MessageCenter',
         'Parameters',
-        'ParameterContent',
         'MessageBell',
       ].map((file) => [file, {}, '/bge/hk/zh-CN/user/dashboard', '']),
       ['Company', { security: true }, '/bge/hk/zh-CN/security', ''],
