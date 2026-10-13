@@ -365,5 +365,9 @@
   "{count}天前": "text363",
   "Congratulations on completing the task, please go to the Reward Center to claim or view the reward.": "rewardCompleted",
   "显示币种": "currencyLabel",
-  "参考汇率": "currencyRate"
+  "参考汇率": "currencyRate",
+  "费率中心": "text246",
+  "费率标准": "text459",
+  "交易手续费": "text460",
+  "退款费率": "text461"
 }

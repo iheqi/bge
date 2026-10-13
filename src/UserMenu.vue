@@ -18,7 +18,7 @@ const links = [
   { label: '身份认证', path: 'kyc', icon: CircleCheck },
   { label: '账户安全', path: 'security', custom: 'shield' },
   { label: '收付款管理', path: 'payment/fiat', icon: CreditCard },
-  { label: '费率查询', path: 'fees', custom: 'percent' },
+  { label: '费率中心', path: 'fees', custom: 'percent' },
   { label: '参数查询', path: 'parameters', icon: Operation },
   { label: 'API管理', path: 'api', custom: 'api' },
 ]

@@ -16,6 +16,7 @@ import Payment from './Payment.vue'
 import MessageCenter from './MessageCenter.vue'
 import Market from './Market.vue'
 import Parameters from './Parameters.vue'
+import FeeStandard from './FeeStandard.vue'
 import Announcement from './Announcement.vue'
 const path = window.location.pathname
 const page = computed(() =>
@@ -56,6 +57,7 @@ const page = computed(() =>
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
     <OtcTrade v-else-if="page === 'otc-trade'" />
     <Otc v-else-if="page === 'otc'" />
+    <FeeStandard v-else-if="path.replace(/\/$/, '').endsWith('/user/fee-standard')" />
     <Parameters :fees="path.replace(/\/$/, '').endsWith('/user/fees')" v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters') || path.replace(/\/$/, '').endsWith('/user/fees')" />
     <Market v-else-if="page === 'market'" />
     <UserCenter

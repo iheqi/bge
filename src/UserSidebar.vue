@@ -6,7 +6,6 @@ const links = [
   ['身份认证', '/bge/hk/zh-CN/user/kyc', User],
   ['账户安全', '/bge/hk/zh-CN/user/security', Lock],
   ['收付款管理', '/bge/hk/zh-CN/user/payment/fiat', Briefcase],
-  ['费率查询', '/bge/hk/zh-CN/user/fees', Tickets],
   ['参数查询', '/bge/hk/zh-CN/user/parameters', Tickets],
   ['API管理', '/bge/hk/zh-CN/user/api', Connection]
 ]

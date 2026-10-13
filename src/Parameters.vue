@@ -20,7 +20,8 @@ const props = defineProps({ fees: Boolean })
   <div class="user-page parameter-page">
     <SiteHeader active="parameters" />
     <div class="user-layout">
-      <UserSidebar />
+      <!-- 费率中心 / 参数查询 不展示侧边栏 -->
+      <UserSidebar v-if="false" />
       <!--
       <aside>
         <a href="/bge/hk/zh-CN/user/dashboard"
