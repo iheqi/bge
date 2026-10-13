@@ -1,47 +1,12 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
-import { tr } from './i18n'
-import ParameterContent from './ParameterContent.vue'
 import FeeContent from './FeeContent.vue'
-import UserSidebar from './UserSidebar.vue'
-import {
-  ArrowDown,
-  Grid,
-  Wallet,
-  Tickets,
-  User,
-  Lock,
-  Briefcase,
-  Connection,
-} from '@element-plus/icons-vue'
-const props = defineProps({ fees: Boolean })
 </script>
 <template>
   <div class="user-page parameter-page">
     <SiteHeader active="parameters" />
     <div class="user-layout">
-      <!-- 费率中心 / 参数查询 不展示侧边栏 -->
-      <UserSidebar v-if="false" />
-      <!--
-      <aside>
-        <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
-        ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
-        ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
-        ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
-        ><a :class="{ sel: props.fees }" href="/bge/hk/zh-CN/user/fees"><el-icon><Tickets /></el-icon>费率查询</a
-        ><a
-          :class="{ sel: !props.fees }"
-          href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
-        ><a href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
-        >
-      </aside> -->
-      <FeeContent v-if="props.fees" /><ParameterContent v-else />
+      <FeeContent />
     </div>
     <footer>
       <div class="footer-inner">

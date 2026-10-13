@@ -5,7 +5,6 @@ import {
   CopyDocument,
   CreditCard,
   Grid,
-  Operation,
   SwitchButton,
 } from '@element-plus/icons-vue'
 import { tr } from './i18n'
@@ -19,7 +18,6 @@ const links = [
   { label: '账户安全', path: 'security', custom: 'shield' },
   { label: '收付款管理', path: 'payment/fiat', icon: CreditCard },
   { label: '费率中心', path: 'fees', custom: 'percent' },
-  { label: '参数查询', path: 'parameters', icon: Operation },
   { label: 'API管理', path: 'api', custom: 'api' },
 ]
 async function copyUid() {

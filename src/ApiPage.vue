@@ -7,7 +7,6 @@ import {
   ArrowDown,
   Grid,
   Wallet,
-  Tickets,
   User,
   Lock,
   Briefcase,
@@ -30,8 +29,6 @@ import {
         ><a href="/bge/hk/zh-CN/user/payment/fiat"
           ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
         ><a href="/bge/hk/zh-CN/user/fees">费率查询</a
-        ><a href="/bge/hk/zh-CN/user/parameters"
-          ><el-icon><Tickets /></el-icon>{{ $t('text012') }}</a
         ><a
           class="sel"
           href="/bge/hk/zh-CN/user/api"

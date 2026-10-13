@@ -9,6 +9,9 @@ import OtcTrade from './OtcTrade.vue'
 import Company from './Company.vue'
 import UserCenter from './UserCenter.vue'
 import CryptoWithdraw from './CryptoWithdraw.vue'
+import CryptoDeposit from './CryptoDeposit.vue'
+import FiatDeposit from './FiatDeposit.vue'
+import QuoteLimit from './QuoteLimit.vue'
 import FiatWithdraw from './FiatWithdraw.vue'
 import Kyc from './Kyc.vue'
 import Report from './Report.vue'
@@ -26,6 +29,12 @@ const page = computed(() =>
     ? 'announcement'
     : path.includes('/market')
     ? 'market'
+    : path.includes('/quote-limit')
+    ? 'quote-limit'
+    : path.includes('/user/fiat/deposit')
+    ? 'fiat-deposit'
+    : path.includes('/user/crypto/deposit')
+    ? 'crypto-deposit'
     : path.includes('/user/crypto/withdraw')
     ? 'crypto-withdraw'
     : path.includes('/user/fiat/withdraw')
@@ -64,7 +73,7 @@ const page = computed(() =>
     <OtcTrade v-else-if="page === 'otc-trade'" />
     <Otc v-else-if="page === 'otc'" />
     <FeeStandard v-else-if="path.replace(/\/$/, '').endsWith('/user/fee-standard')" />
-    <Parameters :fees="path.replace(/\/$/, '').endsWith('/user/fees')" v-else-if="path.replace(/\/$/, '').endsWith('/user/parameters') || path.replace(/\/$/, '').endsWith('/user/fees')" />
+    <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/fees')" />
     <Market v-else-if="page === 'market'" />
     <UserCenter
       v-else-if="page === 'assets' || page === 'dashboard'"
@@ -72,6 +81,9 @@ const page = computed(() =>
     />
     <Kyc v-else-if="page === 'kyc'" />
     <CryptoWithdraw v-else-if="page === 'crypto-withdraw'" />
+    <CryptoDeposit v-else-if="page === 'crypto-deposit'" />
+    <FiatDeposit v-else-if="page === 'fiat-deposit'" />
+    <QuoteLimit v-else-if="page === 'quote-limit'" />
     <FiatWithdraw v-else-if="page === 'fiat-withdraw'" />
     <Report v-else-if="page === 'report'" />
     <AccountSecurity v-else-if="page === 'user-security'" />

@@ -51,6 +51,10 @@ const withdrawHref = (symbol) =>
   ['USD', 'HKD'].includes(symbol)
     ? `/bge/hk/zh-CN/user/fiat/withdraw/${symbol}`
     : `/bge/hk/zh-CN/user/crypto/withdraw/${symbol}`
+const depositHref = (symbol) =>
+  ['USD', 'HKD'].includes(symbol)
+    ? `/bge/hk/zh-CN/user/fiat/deposit/${symbol}`
+    : `/bge/hk/zh-CN/user/crypto/deposit/${symbol}`
 const activeBtc = computed(() => accountBtc(activeAccount.value))
 const totalBtc = computed(() => accountBtc('fund') + accountBtc('trade'))
 
@@ -194,6 +198,27 @@ function confirmTransfer() {
               >{{ totalBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(totalBtc * prices.BTC, 'USD', 4) }}</small></strong
             ><a>{{ $t('text342') }}</a>
           </section>
+          <div class="asset-panels">
+            <section class="asset-panel risk-panel">
+              <h3>风险测评</h3>
+              <div class="risk-level">
+                <b>极高风险承受能力</b><span class="risk-bars"><i /><i /><i /><i /><i /></span>
+              </div>
+              <p class="risk-date">2026-08-18</p>
+            </section>
+            <section class="asset-panel quota-panel">
+              <header>
+                <h3>账户限额</h3>
+                <a href="/bge/hk/zh-CN/quote-limit">限额说明</a>
+              </header>
+              <div class="quota-grid">
+                <div><b>HKD 3,000,000,000.00</b><small>持仓限额(累计)</small></div>
+                <div><b class="over">超出 HKD 2,056,268,000,953.32</b><small>持仓剩余额度</small></div>
+                <div><b>HKD 1,500,000,000.00</b><small>交易限额(每日)</small></div>
+                <div><b>HKD 1,500,000,000.00</b><small>交易剩余额度(今日)</small></div>
+              </div>
+            </section>
+          </div>
           <section class="asset-box">
             <h2 class="asset-account-title">{{ accountName(activeAccount) }}</h2>
             <p class="label">{{ accountName(activeAccount) }}{{ $t('text343') }}</p>
@@ -230,7 +255,7 @@ function confirmTransfer() {
                 >{{ btcValue(coin[1], balanceOf(activeAccount, coin[1])).toFixed(8) }}<small>≈ {{ formatMoney(balanceOf(activeAccount, coin[1]) * (prices[coin[1]] ?? 0), 'USD', 4) }}</small></b
               >
               <div>
-                <a class="disabled">{{ $t('text275') }}</a
+                <a :href="depositHref(coin[1])">{{ $t('text275') }}</a
                 ><a :href="withdrawHref(coin[1])">{{ $t('text276') }}</a
                 ><a
                   href="#"
@@ -355,6 +380,21 @@ function confirmTransfer() {
 </template>
 
 <style scoped>
+.asset-panels{display:grid;grid-template-columns:1fr 1.72fr;gap:16px;margin-top:16px}
+.asset-panel{padding:24px 28px;border-radius:5px;background:#fff}
+.asset-panel h3{margin:0;color:#171d27;font-size:16px;font-weight:600}
+.risk-level{display:flex;align-items:center;gap:14px;margin-top:26px}
+.risk-level b{color:#171d27;font-size:15px;font-weight:500}
+.risk-bars{display:inline-flex;gap:3px}
+.risk-bars i{display:block;width:6px;height:15px;background:#f5c518}
+.risk-date{margin:14px 0 0;color:#9aa2ad;font-size:12px}
+.quota-panel header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.quota-panel header a{color:#d9a600;font-size:13px;text-decoration:none}
+.quota-panel header a:hover{color:#b98c00}
+.quota-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}
+.quota-grid b{display:block;color:#171d27;font-size:15px;font-weight:500}
+.quota-grid b.over{color:#e0443a}
+.quota-grid small{display:block;margin-top:8px;color:#9aa2ad;font-size:12px}
 .transfer-mask{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:24px;background:rgb(0 0 0 / 50%)}
 .transfer-modal{position:relative;width:484px;max-width:100%;padding:30px 32px 40px;border-radius:4px;background:#fff;box-shadow:0 10px 30px rgb(0 0 0 / 25%)}
 .transfer-modal h2{margin:0;color:#171d27;font-size:20px;font-weight:500;text-align:center}

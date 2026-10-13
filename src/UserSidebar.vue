@@ -1,12 +1,11 @@
 <script setup>
-import { Grid, Wallet, Tickets, User, Lock, Briefcase, Connection } from '@element-plus/icons-vue'
+import { Grid, Wallet, User, Lock, Briefcase, Connection } from '@element-plus/icons-vue'
 const path = window.location.pathname
 const links = [
   ['总览', '/bge/hk/zh-CN/user/dashboard', Grid],
   ['身份认证', '/bge/hk/zh-CN/user/kyc', User],
   ['账户安全', '/bge/hk/zh-CN/user/security', Lock],
   ['收付款管理', '/bge/hk/zh-CN/user/payment/fiat', Briefcase],
-  ['参数查询', '/bge/hk/zh-CN/user/parameters', Tickets],
   ['API管理', '/bge/hk/zh-CN/user/api', Connection]
 ]
 const isActive = (href) => {
