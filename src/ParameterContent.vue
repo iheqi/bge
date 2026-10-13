@@ -89,14 +89,16 @@ const summaries = [
             v-for="item in summaries"
             :key="item.title"
           >
-            <p>{{ tr(item.title) }}</p>
+            <div class="limit-head">
+              <p>{{ tr(item.title) }}</p>
+              <el-button
+                link
+                @click="detail = item"
+                >{{ tr('Details') }}</el-button
+              >
+            </div>
             <strong
-              >{{ tr('Total:') }} {{ formatFiatText(item.total) }} | {{ tr('Used:') }} 0%</strong
-            >
-            <el-button
-              link
-              @click="detail = item"
-              >{{ tr('Details') }}</el-button
+              >{{ tr('Total:') }} <b>{{ formatFiatText(item.total) }}</b> | {{ tr('Used:') }} 0%</strong
             >
           </div>
         </div>
@@ -139,25 +141,27 @@ const summaries = [
 .parameter-main {
   flex: 1;
   min-width: 0;
-  padding: 24px;
-  background: #f6f6f6;
-  color: #252a32;
+  /* The parameter query keeps one centred content column, like the fee centre. */
+  width: 100%;
+  max-width: 1190px;
+  margin: 0 auto;
+  padding: 34px 0 60px;
+  background: transparent;
+  color: #171a20;
 }
 h1 {
-  margin: 0 0 10px;
-  font-size: 22px;
-  font-weight: 500;
-}
-.parameter-description,
-.parameter-note {
-  font-size: 13px;
-  color: #929ba9;
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 600;
 }
 .parameter-description {
-  margin: 0 0 24px;
+  margin: 0 0 34px;
+  color: #6b7280;
+  font-size: 14px;
 }
 .parameter-tabs {
   background: #fff;
+  border-radius: 5px;
   --el-color-primary: #d8b000;
   --el-border-color-light: #e2e6ed;
 }
@@ -165,52 +169,92 @@ h1 {
   margin: 0;
 }
 .parameter-tabs :deep(.el-tabs__nav-wrap) {
-  padding: 0 24px;
+  padding: 0 28px;
+}
+.parameter-tabs :deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+  background-color: #edf0f4;
 }
 .parameter-tabs :deep(.el-tabs__item) {
-  height: 56px;
-  font-size: 15px;
+  height: 64px;
+  padding: 0 20px;
+  color: #9aa1ad;
+  font-size: 18px;
+}
+.parameter-tabs :deep(.el-tabs__item.is-active) {
+  color: #171a20;
+  font-weight: 600;
+}
+.parameter-tabs :deep(.el-tabs__active-bar) {
+  height: 2px;
+  background-color: #f0d000;
 }
 .parameter-tabs :deep(.el-tabs__content) {
-  padding: 20px 24px 24px;
+  padding: 28px;
 }
 .parameter-tabs :deep(.el-table) {
   --el-table-header-bg-color: #f4f6f9;
   --el-table-header-text-color: #697585;
   --el-table-border-color: #edf0f4;
   --el-table-text-color: #303744;
-  font-size: 13px;
+  font-size: 14px;
 }
-.parameter-tabs :deep(.el-table__cell) {
-  padding: 14px 0;
+.parameter-tabs :deep(.el-table th.el-table__cell) {
+  height: 56px;
+  font-weight: 400;
 }
-.parameter-note {
-  margin: 16px 0 0;
+.parameter-tabs :deep(.el-table td.el-table__cell) {
+  padding: 18px 0;
 }
 .investor-summary {
-  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 24px;
   font-size: 14px;
 }
 .limit-summaries {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 28px;
 }
 .limit-summaries > div {
-  background: #f4f6f9;
-  padding: 16px;
   min-width: 0;
+  padding: 24px;
+  border-radius: 5px;
+  background: #f7f8fa;
 }
-.limit-summaries p {
-  color: #929ba9;
-  font-size: 13px;
-  margin: 0 0 8px;
+.limit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
-.limit-summaries strong {
+.limit-head p {
+  margin: 0;
+  color: #6b7280;
   font-size: 14px;
 }
-@media (max-width: 700px) {
+.limit-summaries strong {
+  color: #303744;
+  font-size: 14px;
+  font-weight: 500;
+}
+.limit-summaries strong b {
+  margin: 0 4px;
+  color: #171a20;
+  font-size: 22px;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .parameter-main {
+    padding: 20px 16px 32px;
+  }
+  h1 {
+    font-size: 24px;
+  }
   .limit-summaries {
     grid-template-columns: 1fr;
   }
