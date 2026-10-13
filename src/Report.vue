@@ -1,7 +1,7 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
 import { tr } from './i18n'
-import { ArrowDown, Tickets, Calendar } from '@element-plus/icons-vue'
+import { Tickets } from '@element-plus/icons-vue'
 import { computed, ref, watch } from 'vue'
 const path = window.location.pathname
 const type = path.includes('/wallet')
@@ -29,12 +29,23 @@ const walletStatus = ref('all')
 const spotPair = ref('all')
 const spotOrderType = ref('all')
 const spotSide = ref('all')
+const walletRange = ref([])
+const otcRange = ref([])
+const applied = ref({ spot: [], wallet: [], otc: [] })
+function applyFilters() {
+  applied.value = { ...applied.value, wallet: walletRange.value, otc: otcRange.value }
+}
+function inRange(time, range) {
+  if (!range || range.length !== 2 || !range[0] || !range[1]) return true
+  const day = String(time).slice(0, 10).replaceAll('/', '-')
+  return day >= range[0] && day <= range[1]
+}
 const walletCoins = computed(() => walletTab.value === 'fiat'
   ? ['USD', 'HKD', 'CNY']
   : walletTab.value === 'digital'
     ? ['BTC', 'ETH', 'USDT', 'USDC']
     : ['USD', 'HKD', 'BTC', 'ETH', 'USDT', 'USDC'])
-const mockRows = computed(() => {
+const rawRows = computed(() => {
   if (type === 'spot') {
     if (spotTab.value === 'deals') return [['2026-10-09 14:32:08', 'BTC/USDT', '买入', '84,106.64', '0.125 BTC', '10,513.33 USDT', '10.51 USDT', '主动成交']]
     if (spotTab.value === 'current') return [['2026-10-09 15:06:21', 'ETH/USDT', '限价单', '卖出', '4,982.00', '2.000 ETH', '--', '--', '--', '未成交', '详情']]
@@ -51,9 +62,30 @@ const mockRows = computed(() => {
   }
   return settleTab.value === 'monthly' ? [['2026年09月结单', '下载']] : [['2026年10月08日日结单', '下载']]
 })
+function rowTime(row) {
+  const name = String(row[0])
+  const day = name.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/)
+  if (day) return `${day[1]}-${day[2].padStart(2, '0')}-${day[3].padStart(2, '0')}`
+  const month = name.match(/(\d{4})年(\d{1,2})月/)
+  if (month) return `${month[1]}-${month[2].padStart(2, '0')}-01`
+  return name.slice(0, 10).replaceAll('/', '-')
+}
+const mockRows = computed(() => {
+  const range = applied.value[type]
+  if (!range || range.length !== 2 || !range[0] || !range[1]) return rawRows.value
+  return rawRows.value.filter((row) => inRange(rowTime(row), range))
+})
 function resetWalletFilters() {
   walletCoin.value = 'all'
   walletStatus.value = 'all'
+  walletRange.value = []
+  applied.value = { ...applied.value, wallet: [] }
+}
+function resetOtcFilters() {
+  otcPair.value = 'all'
+  otcStatus.value = 'all'
+  otcRange.value = []
+  applied.value = { ...applied.value, otc: [] }
 }
 watch(walletTab, resetWalletFilters)
 watch(walletDirection, () => { walletStatus.value = 'all' })
@@ -167,9 +199,16 @@ const columns = () => {
                 <el-option :label="tr('已完成')" value="completed" />
                 <el-option v-if="walletDirection === 'withdraw'" :label="tr('已取消')" value="cancelled" />
               </el-select>
-              <button class="date">
-                <el-icon><Calendar /></el-icon>{{ $t('text312') }}</button
-              ><button class="yellow">{{ $t('text283') }}</button
+              <el-date-picker
+                v-model="walletRange"
+                class="date-picker"
+                type="daterange"
+                value-format="YYYY-MM-DD"
+                range-separator="-"
+                :start-placeholder="tr('开始日期')"
+                :end-placeholder="tr('结束日期')"
+                aria-label="日期范围"
+              /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button
               ><button @click="resetWalletFilters">{{ $t('text299') }}</button>
             </div>
             <div v-if="walletTab === 'fiat'" class="table-head wallet-head">
@@ -191,9 +230,17 @@ const columns = () => {
             </div>
             <div class="filters">
               <el-select v-model="otcPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /></el-select><el-select v-model="otcStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待处理" value="pending" /><el-option label="已完成" value="completed" /><el-option label="已取消" value="cancelled" /></el-select
-              ><button class="date">{{ $t('text320') }}</button
-              ><button class="yellow">{{ $t('text283') }}</button
-              ><button>{{ $t('text299') }}</button>
+              ><el-date-picker
+                v-model="otcRange"
+                class="date-picker"
+                type="daterange"
+                value-format="YYYY-MM-DD"
+                range-separator="-"
+                :start-placeholder="tr('开始日期')"
+                :end-placeholder="tr('结束日期')"
+                aria-label="日期范围"
+              /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button
+              ><button @click="resetOtcFilters">{{ $t('text299') }}</button>
             </div>
             <div class="table-head otc-head">
               <span>{{ $t('text313') }}</span

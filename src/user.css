@@ -611,8 +611,20 @@
   color: #111;
   text-align: center;
 }
-.filters button.date {
-  min-width: 260px;
+.filters .date-picker {
+  flex: 0 0 260px;
+  width: 260px;
+  height: 40px;
+}
+.filters .date-picker.el-date-editor {
+  --el-date-editor-daterange-width: 260px;
+  --el-input-height: 40px;
+}
+.filters .date-picker .el-range-input {
+  color: #6d7785;
+  font-size: 14px;
+}
+.filters .date-picker .el-range-separator {
   color: #6d7785;
 }
 .table-head {

@@ -18,24 +18,32 @@ const orders = ref([
 const pairOptions = ['ETH/USDC', 'BTC/USDC', 'BTC/USDT', 'ETH/USDT']
 const filterPair = ref('all')
 const filterStatus = ref('all')
-const applied = ref({ pair: 'all', status: 'all' })
+const filterRange = ref([])
+const applied = ref({ pair: 'all', status: 'all', range: [] })
 const coin = computed(() => pair.value.split('/')[0])
 const payCoin = computed(() => pair.value.split('/')[1])
 const canSubmit = computed(() => Boolean(quantity.value && price.value && validity.value))
+function inRange(time, range) {
+  if (!range || range.length !== 2 || !range[0] || !range[1]) return true
+  const day = time.slice(0, 10)
+  return day >= range[0] && day <= range[1]
+}
 const visibleOrders = computed(() =>
   orders.value.filter(
     (order) =>
       (applied.value.pair === 'all' || order.pair === applied.value.pair) &&
-      (applied.value.status === 'all' || order.status === applied.value.status),
+      (applied.value.status === 'all' || order.status === applied.value.status) &&
+      inRange(order.time, applied.value.range),
   ),
 )
 
 function applyFilters() {
-  applied.value = { pair: filterPair.value, status: filterStatus.value }
+  applied.value = { pair: filterPair.value, status: filterStatus.value, range: filterRange.value }
 }
 function resetFilters() {
   filterPair.value = 'all'
   filterStatus.value = 'all'
+  filterRange.value = []
   applyFilters()
 }
 function submitOrder() {
@@ -65,7 +73,7 @@ function cancelOrder(order) { order.status = '已撤单' }
           <span :class="{ active: tab === 'match' }" @click="tab = 'match'">{{ $t('text318') }}</span>
         </div>
         <div class="filters">
-          <el-select v-model="filterPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="filterStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待成交" value="待成交" /><el-option label="已撤单" value="已撤单" /></el-select><button class="date"><el-icon><Calendar /></el-icon>{{ $t('text312') }}</button><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button><button @click="resetFilters">{{ $t('text299') }}</button>
+          <el-select v-model="filterPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="filterStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待成交" value="待成交" /><el-option label="已撤单" value="已撤单" /></el-select><el-date-picker v-model="filterRange" class="date-picker" type="daterange" value-format="YYYY-MM-DD" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" aria-label="日期范围" /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button><button @click="resetFilters">{{ $t('text299') }}</button>
         </div>
         <el-table
           :data="visibleOrders"
