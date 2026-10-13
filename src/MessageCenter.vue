@@ -122,7 +122,6 @@ async function deleteAll() {
 .message-page {
   min-height: 100vh;
   background: #f5f5f5;
-  --el-color-primary: #12baa6;
   color: #111;
 }
 .message-page .user-right {
@@ -155,6 +154,7 @@ async function deleteAll() {
 }
 .message-sidebar button.selected {
   background: white;
+  border-right: 2px solid #f5ff18;
   color: #111;
 }
 .message-list {
@@ -176,18 +176,24 @@ async function deleteAll() {
   align-items: center;
   gap: 6px;
 }
-.message-actions button,
-.message-delete {
+.message-actions button {
+  height: 40px;
+  min-width: 88px;
+  padding: 0 20px;
   border: 0;
-  background: none;
-  color: #12baa6;
-  cursor: pointer;
-  padding: 4px 0;
+  border-radius: 4px;
+  background: #edf0f6;
+  color: #111;
   font-size: 14px;
+  cursor: pointer;
+}
+.message-actions button:hover:not(:disabled) {
+  background: #e4e8ee;
 }
 .message-actions button:disabled {
-  color: #b5bfbd;
-  cursor: default;
+  background: #f2f3f5;
+  color: #b0b6c0;
+  cursor: not-allowed;
 }
 .message-rows {
   padding: 0 15px;
@@ -227,12 +233,33 @@ async function deleteAll() {
 }
 .message-delete {
   flex-shrink: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: #d9a600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.message-delete:hover {
+  color: #b98c00;
 }
 .message-pagination {
   justify-content: flex-end;
   margin-top: 20px;
   --el-pagination-bg-color: transparent;
   --el-pagination-button-disabled-bg-color: transparent;
+}
+.message-pagination :deep(.el-pager li) {
+  color: #6f7783;
+}
+.message-pagination :deep(.el-pager li.is-active) {
+  background: #f5ff18;
+  color: #111;
+}
+.message-pagination :deep(.el-pager li:hover),
+.message-pagination :deep(.btn-prev:hover),
+.message-pagination :deep(.btn-next:hover) {
+  color: #d9a600;
 }
 @media (max-width: 1240px) {
   .message-layout {
