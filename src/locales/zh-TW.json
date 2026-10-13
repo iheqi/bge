@@ -471,5 +471,6 @@
   "transferAmountPlaceholder": "請輸入劃轉數量",
   "transferConfirm": "確定",
   "transferSuccess": "劃轉成功",
-  "insufficientBalance": "可用餘額不足"
+  "insufficientBalance": "可用餘額不足",
+  "hideSmallAssets": "隱藏小額資產"
 }

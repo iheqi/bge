@@ -12,12 +12,13 @@ const coins = [
   { symbol: 'BTC', name: 'Bitcoin', glyph: '₿', network: 'btc-', chain: 'BTC', fee: 0.00005, min: 0.0005, limit: 100, balance: 0.08 },
   { symbol: 'USDT', name: '泰达币', glyph: '₮', network: 'trc20-', chain: 'TRC20', fee: 10, min: 10, limit: 1000000, balance: 3200 },
   { symbol: 'USDC', name: 'USD Coin', glyph: '$', network: 'erc20-', chain: 'ERC20', fee: 10, min: 10, limit: 500000, balance: 5600 },
+  { symbol: 'SOL', name: 'Solana', glyph: '◎', network: 'sol-', chain: 'SOL', fee: 0.001, min: 0.01, limit: 50000, balance: 0.02 },
 ]
 const requested = decodeURIComponent(window.location.pathname.split('/withdraw/')[1] || 'ETH').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'ETH')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 // Demo balances mirror the funding account on /user/assets.
-const prices = { ETH: 3450, BTC: 96000, USDT: 1, USDC: 1 }
+const prices = { ETH: 3450, BTC: 96000, USDT: 1, USDC: 1, SOL: 150 }
 const balances = ref(Object.fromEntries(coins.map((item) => [item.symbol, item.balance])))
 const wallet = ref(JSON.parse(localStorage.getItem('bge-wallet-record') || 'null'))
 const verified = computed(() => wallet.value?.status === '已认证' && wallet.value?.coin === coin.value)

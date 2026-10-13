@@ -11,6 +11,7 @@ const coins = [
   { symbol: 'BTC', name: 'Bitcoin', glyph: '₿', network: 'btc-', chain: 'BTC', min: 0.00005, confirmations: 2 },
   { symbol: 'USDT', name: '泰达币', glyph: '₮', network: 'trc20-', chain: 'TRC20', min: 10, confirmations: 20 },
   { symbol: 'USDC', name: 'USD Coin', glyph: '$', network: 'erc20-', chain: 'ERC20', min: 10, confirmations: 12 },
+  { symbol: 'SOL', name: 'Solana', glyph: '◎', network: 'sol-', chain: 'SOL', min: 0.01, confirmations: 32 },
 ]
 const requested = decodeURIComponent(window.location.pathname.split('/deposit/')[1] || 'ETH').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'ETH')

@@ -34,13 +34,22 @@ const coins = [
   ['₮', 'USDT', '泰达币', '仅PI'],
   ['HK$', 'HKD', '港币', '法币'],
   ['₿', 'BTC', 'Bitcoin', ''],
+  ['◎', 'SOL', 'Solana', ''],
 ]
 // Demo balances and USD prices behind the transfer flow, so a transfer always has funds to move.
-const prices = { USD: 1, HKD: 0.128, ETH: 3450, USDC: 1, USDT: 1, BTC: 96000 }
+const prices = { USD: 1, HKD: 0.128, ETH: 3450, USDC: 1, USDT: 1, BTC: 96000, SOL: 150 }
 const balances = ref({
-  fund: { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08 },
-  trade: { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012 },
+  fund: { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08, SOL: 0.02 },
+  trade: { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012, SOL: 0.01 },
 })
+// Rows under this USD value answer the 隐藏小额资产 switch.
+const SMALL_ASSET_USD = 10
+const hideSmall = ref(false)
+const visibleCoins = computed(() =>
+  hideSmall.value
+    ? coins.filter((coin) => balanceOf(activeAccount.value, coin[1]) * (prices[coin[1]] ?? 0) >= SMALL_ASSET_USD)
+    : coins,
+)
 const activeAccount = computed(() => (accountTab.value === 'trade' ? 'trade' : 'fund'))
 const accountName = (account) => tr(account === 'trade' ? '交易账户' : '资金账户')
 const balanceOf = (account, symbol) => balances.value[account][symbol] ?? 0
@@ -226,7 +235,11 @@ function confirmTransfer() {
               >{{ activeBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(activeBtc * prices.BTC, 'USD', 4) }}</small></strong
             >
             <div class="asset-tools">
-              <label>{{ $t('text344') }}</label>
+              <el-checkbox
+                v-model="hideSmall"
+                class="asset-hide-small"
+                >{{ $t('hideSmallAssets') }}</el-checkbox
+              >
               <div class="search">
                 <input :placeholder="$t('text283')" /><el-icon><Search /></el-icon>
               </div>
@@ -239,7 +252,7 @@ function confirmTransfer() {
               ><span>{{ $t('text065') }}</span>
             </div>
             <div
-              v-for="coin in coins"
+              v-for="coin in visibleCoins"
               :key="coin[1]"
               class="coin-row"
             >
@@ -255,14 +268,26 @@ function confirmTransfer() {
                 >{{ btcValue(coin[1], balanceOf(activeAccount, coin[1])).toFixed(8) }}<small>≈ {{ formatMoney(balanceOf(activeAccount, coin[1]) * (prices[coin[1]] ?? 0), 'USD', 4) }}</small></b
               >
               <div>
-                <a :href="depositHref(coin[1])">{{ $t('text275') }}</a
-                ><a :href="withdrawHref(coin[1])">{{ $t('text276') }}</a
+                <a
+                  v-if="activeAccount !== 'trade'"
+                  :href="depositHref(coin[1])"
+                  >{{ $t('text275') }}</a
+                ><a
+                  v-if="activeAccount !== 'trade'"
+                  :href="withdrawHref(coin[1])"
+                  >{{ $t('text276') }}</a
                 ><a
                   href="#"
                   @click.prevent="openTransfer(coin[1])"
                   >{{ $t('text309') }}</a
                 >
               </div>
+            </div>
+            <div
+              v-if="!visibleCoins.length"
+              class="asset-empty"
+            >
+              暂无数据
             </div>
           </section></template
         >
@@ -380,7 +405,10 @@ function confirmTransfer() {
 </template>
 
 <style scoped>
+.asset-hide-small{--el-checkbox-checked-bg-color:#f0d000;--el-checkbox-checked-input-border-color:#f0d000;--el-checkbox-checked-icon-color:#111;--el-checkbox-input-border-color-hover:#f0d000}
+.asset-hide-small :deep(.el-checkbox__label){padding-left:8px;color:#6f7783;font-size:13px;font-weight:400}
 .asset-panels{display:grid;grid-template-columns:1fr 1.72fr;gap:16px;margin-top:16px}
+.asset-empty{padding:60px 0;color:#9aa2ad;font-size:14px;text-align:center}
 .asset-panel{padding:24px 28px;border-radius:5px;background:#fff}
 .asset-panel h3{margin:0;color:#171d27;font-size:16px;font-weight:600}
 .risk-level{display:flex;align-items:center;gap:14px;margin-top:26px}

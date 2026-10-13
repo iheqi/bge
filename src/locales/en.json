@@ -471,5 +471,6 @@
   "transferAmountPlaceholder": "Enter the transfer amount",
   "transferConfirm": "Confirm",
   "transferSuccess": "Transfer completed",
-  "insufficientBalance": "Insufficient available balance"
+  "insufficientBalance": "Insufficient available balance",
+  "hideSmallAssets": "Hide small balances"
 }
