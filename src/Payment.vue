@@ -43,8 +43,10 @@ const usageCodes = (usage) =>
             >
           </div>
           <BankDetail v-if="bankDetail" /><WalletAdd v-else-if="addWallet" /><template v-else-if="!crypto"
-            ><h2>{{ $t('text268') }} ({{ bankCount }})</h2>
-            <a class="add-btn" href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add">{{ $t('text271') }}</a>
+            ><div class="payment-title">
+              <h2>{{ $t('text268') }} ({{ bankCount }})</h2>
+              <a class="add-btn" href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add">{{ $t('text271') }}</a>
+            </div>
             <div class="payment-head">
               <span>{{ $t('text272') }}</span
               ><span>{{ $t('text273') }}</span
@@ -67,8 +69,10 @@ const usageCodes = (usage) =>
             /></template
           ><template v-else
             ><div class="notice-bar">{{ $t('text277') }}</div>
-            <h2>{{ $t('text278') }}</h2>
-            <a class="add-btn" href="/bge/hk/zh-CN/user/payment/crypto/add">{{ $t('text279') }}</a>
+            <div class="payment-title">
+              <h2>{{ $t('text278') }}</h2>
+              <a class="add-btn" href="/bge/hk/zh-CN/user/payment/crypto/add">{{ $t('text279') }}</a>
+            </div>
             <div class="wallet-filters">
               <el-select v-model="walletFilterCoin" class="wallet-filter-select" aria-label="币种"><el-option label="全部币种" value="all" /><el-option label="ETH" value="ETH" /><el-option label="BTC" value="BTC" /><el-option label="USDT" value="USDT" /><el-option label="USDC" value="USDC" /></el-select><el-select v-model="walletFilterStatus" class="wallet-filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="已认证" value="verified" /><el-option label="未认证" value="unverified" /><el-option label="已过期" value="expired" /></el-select
               ><input :placeholder="$t('text282')" /><button class="search-btn">
