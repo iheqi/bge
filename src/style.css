@@ -15,16 +15,6 @@ a {
   min-width: 1100px;
   background: #fff;
 }
-.nav {
-  height: 72px;
-  background: #090e13;
-  color: #c8cbd0;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  gap: 42px;
-  font-size: 14px;
-}
 .brand {
   display: flex;
   align-items: center;
@@ -45,14 +35,6 @@ a {
   font-size: 24px;
 }
 .main-links,
-.right-links {
-  display: flex;
-  align-items: center;
-  gap: 38px;
-}
-.main-links .active {
-  color: #fff;
-}
 .company {
   display: flex;
   align-items: center;
@@ -60,14 +42,6 @@ a {
 }
 .company .el-icon {
   font-size: 12px;
-}
-.right-links {
-  margin-left: auto;
-  gap: 29px;
-}
-.right-links > .account-divider {
-  height: 16px;
-  border-left: 1px solid #41464d;
 }
 .avatar {
   width: 30px;
@@ -396,46 +370,7 @@ footer {
   background: #fff;
   min-width: 1100px;
 }
-.otc-nav {
-  height: 64px;
-  background: #20242d;
-  color: #cbd0d8;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  gap: 40px;
-  font-size: 14px;
-}
-.otc-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #f5f6f8;
-  font-size: 30px;
-}
-.otc-brand span {
-  width: 28px;
-  height: 28px;
-  background: #f7ff18;
-  color: #111;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
 .otc-nav nav,
-.otc-right {
-  display: flex;
-  align-items: center;
-  gap: 38px;
-}
-.otc-nav nav .on {
-  color: #fff;
-}
-.otc-right {
-  margin-left: auto;
-  gap: 28px;
-}
 .otc-right button,
 .contact-btn {
   border: 0;
@@ -444,10 +379,6 @@ footer {
   height: 42px;
   padding: 0 28px;
   font-size: 14px;
-}
-.otc-right > .account-divider {
-  height: 16px;
-  border-left: 1px solid #70747b;
 }
 .service-section,
 .steps-section,

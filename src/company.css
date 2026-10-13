@@ -11,23 +11,6 @@
 .company-hero.security {
   background: linear-gradient(rgb(15 29 43 / 72%), rgb(15 29 43 / 72%)), url('/images/about-bg.jpg') center top / cover no-repeat;
 }
-.company-nav {
-  height: 72px;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  gap: 40px;
-  color: #cbd0d8;
-}
-.company-nav nav {
-  display: flex;
-  gap: 38px;
-  align-items: center;
-}
-.company-nav a {
-  color: inherit;
-  text-decoration: none;
-}
 .company-menu {
   position: relative;
   height: 72px;
@@ -59,16 +42,6 @@
 .company-dropdown a.selected {
   color: #f4ff19;
   background: #3a4356;
-}
-.company-account {
-  margin-left: auto;
-  display: flex;
-  gap: 30px;
-  align-items: center;
-}
-.company-account > .account-divider {
-  height: 16px;
-  border-left: 1px solid #65707d;
 }
 .company-intro {
   text-align: center;

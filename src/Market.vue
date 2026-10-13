@@ -12,17 +12,20 @@ const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
 // Demo quotes; USDC/USDT are valued at 1 USD. Turnover is stored in USD.
+// BTC quotes keep 4 decimals, ETH quotes 3; stablecoin pairs keep their own precision.
 const markets = [
-  ['BTC/USDC', 84106.64, '+1.82%', 85880.12, 82410.55, 18650000, true],
-  ['ETH/USDC', 4981.81, '+0.64%', 5098.22, 4876.34, 8420000, true],
-  ['BTC/HKD', 654320.18, '-0.73%', 662800.45, 648210.12, 3150000, false],
-  ['ETH/HKD', 38762.26, '+0.18%', 39420.6, 37980.15, 1760000, false],
+  ['BTC/USDC', 84106.6423, '+1.82%', 85880.1234, 82410.5567, 18650000, true],
+  ['ETH/USDC', 4981.812, '+0.64%', 5098.224, 4876.341, 8420000, true],
+  ['BTC/HKD', 654320.1842, '-0.73%', 662800.4512, 648210.1287, 3150000, false],
+  ['ETH/HKD', 38762.261, '+0.18%', 39420.603, 37980.152, 1760000, false],
   ['USDC/USD', 1.0002, '+0.02%', 1.0012, 0.9991, 420000, true],
-  ['BTC/USDT', 84112.38, '-2.77%', 86542.96, 83516.94, 1369000000, true],
-  ['ETH/USDT', 4981.81, '+0.91%', 5072.2, 4810.5, 286000000, true],
+  ['BTC/USDT', 84112.3856, '-2.77%', 86542.9613, 83516.9425, 1369000000, true],
+  ['ETH/USDT', 4981.812, '+0.91%', 5072.204, 4810.507, 286000000, true],
   ['USDT/USD', 0.9998, '-0.01%', 1.0004, 0.9992, 1180000, true],
   ['USDT/HKD', 7.8124, '+0.03%', 7.8241, 7.8012, 630000, true],
 ].map(([pair, price, change, high, low, turnover, hot]) => ({ pair, price, change, high, low, turnover, hot }))
+// Quote precision follows the base currency: BTC 4 decimals, ETH 3, other pairs 4.
+const priceDigits = (pair) => (pair.startsWith('BTC') ? 4 : pair.startsWith('ETH') ? 3 : 4)
 function usdPrice(row, value) {
   return value === null ? null : value / (row.pair.endsWith('/HKD') ? HKD_PER_USD : 1)
 }
@@ -30,8 +33,11 @@ function priceCell(row, column, value) {
   return formatMoney(
     column.property === 'turnover' ? value : usdPrice(row, value),
     'USD',
-    column.property === 'turnover' ? 2 : 6,
+    column.property === 'turnover' ? 2 : priceDigits(row.pair),
   )
+}
+function basePrice(row, value) {
+  return formatMoney(value, 'USD', priceDigits(row.pair)).split(' ').slice(1).join(' ')
 }
 let saved = ['ETH/USDT']
 try {
@@ -123,11 +129,9 @@ function trade() {
             >
           </div>
           <div class="ticker-price">
-            <strong>{{ formatMoney(usdPrice(coin, coin.price), 'USD', 6).split(' ')[0] }}</strong>
-            <b>{{
-              formatMoney(usdPrice(coin, coin.price), 'USD', 6).split(' ').slice(1).join(' ')
-            }}</b>
-            <small>{{ coin.price }} {{ coin.pair.split('/')[1] }}</small>
+            <strong>{{ formatMoney(usdPrice(coin, coin.price), 'USD', 2).split(' ')[0] }}</strong>
+            <b>{{ basePrice(coin, usdPrice(coin, coin.price)) }}</b>
+            <small>{{ basePrice(coin, coin.price) }} {{ coin.pair.split('/')[1] }}</small>
           </div>
           <div class="ticker-volume">
             24H Vol {{ (coin.turnover / usdPrice(coin, coin.price)).toFixed(4) }} {{ coin.pair.split('/')[0]
@@ -238,11 +242,11 @@ function trade() {
           sortable="custom"
           min-width="230"
           ><template #default="{ row }"
-            >{{ formatMoney(usdPrice(row, row.price), 'USD', 6)
+            >{{ priceCell(row, { property: 'price' }, row.price)
             }}<span
               v-if="row.price !== null"
               class="fiat-price"
-              >/ {{ row.price }} {{ row.pair.split('/')[1] }}</span
+              >/ {{ basePrice(row, row.price) }} {{ row.pair.split('/')[1] }}</span
             ></template
           ></el-table-column
         >

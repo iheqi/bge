@@ -1,11 +1,9 @@
 <script setup>
+import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
 import { tr } from './i18n'
-import LanguageSwitcher from './LanguageSwitcher.vue'
-import CurrencySwitcher from './CurrencySwitcher.vue'
 import { computed, ref, watch } from 'vue'
 import { ElMessageBox } from 'element-plus'
-import MessageBell from './MessageBell.vue'
 import { messages, messageCategories, markRead, removeMessages } from './messages'
 
 const category = ref('全部消息')
@@ -45,38 +43,7 @@ async function deleteAll() {
 
 <template>
   <div class="message-page">
-    <header class="user-nav">
-      <a
-        class="brand"
-        href="/bge/hk/zh-CN/"
-        ><img
-          class="brand-logo brand-logo-full"
-          src="/logo-bge-light.svg"
-          alt="BGE"
-          width="116"
-          height="28"
-      /></a>
-      <nav>
-        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
-        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
-        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
-        ><a href="/bge/hk/zh-CN/about">{{ $t('text004') }}</a>
-      </nav>
-      <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
-        ><a href="/bge/hk/zh-CN/user/assets">{{ $t('text006') }}</a
-        ><MessageBell /><a
-          class="avatar"
-          href="/bge/hk/zh-CN/user/dashboard"
-          :aria-label="$t('text184')"
-          ><img
-            src="/avatar.png"
-            alt=""
-            width="30"
-            height="30" /></a
-        ><LanguageSwitcher /><CurrencySwitcher />
-      </div>
-    </header>
+    <SiteHeader active="messages" />
     <main class="message-layout">
       <UserSidebar />
       <div class="message-content">

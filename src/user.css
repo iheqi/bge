@@ -4,34 +4,7 @@
   min-height: 100vh;
   color: #151923;
 }
-.user-nav {
-  height: 72px;
-  background: #050505;
-  color: #cbd0d8;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  gap: 40px;
-}
 .user-nav nav,
-.user-right {
-  display: flex;
-  align-items: center;
-  gap: 38px;
-  font-size: 14px;
-}
-.user-nav a {
-  color: inherit;
-  text-decoration: none;
-}
-.user-right {
-  margin-left: auto;
-  gap: 28px;
-}
-.user-right > .account-divider {
-  height: 16px;
-  border-left: 1px solid #555;
-}
 .avatar {
   width: 30px;
   height: 30px;

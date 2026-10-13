@@ -1,11 +1,8 @@
 <script setup>
+import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
 import { formatMoney } from './currency'
-import LanguageSwitcher from './LanguageSwitcher.vue'
-import CurrencySwitcher from './CurrencySwitcher.vue'
 import { tr } from './i18n'
-import UserMenu from './UserMenu.vue'
-import MessageBell from './MessageBell.vue'
 import Footer from './Footer.vue'
 import {
   ArrowDown,
@@ -39,39 +36,7 @@ const coins = [
 </script>
 <template>
   <div class="user-page">
-    <header class="user-nav">
-      <a
-        class="brand"
-        href="/bge/hk/zh-CN/"
-        ><img
-          class="brand-logo brand-logo-full"
-          src="/logo-bge-light.svg"
-          alt="BGE"
-          width="116"
-          height="28"
-      /></a>
-      <nav>
-        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
-        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
-        ><a href="/bge/hk/zh-CN/otc">{{ $t('text002') }}</a
-        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
-        ><a href="/bge/hk/zh-CN/about"
-          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
-        ></a>
-      </nav>
-      <div class="user-right">
-        <a href="/bge/hk/zh-CN/user/report/spot">{{ $t('text005') }}</a
-        ><a
-          :class="{ active: assets }"
-          href="/bge/hk/zh-CN/user/assets"
-          >{{ $t('text006') }}</a
-        ><MessageBell /><UserMenu /><LanguageSwitcher /><span
-          class="account-divider"
-          aria-hidden="true"
-        ></span>
-        <CurrencySwitcher />
-      </div>
-    </header>
+    <SiteHeader active="assets" />
     <div class="user-layout">
       <aside
         v-if="assets"

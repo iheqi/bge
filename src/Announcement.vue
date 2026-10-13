@@ -1,10 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { ArrowDown } from '@element-plus/icons-vue'
-import LanguageSwitcher from './LanguageSwitcher.vue'
-import CurrencySwitcher from './CurrencySwitcher.vue'
-import UserMenu from './UserMenu.vue'
-import MessageBell from './MessageBell.vue'
+import SiteHeader from './SiteHeader.vue'
 import Footer from './Footer.vue'
 
 const base = '/bge/hk/zh-CN/support/announcement'
@@ -31,11 +27,7 @@ const detailArticle = computed(() => {
 
 <template>
   <div class="announcement-page">
-    <header class="nav announcement-nav">
-      <a class="brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a>
-      <nav class="main-links"><a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/otc">场外</a><a href="/bge/hk/zh-CN/spot">现货交易</a><a class="company" href="/bge/hk/zh-CN/about">公司<el-icon><ArrowDown /></el-icon></a></nav>
-      <div class="right-links"><a href="/bge/hk/zh-CN/user/report/spot">账户记录</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><MessageBell /><UserMenu /><LanguageSwitcher /><span class="account-divider"></span><CurrencySwitcher /></div>
-    </header>
+    <SiteHeader active="announcement" />
 
     <section v-if="!detail" class="announcement-hero">
       <h1>公告中心</h1>

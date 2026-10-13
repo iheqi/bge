@@ -1,4 +1,5 @@
 <script setup>
+import SiteHeader from './SiteHeader.vue'
 import { computed, ref } from 'vue'
 import { ArrowDown, Calendar, Close } from '@element-plus/icons-vue'
 
@@ -34,11 +35,7 @@ function cancelOrder(order) { order.status = '已撤单' }
 
 <template>
   <div class="otc-trade-page">
-    <header class="otc-nav">
-      <a class="otc-brand" href="/bge/hk/zh-CN/"><img class="brand-logo brand-logo-full" src="/logo-bge-light.svg" alt="BGE" width="116" height="28" /></a>
-      <nav><a href="/bge/hk/zh-CN/">首页</a><a href="/bge/hk/zh-CN/market">行情</a><a class="on" href="/bge/hk/zh-CN/otc">场外</a><a href="/bge/hk/zh-CN/spot">现货交易</a><a href="/bge/hk/zh-CN/about">公司<el-icon><ArrowDown /></el-icon></a></nav>
-      <div class="otc-right"><a href="/bge/hk/zh-CN/user/report/otc-orders">订单记录</a><a href="/bge/hk/zh-CN/user/assets">资产管理</a><a href="/bge/hk/zh-CN/otc">返回 OTC</a></div>
-    </header>
+    <SiteHeader active="otc" />
     <main class="otc-trade-main">
       <div class="otc-trade-title"><h1>OTC订单</h1><button class="otc-primary" @click="showForm = true">下单</button></div>
       <el-tabs v-model="tab"><el-tab-pane label="买卖意向单" name="intent" /><el-tab-pane label="OTC匹配单" name="match" /></el-tabs>

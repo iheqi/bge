@@ -1,9 +1,6 @@
 <script setup>
-import LanguageSwitcher from './LanguageSwitcher.vue'
-import CurrencySwitcher from './CurrencySwitcher.vue'
+import SiteHeader from './SiteHeader.vue'
 import { tr } from './i18n'
-import MessageBell from './MessageBell.vue'
-import { ArrowDown } from '@element-plus/icons-vue'
 const services = [
   ['a', '专属客户经理', '享受机构级专属服务'],
   ['b', '深度流动性', '大宗交易小滑点'],
@@ -31,38 +28,7 @@ const faqs = [
 </script>
 <template>
   <div class="otc-page">
-    <header class="otc-nav">
-      <a
-        class="otc-brand"
-        href="/bge/hk/zh-CN/"
-        ><img
-          class="brand-logo brand-logo-full"
-          src="/logo-bge-light.svg"
-          alt="BGE"
-          width="116"
-          height="28"
-      /></a>
-      <nav>
-        <a href="/bge/hk/zh-CN/">{{ $t('text000') }}</a
-        ><a href="/bge/hk/zh-CN/market">{{ $t('text001') }}</a
-        ><a
-          class="on"
-          href="/bge/hk/zh-CN/otc"
-          >{{ $t('text002') }}</a
-        ><a href="/bge/hk/zh-CN/spot">{{ $t('text003') }}</a
-        ><a href="/bge/hk/zh-CN/about"
-          >{{ $t('text004') }}<el-icon><ArrowDown /></el-icon
-        ></a>
-      </nav>
-      <div class="otc-right">
-        <MessageBell /><a href="#">{{ $t('text212') }}</a
-        ><button>{{ $t('text213') }}</button><LanguageSwitcher /><span
-          class="account-divider"
-          aria-hidden="true"
-        ></span
-        ><CurrencySwitcher />
-      </div>
-    </header>
+    <SiteHeader active="otc" guest contact />
     <main>
       <section class="service-section">
         <h1>{{ $t('text214') }}</h1>
