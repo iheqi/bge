@@ -2,56 +2,13 @@
 import SiteHeader from './SiteHeader.vue'
 import ApiKeyRecords from './ApiKeyRecords.vue'
 import UserSidebar from './UserSidebar.vue'
-import { tr } from './i18n'
-import {
-  ArrowDown,
-  Grid,
-  Wallet,
-  User,
-  Lock,
-  Briefcase,
-  Connection,
-} from '@element-plus/icons-vue'
 </script>
 <template>
   <div class="user-page api-page">
     <SiteHeader active="api" />
     <div class="user-layout">
       <UserSidebar />
-      <!--
-      <aside>
-        <a href="/bge/hk/zh-CN/user/dashboard"
-          ><el-icon><Grid /></el-icon>{{ $t('text008') }}</a
-        ><a href="/bge/hk/zh-CN/user/kyc"
-          ><el-icon><User /></el-icon>{{ $t('text009') }}</a
-        ><a href="/bge/hk/zh-CN/user/security"
-          ><el-icon><Lock /></el-icon>{{ $t('text010') }}</a
-        ><a href="/bge/hk/zh-CN/user/payment/fiat"
-          ><el-icon><Briefcase /></el-icon>{{ $t('text011') }}</a
-        ><a href="/bge/hk/zh-CN/user/fees">费率查询</a
-        ><a
-          class="sel"
-          href="/bge/hk/zh-CN/user/api"
-          ><el-icon><Connection /></el-icon>{{ $t('text013') }}</a
-        >
-      </aside> -->
       <main class="api-main">
-        <section class="api-create">
-          <div class="api-title">{{ $t('text051') }}</div>
-          <a class="api-doc">{{ $t('text052') }}</a>
-          <div class="api-info">
-            <h3>{{ $t('text053') }}</h3>
-            <div>
-              <p>{{ $t('text054') }}</p>
-              <p>{{ $t('text055') }}</p>
-              <p>{{ $t('text056') }}</p>
-              <p>{{ $t('text057') }}</p>
-              <p>
-                {{ $t('text058') }}<span>{{ $t('text059') }}</span>
-              </p>
-            </div>
-          </div>
-        </section>
         <ApiKeyRecords />
       </main>
     </div>

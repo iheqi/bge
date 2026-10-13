@@ -7,17 +7,18 @@ let initial = seed
 try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (Array.isArray(saved) && saved.every(r => r.id && Array.isArray(r.authorities))) initial = saved } catch {}
 const rows = ref(initial)
 const authNames = { readonly: '读取', trade: '交易', withdraw: '划转' }
-const authText = row => row.authorities.map(a => authNames[a]).join('、')
-const editor = ref(false), detail = ref(null), verification = ref(false), code = ref(''), verifyError = ref(''), editId = ref(null)
+const authText = row => row.authorities.map(a => authNames[a]).join(',')
+const detail = ref(null), verification = ref(false), editId = ref(null)
+const codes = reactive({ sms: '', email: '', ga: '' })
 const formRef = ref()
 const form = reactive({ remarks: '', ipAddresses: '', authorities: ['readonly'] })
 let pending = null
 const rules = {
  remarks: [{ validator: (_, value, done) => done(value.trim() ? undefined : new Error('请输入备注')), trigger: 'blur' }],
  ipAddresses: [{ validator: (_, value, done) => {
-  const ips = value.split(',').map(s => s.trim())
+  const ips = value.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
   const valid = ips.every(ip => /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && ip.split('.').every(n => Number(n) <= 255))
-  done(!value.trim() ? new Error('请输入IP地址') : ips.length > 10 ? new Error('最多支持配置10个IP') : !valid ? new Error('请输入正确的IPv4地址，多个地址以英文逗号分隔') : undefined)
+  done(!ips.length ? new Error('请输入IP地址') : ips.length > 10 ? new Error('最多支持配置10个IP') : !valid ? new Error('请输入正确的IPv4地址，多个地址以英文逗号分隔') : undefined)
  }, trigger: 'blur' }]
 }
 function persist() { try { localStorage.setItem(storageKey, JSON.stringify(rows.value)) } catch { ElMessage.warning('浏览器无法保存，本次变更仅在当前页面有效') } }
@@ -25,26 +26,46 @@ function edit(row) {
  if (!row && rows.value.length >= 10) return ElMessage.warning('最多创建10个API Key')
  editId.value = row?.id ?? null
  Object.assign(form, { remarks: row?.remarks ?? '', ipAddresses: row?.ipAddresses ?? '', authorities: [...(row?.authorities ?? ['readonly'])] })
- editor.value = true
+ formRef.value?.clearValidate()
+ window.scrollTo({ top: 0, behavior: 'smooth' })
 }
-function verify(action) { pending = action; code.value = ''; verifyError.value = ''; verification.value = true }
+function resetForm() {
+ editId.value = null
+ Object.assign(form, { remarks: '', ipAddresses: '', authorities: ['readonly'] })
+ formRef.value?.clearValidate()
+}
+function verify(action) {
+ pending = action
+ Object.assign(codes, { sms: '', email: '', ga: '' })
+ verification.value = true
+}
+function sendCode(channel) {
+ ElMessage.success(`${channel}验证码已发送（演示）`)
+}
 function confirmVerification() {
- if (code.value !== '123456') { verifyError.value = '请输入演示验证码 123456'; return }
+ if (!/^\d{6}$/.test(codes.sms) || !/^\d{6}$/.test(codes.email) || !/^\d{6}$/.test(codes.ga)) {
+  return ElMessage.warning('演示验证码：短信与邮箱均为 123456，Google 验证码任意 6 位')
+ }
+ const action = pending
+ pending = null
  verification.value = false
- const action = pending; pending = null; action?.()
+ action?.()
 }
 async function save() {
  if (!(await formRef.value.validate().catch(() => false))) return
- const values = { remarks: form.remarks.trim(), ipAddresses: form.ipAddresses.split(',').map(s => s.trim()).join(','), authorities: [...form.authorities] }
+ const values = { remarks: form.remarks.trim(), ipAddresses: form.ipAddresses.split(/[,\n]/).map(s => s.trim()).filter(Boolean).join(','), authorities: [...form.authorities] }
  const id = editId.value
  verify(() => {
   if (id) Object.assign(rows.value.find(r => r.id === id), values)
   else {
    const token = crypto.randomUUID()
    const row = { ...values, id: token, state: 'valid', createdDate: new Date().toLocaleString('sv-SE'), apiKey: `demo_api_${token}`, secret: `demo_secret_${crypto.randomUUID()}` }
-   rows.value.unshift(row); detail.value = row
+   rows.value.unshift(row)
+   detail.value = row
   }
-  persist(); editor.value = false; ElMessage.success(id ? 'API修改成功' : 'API创建成功')
+  persist()
+  resetForm()
+  ElMessage.success(id ? 'API修改成功' : 'API创建成功')
  })
 }
 async function remove(row) {
@@ -55,41 +76,259 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
 </script>
 <template>
  <section class="api-record api-key-records">
-  <div class="records-heading"><h2>API Key记录</h2><el-button type="primary" @click="edit(null)">创建API Key</el-button></div>
-  <el-table :data="rows" row-key="id" empty-text="暂无数据">
-   <el-table-column prop="remarks" label="备注名" min-width="180" />
-   <el-table-column label="权限" min-width="200"><template #default="{ row }">{{ authText(row) }}</template></el-table-column>
-   <el-table-column label="状态" width="100"><template #default="{ row }"><span :class="{ expired: row.state === 'overdue' }">{{ row.state === 'valid' ? '有效' : '失效' }}</span></template></el-table-column>
-   <el-table-column prop="createdDate" label="创建时间" min-width="190" />
-   <el-table-column label="操作" width="210" fixed="right"><template #default="{ row }"><el-button link type="primary" @click="verify(() => detail = row)">查看</el-button><el-button link type="primary" @click="edit(row)">编辑</el-button><el-button link type="primary" @click="remove(row)">删除</el-button></template></el-table-column>
-  </el-table>
-  <el-dialog v-model="editor" :title="editId ? '编辑API' : '创建API Key'" width="456px" center destroy-on-close>
-   <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="save">
-    <el-form-item label="备注" prop="remarks"><el-input v-model="form.remarks" placeholder="请输入API Key备注名" /></el-form-item>
-    <el-form-item label="绑定IP地址" prop="ipAddresses"><el-input v-model="form.ipAddresses" type="textarea" :rows="3" placeholder="多个IPv4地址使用英文逗号分隔，最多10个" /></el-form-item>
-    <el-form-item label="权限"><el-checkbox-group v-model="form.authorities"><el-checkbox value="readonly" disabled>读取</el-checkbox><el-checkbox value="trade">交易</el-checkbox><el-checkbox value="withdraw">划转</el-checkbox></el-checkbox-group></el-form-item>
-    <el-button class="full" type="primary" native-type="submit">{{ editId ? '修改' : '创建' }}</el-button>
+  <div class="api-head">
+   <h2 class="api-bar-title">{{ editId ? '编辑API Key' : $t('text051') }}</h2>
+   <a class="api-doc-link">{{ $t('text052') }}</a>
+  </div>
+  <div class="api-columns">
+   <el-form
+    ref="formRef"
+    class="api-form"
+    :model="form"
+    :rules="rules"
+    label-position="top"
+    @submit.prevent="save"
+   >
+    <el-form-item
+     label="备注"
+     prop="remarks"
+     required
+    >
+     <el-input
+      v-model="form.remarks"
+      placeholder="请输入 API Key备注名"
+     />
+    </el-form-item>
+    <el-form-item
+     label="绑定IP地址"
+     prop="ipAddresses"
+     required
+    >
+     <el-input
+      v-model="form.ipAddresses"
+      type="textarea"
+      :rows="3"
+      placeholder="为 API Key 绑定IP地址，以提高您账户的安全性"
+     />
+    </el-form-item>
+    <el-form-item label="权限">
+     <el-checkbox-group v-model="form.authorities">
+      <el-checkbox
+       value="readonly"
+       disabled
+       >读取</el-checkbox
+      ><el-checkbox value="trade">交易</el-checkbox><el-checkbox value="withdraw">划转</el-checkbox>
+     </el-checkbox-group>
+    </el-form-item>
+    <button
+     class="api-submit"
+     type="submit"
+    >
+     {{ editId ? '修改' : '创建' }}
+    </button>
+    <a
+     v-if="editId"
+     class="api-cancel-edit"
+     @click="resetForm"
+     >取消编辑</a
+    >
    </el-form>
+   <div class="api-notes">
+    <h3>{{ $t('text053') }}</h3>
+    <div class="api-notes-box">
+     <p>{{ $t('text054') }}</p>
+     <p>{{ $t('text055') }}</p>
+     <p>{{ $t('text056') }}</p>
+     <p>{{ $t('text057') }}</p>
+     <p>{{ $t('text058') }}<a>{{ $t('text059') }}</a></p>
+    </div>
+   </div>
+  </div>
+
+  <h2 class="api-bar-title api-record-title">API Key记录</h2>
+  <el-table
+   :data="rows"
+   row-key="id"
+   empty-text="暂无数据"
+   :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+  >
+   <el-table-column
+    prop="remarks"
+    label="备注名"
+    min-width="180"
+   />
+   <el-table-column
+    label="权限"
+    min-width="200"
+   ><template #default="{ row }">{{ authText(row) }}</template></el-table-column>
+   <el-table-column
+    label="状态"
+    width="120"
+   ><template #default="{ row }"><span :class="{ expired: row.state === 'overdue' }">{{ row.state === 'valid' ? '有效' : '失效' }}</span></template></el-table-column>
+   <el-table-column
+    prop="createdDate"
+    label="创建时间"
+    min-width="190"
+   />
+   <el-table-column
+    label="操作"
+    width="210"
+    fixed="right"
+   ><template #default="{ row }"><el-button
+    link
+    class="api-action"
+    @click="verify(() => detail = row)"
+    >查看</el-button
+   ><el-button
+    link
+    class="api-action"
+    @click="edit(row)"
+    >编辑</el-button
+   ><el-button
+    link
+    class="api-action api-danger"
+    @click="remove(row)"
+    >删除</el-button></template></el-table-column>
+  </el-table>
+
+  <el-dialog
+   v-model="verification"
+   width="400px"
+   align-center
+   class="verify-dialog"
+   @closed="pending = null"
+  >
+   <template #header><h3 class="verify-title">安全验证</h3></template>
+   <div class="verify-field">
+    <p>输入 150****8881 收到的验证码</p>
+    <label class="verify-line"><input
+     v-model="codes.sms"
+     placeholder="请输入短信验证码"
+     maxlength="6"
+    /><button
+     type="button"
+     @click="sendCode('短信')"
+    >
+     发送
+    </button></label>
+   </div>
+   <div class="verify-field">
+    <p>输入 heqi**gic@gmail.com 收到的验证码</p>
+    <label class="verify-line"><input
+     v-model="codes.email"
+     placeholder="输入邮箱验证码"
+     maxlength="6"
+    /><button
+     type="button"
+     @click="sendCode('邮箱')"
+    >
+     发送
+    </button></label>
+   </div>
+   <div class="verify-field">
+    <p>请输入Google验证码</p>
+    <label class="verify-line"><input
+     v-model="codes.ga"
+     placeholder="请输入Google验证码"
+     maxlength="6"
+    /></label>
+   </div>
+   <div class="verify-actions">
+    <button
+     class="verify-cancel"
+     type="button"
+     @click="verification = false"
+    >
+     取消
+    </button>
+    <button
+     class="verify-confirm"
+     type="button"
+     @click="confirmVerification"
+    >
+     确定
+    </button>
+   </div>
+   <p class="verify-hint">演示验证码：短信与邮箱均为 123456，Google 验证码任意 6 位</p>
   </el-dialog>
-  <el-dialog v-model="verification" title="账户验证" width="456px" center append-to-body @closed="pending = null">
-   <el-form label-position="top" @submit.prevent="confirmVerification"><p>演示验证码：123456</p><el-form-item label="验证码" :error="verifyError"><el-input v-model="code" maxlength="6" placeholder="请输入验证码" /></el-form-item><el-button type="primary" class="full" native-type="submit">确认</el-button></el-form>
-  </el-dialog>
-  <el-dialog :model-value="!!detail" title="查看API" width="760px" center @close="detail = null">
-   <div v-if="detail" class="key-details"><div><label>备注名</label><p>{{ detail.remarks }}</p><label>权限</label><p>{{ authText(detail) }}</p><label>绑定IP地址</label><p>{{ detail.ipAddresses }}</p></div><div><label>API Key</label><p>{{ detail.apiKey }} <el-button link type="primary" @click="copy(detail.apiKey)">复制</el-button></p><label>秘钥</label><p>{{ detail.secret }} <el-button link type="primary" @click="copy(detail.secret)">复制</el-button></p></div></div>
+
+  <el-dialog
+   :model-value="!!detail"
+   title="查看API"
+   width="760px"
+   center
+   @close="detail = null"
+  >
+   <div
+    v-if="detail"
+    class="key-details"
+   >
+    <div><label>备注名</label><p>{{ detail.remarks }}</p><label>权限</label><p>{{ authText(detail) }}</p><label>绑定IP地址</label><p>{{ detail.ipAddresses }}</p></div><div><label>API Key</label><p>{{ detail.apiKey }} <el-button
+     link
+     class="api-action"
+     @click="copy(detail.apiKey)"
+     >复制</el-button></p><label>秘钥</label><p>{{ detail.secret }} <el-button
+     link
+     class="api-action"
+     @click="copy(detail.secret)"
+     >复制</el-button></p></div>
+   </div>
   </el-dialog>
  </section>
 </template>
 <style scoped>
-.api-key-records { --el-color-primary: #c9a000; }
-.records-heading { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-.records-heading h2 { margin:0; font-size:20px; font-weight:500; }
-.api-key-records :deep(.el-table) { --el-table-header-bg-color:#f4f6f9; --el-table-header-text-color:#929ba9; }
-.api-key-records :deep(.el-table__cell) { padding:18px 0; }
-.api-key-records :deep(.el-button--primary:not(.is-link)) { background:#f5ff18; border-color:#f5ff18; color:#151923; }
-.full { width:100%; height:40px; }
-.expired { color:#f56c6c; }
-.key-details { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
-.key-details > div:first-child { border-right:1px dashed #e4e7ed; padding-right:24px; }
-.key-details label { color:#929ba9; }
-.key-details p { overflow-wrap:anywhere; margin:8px 0 24px; line-height:1.6; }
+.api-key-records{--el-color-primary:#c9a000}
+.api-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:30px}
+.api-bar-title{margin:0;padding-left:12px;border-left:8px solid #ffd52a;color:#171d27;font-size:22px;font-weight:600}
+.api-doc-link{color:#d9a600;text-decoration:none;font-size:14px;cursor:pointer}
+.api-doc-link:hover{color:#b98c00}
+.api-columns{display:flex;gap:48px;align-items:flex-start}
+.api-form{flex:1;min-width:0;max-width:775px}
+.api-form :deep(.el-form-item__label){color:#303744;font-size:15px;line-height:1.4;padding-bottom:6px}
+.api-form :deep(.el-form-item__label:before){color:#e0443a}
+.api-form :deep(.el-input__wrapper),.api-form :deep(.el-textarea__inner){border-radius:4px;box-shadow:0 0 0 1px #dfe4ec inset}
+.api-form :deep(.el-input__wrapper){min-height:46px}
+.api-form :deep(.el-textarea__inner){padding:12px 14px;line-height:1.7}
+.api-form :deep(.el-form-item){margin-bottom:26px}
+.api-form :deep(.el-checkbox){margin-right:28px;color:#505967}
+.api-form :deep(.el-checkbox__input.is-checked .el-checkbox__inner),
+.api-form :deep(.el-checkbox__input.is-checked.is-disabled .el-checkbox__inner){border-color:#f0d000;background:#f0d000}
+.api-form :deep(.el-checkbox__input.is-checked + .el-checkbox__label){color:#303744}
+.api-submit{width:100%;height:48px;margin-top:6px;border:0;border-radius:4px;background:#f5ff18;color:#111;font-size:16px;font-weight:600;cursor:pointer}
+.api-submit:hover{background:#e8f000}
+.api-cancel-edit{display:block;margin-top:14px;color:#d9a600;font-size:13px;text-align:center;cursor:pointer}
+.api-notes{width:340px;flex:0 0 340px;padding-left:44px;border-left:1px solid #edf0f4;align-self:stretch}
+.api-notes h3{margin:0 0 16px;color:#303744;font-size:16px;font-weight:600}
+.api-notes-box{padding:20px;background:#f4f7fa}
+.api-notes-box p{margin:0 0 10px;color:#6f7783;font-size:13px;line-height:1.9}
+.api-notes-box p:last-child{margin-bottom:0}
+.api-notes-box a{margin-left:6px;color:#d9a600;text-decoration:none}
+.api-record-title{margin:56px 0 20px}
+.api-key-records :deep(.el-table){font-size:14px}
+.api-key-records :deep(.el-table__cell){padding:16px 0}
+.api-action{color:#d9a600;font-size:14px}
+.api-action:hover{color:#b98c00}
+.api-danger{color:#e0443a}
+.api-danger:hover{color:#c2352c}
+.expired{color:#e0443a}
+.verify-title{margin:0;color:#171d27;font-size:20px;font-weight:500;text-align:center}
+.verify-field{margin-bottom:22px}
+.verify-field p{margin:0 0 10px;color:#3f4a56;font-size:14px}
+.verify-line{display:flex;align-items:center;gap:16px;padding-bottom:10px;border-bottom:1px solid #dfe4ec}
+.verify-line input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:#303744;font-size:14px}
+.verify-line input::placeholder{color:#b6bcc6}
+.verify-line button{padding:0;border:0;background:none;color:#d9a600;font-size:14px;cursor:pointer;white-space:nowrap}
+.verify-line button:hover{color:#b98c00}
+.verify-actions{display:flex;justify-content:center;gap:48px;margin-top:34px}
+.verify-cancel,.verify-confirm{width:120px;height:40px;border:0;border-radius:4px;font-size:15px;cursor:pointer}
+.verify-cancel{background:#eef0f5;color:#171d27}
+.verify-cancel:hover{background:#e4e8ee}
+.verify-confirm{background:#f5ff18;color:#111;font-weight:600}
+.verify-confirm:hover{background:#e8f000}
+.verify-hint{margin:16px 0 0;color:#9aa2ad;font-size:12px;text-align:center}
+.key-details{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.key-details > div:first-child{border-right:1px dashed #e4e7ed;padding-right:24px}
+.key-details label{color:#929ba9}
+.key-details p{overflow-wrap:anywhere;margin:8px 0 24px;line-height:1.6}
+@media (max-width:1200px){.api-columns{flex-direction:column;gap:24px;align-items:stretch}.api-notes{width:100%;flex:1 1 auto;padding-left:0;border-left:0}.api-form{max-width:none}}
 </style>

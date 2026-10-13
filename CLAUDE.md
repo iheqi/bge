@@ -19,7 +19,7 @@ Vue 3 + Element Plus + Vite 的官网 Demo，纯静态、无后端：页面数�
 
 ## 已知基线（不是回归，不用去"修"）
 
-- `npm run test:i18n` 固定有 **21 条失败**（Home / Report / Kyc / UserCenter 等页面的 mock 数据没有英文文案），退出码恒为 1。判断标准是失败清单是否新增。
+- `npm run test:i18n` 固定有 **18 条失败**（Home / Report / Kyc / UserCenter 等页面的 mock 数据没有英文文案），退出码恒为 1。判断标准是失败清单是否新增。
 - `npm run format:check` 固定有 **22 个文件失败**（历史遗留风格），不要顺手全量格式化。
 - 仓库没有单元测试；`scripts/check-i18n.mjs`、`scripts/check-currency.mjs` 是两个可运行的校验脚本。
 

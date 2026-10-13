@@ -793,51 +793,12 @@
   padding: 24px;
   flex: 1;
 }
-.api-create,
 .api-record {
   background: #fff;
   padding: 32px 24px;
   min-height: 330px;
   margin-bottom: 16px;
   position: relative;
-}
-.api-title {
-  font-size: 22px;
-  font-weight: 600;
-  border-left: 8px solid #ffd52a;
-  padding-left: 12px;
-}
-.api-doc {
-  position: absolute;
-  right: 24px;
-  top: 40px;
-  color: #d9aa00;
-  text-decoration: none;
-  font-size: 14px;
-}
-.api-info {
-  width: 48%;
-  margin-left: auto;
-  margin-top: 35px;
-}
-.api-info h3 {
-  font-size: 16px;
-}
-.api-info > div {
-  background: #f4f6f9;
-  padding: 15px;
-  color: #69737f;
-  font-size: 13px;
-  line-height: 1.8;
-}
-.api-info p {
-  margin: 0;
-}
-.api-info span {
-  color: #dbaa00;
-}
-.api-record {
-  min-height: 320px;
 }
 .api-head {
   display: grid;
