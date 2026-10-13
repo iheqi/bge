@@ -306,5 +306,5 @@ function submit() {
 .fiat-empty{padding:60px 0;color:#9aa2ad;font-size:14px;text-align:center}
 .fiat-footnote{margin:18px 0 0;color:#9aa2ad;font-size:12px}
 .fiat-footnote a{color:#d9a600;text-decoration:none}
-@media (max-width:1200px){.fiat-columns{flex-direction:column;gap:24px}.fiat-aside{width:100%;flex:1 1 auto;padding-left:0;border-left:0}.fiat-form{max-width:none}}
+@media (max-width:1200px){.fiat-columns{flex-direction:column;gap:24px;align-items:stretch}.fiat-aside{width:100%;flex:1 1 auto;padding-left:0;border-left:0}.fiat-form{max-width:none}}
 </style>

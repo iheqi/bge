@@ -524,5 +524,5 @@ function submit() {
 .dep-sample dt{margin:0;color:#8a94a6}
 .dep-sample dd{margin:0;color:#303744}
 .dep-sample-note{margin:14px 0 0;color:#9aa2ad;font-size:12px}
-@media (max-width:1200px){.dep-columns{flex-direction:column;gap:32px}.dep-step-two{padding-left:0;border-left:0}}
+@media (max-width:1200px){.dep-columns{flex-direction:column;gap:32px;align-items:stretch}.dep-step-two{padding-left:0;border-left:0}}
 </style>

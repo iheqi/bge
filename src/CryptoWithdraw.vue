@@ -350,5 +350,5 @@ function submit() {
 .withdraw-empty{padding:60px 0;color:#9aa2ad;font-size:14px;text-align:center}
 .withdraw-footnote{margin:18px 0 0;color:#9aa2ad;font-size:12px}
 .withdraw-footnote a{color:#d9a600;text-decoration:none}
-@media (max-width:1200px){.withdraw-columns{flex-direction:column;gap:24px}.withdraw-aside{width:100%;flex:1 1 auto;padding-left:0;border-left:0}}
+@media (max-width:1200px){.withdraw-columns{flex-direction:column;gap:24px;align-items:stretch}.withdraw-aside{width:100%;flex:1 1 auto;padding-left:0;border-left:0}}
 </style>

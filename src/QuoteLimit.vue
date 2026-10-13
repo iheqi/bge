@@ -153,5 +153,5 @@ const position = [
 .quote-meter-title{margin:22px 0 0;color:#3f4a56;font-size:13.5px;font-weight:600}
 .quote-meter{display:block;height:6px;margin:12px 0 16px;border-radius:3px;background:#ececec}
 .quote-meter i{display:block;height:6px;border-radius:3px;background:#f5c518}
-@media (max-width:1100px){.quote-columns{flex-direction:column}.quote-aside{width:100%;flex:1 1 auto}.quote-main{width:calc(100% - 40px)}}
+@media (max-width:1100px){.quote-columns{flex-direction:column;align-items:stretch}.quote-aside{width:100%;flex:1 1 auto}.quote-main{width:calc(100% - 40px)}}
 </style>
