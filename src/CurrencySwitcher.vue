@@ -1,16 +1,25 @@
 <script setup>
-import { useClickDropdown } from './useClickDropdown'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { tr } from './i18n'
 import { currency, currencies, setCurrency } from './currency'
-const { root, open } = useClickDropdown()
+// Hover opens the list so a currency can be picked with a single click, matching the header menus.
+const open = ref(false)
+const root = ref(null)
 const current = computed(() => ({ value: currency.value, label: currency.value }))
-function select(value) {
-  setCurrency(value)
+function show() {
+  open.value = true
+}
+function hide() {
   open.value = false
 }
-function leave(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) open.value = false
+function select(value) {
+  setCurrency(value)
+  hide()
+}
+function escape(event) {
+  if (event.key !== 'Escape' || !open.value) return
+  hide()
+  root.value?.querySelector('button')?.focus()
 }
 </script>
 
@@ -18,7 +27,11 @@ function leave(event) {
   <div
     class="currency-switcher"
     ref="root"
-    @focusout="leave"
+    @mouseenter="show"
+    @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
+    @keydown="escape"
   >
     <button
       class="currency-trigger"
@@ -26,8 +39,6 @@ function leave(event) {
       :aria-label="tr('显示币种')"
       :aria-expanded="open"
       aria-haspopup="menu"
-      @click="open = !open"
-      @keydown.down.prevent="open = true"
     >
       {{ current.label }}
     </button>

@@ -1,15 +1,24 @@
 <script setup>
-import { useClickDropdown } from './useClickDropdown'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { i18n, languages, setLanguage, tr } from './i18n'
-const { root, open } = useClickDropdown()
+// Hover opens the list so a language can be picked with a single click, matching the header menus.
+const open = ref(false)
+const root = ref(null)
 const current = computed(() => languages.find((item) => item.value === i18n.global.locale.value))
-function select(value) {
-  setLanguage(value)
+function show() {
+  open.value = true
+}
+function hide() {
   open.value = false
 }
-function leave(event) {
-  if (!event.currentTarget.contains(event.relatedTarget)) open.value = false
+function select(value) {
+  setLanguage(value)
+  hide()
+}
+function escape(event) {
+  if (event.key !== 'Escape' || !open.value) return
+  hide()
+  root.value?.querySelector('button')?.focus()
 }
 </script>
 
@@ -17,7 +26,11 @@ function leave(event) {
   <div
     class="language-switcher"
     ref="root"
-    @focusout="leave"
+    @mouseenter="show"
+    @mouseleave="hide"
+    @focusin="show"
+    @focusout="hide"
+    @keydown="escape"
   >
     <button
       class="language-trigger"
@@ -25,8 +38,6 @@ function leave(event) {
       :aria-label="tr('语言')"
       :aria-expanded="open"
       aria-haspopup="menu"
-      @click="open = !open"
-      @keydown.down.prevent="open = true"
     >
       {{ current.label }}
     </button>

@@ -11,6 +11,36 @@ defineProps({
   // OTC keeps its own call to action next to the account area.
   contact: Boolean,
 })
+// 订单 and 资产管理 open the same kind of hover panel as 公司, so every header entry can be
+// reached in one click. The first page of each menu names the sub page it leads to.
+const menus = [
+  {
+    active: 'report',
+    label: 'text005',
+    href: '/bge/hk/zh-CN/user/report/spot',
+    width: 168,
+    popper: 'site-header-orders-popper',
+    links: [
+      { label: 'text289', href: '/bge/hk/zh-CN/user/report/spot' },
+      { label: 'text290', href: '/bge/hk/zh-CN/user/report/wallet' },
+      { label: 'text291', href: '/bge/hk/zh-CN/user/report/otc-orders' },
+      { label: 'text292', href: '/bge/hk/zh-CN/user/report/settle' },
+    ],
+  },
+  {
+    active: 'assets',
+    label: 'text006',
+    href: '/bge/hk/zh-CN/user/assets',
+    width: 168,
+    popper: 'site-header-assets-popper',
+    links: [
+      { label: 'text333', href: '/bge/hk/zh-CN/user/assets?account=fund' },
+      { label: 'text334', href: '/bge/hk/zh-CN/user/assets?account=trade' },
+      { label: 'text268', href: '/bge/hk/zh-CN/user/payment/fiat' },
+      { label: 'text269', href: '/bge/hk/zh-CN/user/payment/crypto' },
+    ],
+  },
+]
 </script>
 <template>
   <header class="site-header">
@@ -80,15 +110,41 @@ defineProps({
       </el-popover>
     </nav>
     <div class="site-header-right">
-      <a
-        :class="{ active: active === 'report' }"
-        href="/bge/hk/zh-CN/user/report/spot"
-        >{{ $t('text005') }}</a
-      ><a
-        :class="{ active: active === 'assets' }"
-        href="/bge/hk/zh-CN/user/assets"
-        >{{ $t('text006') }}</a
-      ><MessageBell />
+      <el-popover
+        v-for="menu in menus"
+        :key="menu.active"
+        placement="bottom"
+        trigger="hover"
+        :show-after="0"
+        :hide-after="100"
+        :offset="1"
+        :width="menu.width"
+        :show-arrow="false"
+        :popper-class="'site-header-menu-popper ' + menu.popper"
+        :teleported="false"
+      >
+        <template #reference>
+          <div class="site-header-menu-reference">
+            <a
+              :class="{ active: active === menu.active }"
+              :href="menu.href"
+              >{{ $t(menu.label) }}</a
+            >
+          </div>
+        </template>
+        <nav
+          class="site-header-dropdown"
+          :aria-label="$t(menu.label)"
+        >
+          <a
+            v-for="link in menu.links"
+            :key="link.href"
+            :href="link.href"
+            >{{ $t(link.label) }}</a
+          >
+        </nav>
+      </el-popover>
+      <MessageBell />
       <template v-if="guest"
         ><a href="/bge/hk/zh-CN/user/dashboard">{{ $t('text212') }}</a
         ><button
@@ -125,7 +181,11 @@ defineProps({
 .site-header-company-menu { display:flex; flex-direction:column; }
 .site-header .site-header-company-menu a { display:flex; align-items:center; height:36px; padding:0 8px; border-radius:6px; color:#fff; font-size:14px; }
 .site-header .site-header-company-menu a:hover, .site-header .site-header-company-menu a.active { background:#343b49; color:#fff; }
+.site-header .site-header-menu-popper a { display:flex; align-items:center; height:36px; padding:0 8px; border-radius:6px; color:#fff; font-size:14px; }
+.site-header .site-header-menu-popper a:hover, .site-header .site-header-menu-popper a.active { background:#343b49; color:#fff; }
+.site-header-menu-reference { display:flex; align-items:center; align-self:stretch; }
+.site-header-dropdown { display:flex; flex-direction:column; }
 .site-header-divider { height:16px; border-left:1px solid #41464d; }
 .site-header-register, .site-header-contact { height:36px; padding:0 20px; border:0; border-radius:9px; background:#f5ff18; color:#111; font:inherit; cursor:pointer; }
-.site-header-company-popper.el-popover { min-width:0; padding:8px; border:0; background:#272c37; border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,.28); }
+.site-header-company-popper.el-popover, .site-header-orders-popper.el-popover, .site-header-assets-popper.el-popover { min-width:0; padding:8px; border:0; background:#272c37; border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,.28); }
 </style>
