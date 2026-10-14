@@ -120,12 +120,20 @@ const doneMessage = computed(() =>
             <article>
               <div class="kyc-icon">▣</div>
               <p>{{ $t('text135') }}</p>
-              <button>{{ $t('text136') }}</button>
+              <a
+                class="kyc-option-link"
+                href="/bge/hk/zh-CN/user/kyc/corp/prepare"
+                >{{ $t('text136') }}</a
+              >
             </article>
             <article>
               <div class="kyc-icon">▥</div>
               <p>{{ $t('text137') }}</p>
-              <button>{{ $t('text138') }}</button>
+              <a
+                class="kyc-option-link"
+                href="/bge/hk/zh-CN/user/kyc/institution/prepare"
+                >{{ $t('text138') }}</a
+              >
             </article>
           </div>
           <div class="notice">

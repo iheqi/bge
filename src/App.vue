@@ -15,6 +15,8 @@ import QuoteLimit from './QuoteLimit.vue'
 import FiatWithdraw from './FiatWithdraw.vue'
 import Kyc from './Kyc.vue'
 import KycPerson from './KycPerson.vue'
+import KycCorp from './KycCorp.vue'
+import KycInstitution from './KycInstitution.vue'
 import Report from './Report.vue'
 import AccountSecurity from './AccountSecurity.vue'
 import ApiPage from './ApiPage.vue'
@@ -58,7 +60,11 @@ const page = computed(() =>
             ? 'report'
             : path.includes('/user/kyc/person')
               ? 'kyc-person'
-              : path.includes('/user/kyc')
+              : path.includes('/user/kyc/corp')
+                ? 'kyc-corp'
+                : path.includes('/user/kyc/institution')
+                  ? 'kyc-institution'
+                  : path.includes('/user/kyc')
                 ? 'kyc'
               : path.includes('/user/assets')
                 ? 'assets'
@@ -93,6 +99,8 @@ const page = computed(() =>
     />
     <Kyc v-else-if="page === 'kyc'" />
     <KycPerson v-else-if="page === 'kyc-person'" />
+    <KycCorp v-else-if="page === 'kyc-corp'" />
+    <KycInstitution v-else-if="page === 'kyc-institution'" />
     <CryptoWithdraw v-else-if="page === 'crypto-withdraw'" />
     <CryptoDeposit v-else-if="page === 'crypto-deposit'" />
     <FiatDeposit v-else-if="page === 'fiat-deposit'" />

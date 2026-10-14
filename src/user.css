@@ -495,6 +495,71 @@
 .kyc-options .kyc-option-link:hover {
   background: #e8f000;
 }
+/* Shared chrome of the identity preparation pages. */
+.person-main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+.person-box {
+  padding: 28px 24px 40px;
+  background: #fff;
+}
+.person-title {
+  display: inline-block;
+  margin: 0 0 26px;
+  padding-bottom: 8px;
+  border-bottom: 2px dashed #f0d000;
+  color: #171d27;
+  font-size: 22px;
+  font-weight: 600;
+}
+.person-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-width: 955px;
+  margin: 44px 0 26px;
+  border-bottom: 1px solid #e2e6ed;
+}
+.person-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 300px;
+  height: 36px;
+  padding: 0 34px 0 24px;
+  background: #f0c518;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  clip-path: polygon(0 0, 92% 0, 100% 100%, 0 100%);
+}
+.person-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 955px;
+  margin-top: 64px;
+}
+.person-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 48px;
+  border: 1px solid #dfe4ec;
+  border-radius: 4px;
+  background: #fff;
+  color: #303744;
+  font-size: 16px;
+  text-decoration: none;
+}
+.person-back:hover {
+  border-color: #f0d000;
+  color: #d9a600;
+}
+
 .kyc-done {
   display: flex;
   flex-direction: column;

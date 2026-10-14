@@ -332,9 +332,6 @@ function next() {
 </template>
 
 <style scoped>
-.person-main{padding:24px;flex:1;min-width:0}
-.person-box{padding:28px 24px 40px;background:#fff}
-.person-title{display:inline-block;margin:0 0 26px;padding-bottom:8px;border-bottom:2px dashed #f0d000;color:#171d27;font-size:22px;font-weight:600}
 .person-hero{position:relative;display:flex;align-items:center;gap:24px;max-width:955px;min-height:180px;margin-bottom:26px;padding:44px 40px;background:linear-gradient(90deg,#fdf4e0,#fdf9ee 70%,#fefdf9);overflow:hidden}
 .person-hero-text b{display:block;color:#d9a600;font-size:21px;font-weight:600}
 .person-hero-text span{display:block;margin-top:14px;color:#8a8f99;font-size:15px}
@@ -348,8 +345,6 @@ function next() {
 .person-step-no{color:#d9a600;font-weight:600}
 .person-steps-text small{display:block;margin-top:14px;color:#d9a600;font-size:13px}
 .person-steps-art{position:absolute;right:20px;bottom:0;width:280px;height:140px}
-.person-chip-row{display:flex;align-items:center;gap:18px;max-width:955px;margin:44px 0 26px;border-bottom:1px solid #e2e6ed}
-.person-chip{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:300px;height:36px;padding:0 34px 0 24px;background:#f0c518;color:#fff;font-size:16px;font-weight:600;clip-path:polygon(0 0,92% 0,100% 100%,0 100%)}
 .person-list{max-width:955px;margin:0;padding:0;list-style:none;counter-reset:doc}
 .person-list li{position:relative;counter-increment:doc;padding-left:28px;color:#303744;font-size:15px;line-height:2.4}
 .person-list li::before{content:counter(doc) ')';position:absolute;left:0;color:#303744}
@@ -365,9 +360,6 @@ function next() {
 .person-note p{margin:0 0 8px;color:#8a8f99;font-size:13px;line-height:1.9}
 .person-office{margin-top:44px;padding-top:24px}
 .person-office p{margin:0 0 10px;color:#8a8f99;font-size:14px;line-height:1.8}
-.person-actions{display:flex;justify-content:space-between;gap:24px;max-width:955px;margin-top:64px}
-.person-back{display:inline-flex;align-items:center;justify-content:center;width:300px;height:48px;border:1px solid #dfe4ec;border-radius:4px;background:#fff;color:#303744;font-size:16px;text-decoration:none}
-.person-back:hover{border-color:#f0d000;color:#d9a600}
 .person-next{width:300px;height:48px;border:0;border-radius:4px;background:#f5ff18;color:#111;font-size:16px;font-weight:600;cursor:pointer}
 .person-next:hover{background:#e8f000}
 @media (max-width:1200px){.person-hero{padding:32px 24px}.person-hero-art{position:static;width:100%;height:200px}.person-actions{flex-direction:column}.person-back,.person-next{width:100%}}
