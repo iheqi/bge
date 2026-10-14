@@ -30,7 +30,11 @@ const showInvestorInfo = ref(false)
             <article>
               <div class="kyc-icon">▤</div>
               <p>{{ $t('text133') }}</p>
-              <button>{{ $t('text134') }}</button>
+              <a
+                class="kyc-option-link"
+                href="/bge/hk/zh-CN/user/kyc/person/prepare"
+                >{{ $t('text134') }}</a
+              >
             </article>
             <article>
               <div class="kyc-icon">▣</div>
