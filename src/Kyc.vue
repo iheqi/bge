@@ -2,7 +2,8 @@
 import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
 import { tr } from './i18n'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { kycType, kycVerified } from './session'
 import {
   ArrowDown,
   Grid,
@@ -14,6 +15,12 @@ import {
   Connection,
 } from '@element-plus/icons-vue'
 const showInvestorInfo = ref(false)
+const doneTitle = computed(() =>
+  kycType.value === 'corporation' ? 'kycCorpTitle' : kycType.value === 'institution' ? 'kycInstTitle' : 'personTitle',
+)
+const doneMessage = computed(() =>
+  kycType.value === 'corporation' ? 'kycCorpDone' : kycType.value === 'institution' ? 'kycInstDone' : 'kycPersonDone',
+)
 </script>
 <template>
   <div class="user-page kyc-page">
@@ -22,6 +29,80 @@ const showInvestorInfo = ref(false)
       <UserSidebar />
       <main class="kyc-main">
         <section class="kyc-box">
+          <template v-if="kycVerified">
+            <h2>{{ $t(doneTitle) }}</h2>
+            <div class="kyc-done">
+              <svg
+                viewBox="0 0 220 130"
+                aria-hidden="true"
+              >
+                <ellipse
+                  cx="112"
+                  cy="124"
+                  rx="70"
+                  ry="6"
+                  fill="#eef2f7"
+                />
+                <rect
+                  x="82"
+                  y="12"
+                  width="96"
+                  height="96"
+                  rx="6"
+                  fill="#fbfcfe"
+                  stroke="#dde4ec"
+                  stroke-width="2"
+                />
+                <path
+                  d="M98 38h64M98 52h64M98 66h44"
+                  stroke="#e6ebf2"
+                  stroke-width="4"
+                  stroke-linecap="round"
+                />
+                <circle
+                  cx="170"
+                  cy="94"
+                  r="16"
+                  fill="#2fac6a"
+                />
+                <path
+                  d="m163 94 5 5.5 10-11"
+                  fill="none"
+                  stroke="#fff"
+                  stroke-width="3.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle
+                  cx="50"
+                  cy="54"
+                  r="13"
+                  fill="#f0a02a"
+                />
+                <path
+                  d="M28 124c0-26 10-40 22-40s22 14 22 40z"
+                  fill="#f0a02a"
+                />
+                <path
+                  d="M70 88l26-16"
+                  stroke="#f0a02a"
+                  stroke-width="10"
+                  stroke-linecap="round"
+                />
+                <rect
+                  x="88"
+                  y="60"
+                  width="18"
+                  height="12"
+                  rx="2"
+                  transform="rotate(-32 88 60)"
+                  fill="#2fac6a"
+                />
+              </svg>
+              <p>{{ $t(doneMessage) }}</p>
+            </div>
+          </template>
+          <template v-else>
           <h2>{{ $t('text009') }}</h2>
           <p class="kyc-desc">{{ $t('text130') }}</p>
           <div class="investor-tab">{{ $t('text131') }}</div>
@@ -55,6 +136,7 @@ const showInvestorInfo = ref(false)
               <li>{{ $t('text142') }}</li>
             </ol>
           </div>
+          </template>
         </section>
       </main>
     </div>

@@ -874,5 +874,11 @@
   "loginSmsLabel": "SMS code",
   "loginSmsHint": "Enter the code sent to 20****1",
   "loginGaLabel": "Google Authenticator code",
-  "loginDemoHint": "Demo code: 111111"
+  "loginDemoHint": "Demo code: 111111",
+  "kycRequiredNotice": "Complete identity verification before continuing",
+  "kycCorpTitle": "Corporate verification (Professional Investor)",
+  "kycCorpDone": "Corporate verification (Professional Investor) is complete",
+  "kycPersonDone": "Personal verification (Professional Investor) is complete",
+  "kycInstTitle": "Institutional verification (Professional Investor)",
+  "kycInstDone": "Institutional verification (Professional Investor) is complete"
 }

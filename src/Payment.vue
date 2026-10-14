@@ -6,6 +6,15 @@ import { ArrowDown, InfoFilled } from '@element-plus/icons-vue'
 import { computed, ref } from 'vue'
 import WalletAdd from './WalletAdd.vue'
 import BankDetail from './BankDetail.vue'
+import KycNotice from './KycNotice.vue'
+import { kycVerified } from './session'
+function openAdd(href) {
+  if (!kycVerified.value) {
+    showKycNotice.value = true
+    return
+  }
+  window.location.href = href
+}
 const crypto = window.location.pathname.includes('/crypto')
 const addWallet = window.location.pathname.includes('/crypto/add')
 const bankDetail = window.location.pathname.includes('/user/payment/fiat/detail')
@@ -13,6 +22,7 @@ const walletRecord = ref(JSON.parse(localStorage.getItem('bge-wallet-record') ||
   address: '0x9e3729f5a1c237475d9f6a30ff6cf0f7138c7285',
   network: 'eth-', remark: '123', coin: 'ETH', status: '未认证', expires: '-',
 })
+const showKycNotice = ref(false)
 const walletFilterCoin = ref('all')
 const walletFilterStatus = ref('all')
 // The bank card added on /user/payment/fiat/detail is stored locally, like the wallet records.
@@ -45,7 +55,12 @@ const usageCodes = (usage) =>
           <BankDetail v-if="bankDetail" /><WalletAdd v-else-if="addWallet" /><template v-else-if="!crypto"
             ><div class="payment-title">
               <h2>{{ $t('text268') }} ({{ bankCount }})</h2>
-              <a class="add-btn" href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add">{{ $t('text271') }}</a>
+              <a
+                class="add-btn"
+                href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add"
+                @click.prevent="openAdd('/bge/hk/zh-CN/user/payment/fiat/detail?type=add')"
+                >{{ $t('text271') }}</a
+              >
             </div>
             <div class="payment-head">
               <span>{{ $t('text272') }}</span
@@ -71,7 +86,12 @@ const usageCodes = (usage) =>
             ><div class="notice-bar">{{ $t('text277') }}</div>
             <div class="payment-title">
               <h2>{{ $t('text278') }}</h2>
-              <a class="add-btn" href="/bge/hk/zh-CN/user/payment/crypto/add">{{ $t('text279') }}</a>
+              <a
+                class="add-btn"
+                href="/bge/hk/zh-CN/user/payment/crypto/add"
+                @click.prevent="openAdd('/bge/hk/zh-CN/user/payment/crypto/add')"
+                >{{ $t('text279') }}</a
+              >
             </div>
             <div class="wallet-filters">
               <el-select v-model="walletFilterCoin" class="wallet-filter-select" aria-label="币种"><el-option label="全部币种" value="all" /><el-option label="ETH" value="ETH" /><el-option label="BTC" value="BTC" /><el-option label="USDT" value="USDT" /><el-option label="USDC" value="USDC" /></el-select><el-select v-model="walletFilterStatus" class="wallet-filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option :label="$t('statusVerified')" value="verified" /><el-option :label="$t('statusUnverified')" value="unverified" /><el-option :label="$t('statusExpired')" value="expired" /></el-select
@@ -96,5 +116,6 @@ const usageCodes = (usage) =>
         </section>
       </main>
     </div>
+    <KycNotice v-model="showKycNotice" />
   </div>
 </template>

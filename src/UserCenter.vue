@@ -5,6 +5,7 @@ import { formatMoney } from './currency'
 import { i18n, tr } from './i18n'
 import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
+import { kycVerified } from './session'
 import {
   ArrowDown,
   Grid,
@@ -207,7 +208,10 @@ function confirmTransfer() {
               >{{ totalBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(totalBtc * prices.BTC, 'USD', 4) }}</small></strong
             ><a>{{ $t('text342') }}</a>
           </section>
-          <div class="asset-panels">
+          <div
+            v-if="kycVerified"
+            class="asset-panels"
+          >
             <section class="asset-panel risk-panel">
               <h3>{{ $t('assetRisk') }}</h3>
               <div class="risk-level">

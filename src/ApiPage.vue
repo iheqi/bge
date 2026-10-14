@@ -2,6 +2,11 @@
 import SiteHeader from './SiteHeader.vue'
 import ApiKeyRecords from './ApiKeyRecords.vue'
 import UserSidebar from './UserSidebar.vue'
+import KycNotice from './KycNotice.vue'
+import { ref } from 'vue'
+import { kycVerified } from './session'
+
+const showKycNotice = ref(!kycVerified.value)
 </script>
 <template>
   <div class="user-page api-page">
@@ -12,6 +17,7 @@ import UserSidebar from './UserSidebar.vue'
         <ApiKeyRecords />
       </main>
     </div>
+    <KycNotice v-model="showKycNotice" />
     <footer>
       <div class="footer-inner">
         <a

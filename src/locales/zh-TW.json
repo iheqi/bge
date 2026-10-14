@@ -874,5 +874,11 @@
   "loginSmsLabel": "手機驗證碼",
   "loginSmsHint": "輸入 20****1 收到的驗證碼",
   "loginGaLabel": "谷歌驗證碼",
-  "loginDemoHint": "演示驗證碼：111111"
+  "loginDemoHint": "演示驗證碼：111111",
+  "kycRequiredNotice": "您未完成身份認證，請先完成身份認證",
+  "kycCorpTitle": "法團認證（專業投資者）",
+  "kycCorpDone": "法團認證（專業投資者）已完成",
+  "kycPersonDone": "個人認證（專業投資者）已完成",
+  "kycInstTitle": "機構認證（專業投資者）",
+  "kycInstDone": "機構認證（專業投資者）已完成"
 }

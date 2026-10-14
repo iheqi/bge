@@ -495,6 +495,22 @@
 .kyc-options .kyc-option-link:hover {
   background: #e8f000;
 }
+.kyc-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 148px 0 208px;
+  text-align: center;
+}
+.kyc-done svg {
+  width: 220px;
+  height: 130px;
+}
+.kyc-done p {
+  margin: 26px 0 0;
+  color: #303744;
+  font-size: 19px;
+}
 .notice {
   margin-top: 40px;
   padding: 20px 16px;
