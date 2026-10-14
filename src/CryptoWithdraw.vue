@@ -5,7 +5,10 @@ import Footer from './Footer.vue'
 import { formatMoney } from './currency'
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
+import { i18n, tr } from './i18n'
 import { InfoFilled } from '@element-plus/icons-vue'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 const coins = [
   { symbol: 'ETH', name: '以太坊', glyph: '◆', network: 'eth-', chain: 'ETH', fee: 0.0001, min: 0.02, limit: 3952.316221, balance: 2.4 },
@@ -42,10 +45,10 @@ function fillAll() {
 }
 function submit() {
   const value = Number(amount.value)
-  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning('请输入取款数量')
-  if (value < active.value.min) return ElMessage.warning(`最小提币数量为 ${active.value.min} ${coin.value}`)
-  if (value > available.value) return ElMessage.warning('可用余额不足')
-  if (value > remaining.value) return ElMessage.warning('超出 24H 剩余取款额度')
+  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning(t('withdrawAmountRequired'))
+  if (value < active.value.min) return ElMessage.warning(t('withdrawMinAmount', { min: active.value.min, coin: coin.value }))
+  if (value > available.value) return ElMessage.warning(t('insufficientBalance'))
+  if (value > remaining.value) return ElMessage.warning(t('withdrawOverQuota'))
   balances.value[coin.value] = available.value - value
   records.value.unshift({
     time: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-'),
@@ -58,7 +61,7 @@ function submit() {
     remark: wallet.value?.remark || '—',
   })
   amount.value = ''
-  ElMessage.success('取款申请已提交')
+  ElMessage.success(t('withdrawSubmitted'))
 }
 </script>
 
@@ -69,13 +72,13 @@ function submit() {
       <UserSidebar />
       <main class="withdraw-main">
         <section class="withdraw-box">
-          <h1 class="withdraw-title">数字资产取款</h1>
+          <h1 class="withdraw-title">{{ $t('withdrawTitle') }}</h1>
           <div class="withdraw-notice">
-            <span class="withdraw-notice-icon"><el-icon><InfoFilled /></el-icon></span>{{ $t('text277') }}<a href="/bge/hk/zh-CN/user/payment/crypto">去认证</a>
+            <span class="withdraw-notice-icon"><el-icon><InfoFilled /></el-icon></span>{{ $t('text277') }}<a href="/bge/hk/zh-CN/user/payment/crypto">{{ $t('withdrawGoVerify') }}</a>
           </div>
           <div class="withdraw-columns">
             <div class="withdraw-form">
-              <p class="withdraw-label">取款币种</p>
+              <p class="withdraw-label">{{ $t('withdrawCoin') }}</p>
               <el-select
                 :model-value="coin"
                 class="withdraw-select"
@@ -87,23 +90,23 @@ function submit() {
                   :label="item.symbol"
                   :value="item.symbol"
                 >
-                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ item.name }}</small></span>
+                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ tr(item.name) }}</small></span>
                 </el-option>
               </el-select>
 
               <div class="withdraw-address-head">
-                <p class="withdraw-label">取款网络及地址</p>
+                <p class="withdraw-label">{{ $t('withdrawNetworkAddress') }}</p>
                 <a
                   class="withdraw-link"
                   href="/bge/hk/zh-CN/user/payment/crypto"
-                  >去添加地址›</a
+                  >{{ $t('withdrawAddAddress') }}</a
                 >
               </div>
               <div class="withdraw-network">
                 <i class="coin-badge">{{ active.glyph }}</i>
                 <b>{{ active.network }}</b>
                 <span v-if="verified">{{ wallet.address }}</span>
-                <span class="withdraw-fee">手续费 {{ feeText }} (≈{{ formatMoney(active.fee * prices[coin], 'USD') }})</span>
+                <span class="withdraw-fee">{{ $t('withdrawFeeLabel') }} {{ feeText }} (≈{{ formatMoney(active.fee * prices[coin], 'USD') }})</span>
               </div>
 
               <div
@@ -189,23 +192,23 @@ function submit() {
                     stroke-linecap="round"
                   />
                 </svg>
-                <p>您的{{ coin }}在{{ active.network }}网络地址未认证</p>
+                <p>{{ $t('withdrawUnverified', { coin, network: active.network }) }}</p>
                 <a
                   class="withdraw-verify"
                   href="/bge/hk/zh-CN/user/payment/crypto/add"
-                  >立即认证</a
+                  >{{ $t('withdrawVerifyNow') }}</a
                 >
               </div>
 
               <template v-else>
                 <div class="withdraw-qty">
                   <p class="withdraw-label">{{ $t('text315') }}</p>
-                  <span class="withdraw-available">可用余额 {{ formatAmount(available) }} {{ coin }}</span>
+                  <span class="withdraw-available">{{ $t('availableBalance') }} {{ formatAmount(available) }} {{ coin }}</span>
                 </div>
                 <el-input
                   v-model="amount"
                   class="withdraw-input"
-                  placeholder="请输入取款数量"
+                  :placeholder="$t('withdrawAmountRequired')"
                 >
                   <template #suffix><button
                     class="withdraw-all"
@@ -216,49 +219,49 @@ function submit() {
                   </button></template>
                 </el-input>
                 <div class="withdraw-summary">
-                  <span>手续费 <b>{{ feeText }}</b></span><span>到账数量 <b>{{ formatAmount(received) }} {{ coin }}</b></span>
+                  <span>{{ $t('withdrawFeeLabel') }} <b>{{ feeText }}</b></span><span>{{ $t('withdrawReceiveAmount') }} <b>{{ formatAmount(received) }} {{ coin }}</b></span>
                 </div>
                 <button
                   class="withdraw-submit"
                   type="button"
                   @click="submit"
                 >
-                  提交取款
+                  {{ $t('withdrawSubmit') }}
                 </button>
               </template>
             </div>
 
             <div class="withdraw-aside">
               <section class="withdraw-card">
-                <h3>取款说明</h3>
+                <h3>{{ $t('withdrawNotes') }}</h3>
                 <p class="withdraw-quota">
-                  24H剩余取款额度：{{ formatAmount(remaining) }}/{{ formatAmount(active.limit) }} {{ coin }}
+                  {{ $t('withdrawQuota') }}{{ formatAmount(remaining) }}/{{ formatAmount(active.limit) }} {{ coin }}
                 </p>
                 <ul>
-                  <li>仅支持向 {{ active.chain }} 网络的地址提币。如向非 {{ active.chain }} 网络的地址提币的话，资产将无法退回，请注意。</li>
-                  <li>最小提币数量为：{{ active.min }} {{ coin }}。</li>
-                  <li>为保障资金安全，当您账户安全策略变更、密码修改、我们会对比进行人工审核，请耐心等待工作人员电话或邮件联系。</li>
-                  <li>请务必确认电脑及浏览器安全，防止信息被篡改或泄露。</li>
+                  <li>{{ $t('withdrawNote1', { chain: active.chain }) }}</li>
+                  <li>{{ $t('withdrawMinAmount', { min: active.min, coin }) }}</li>
+                  <li>{{ $t('withdrawNote2') }}</li>
+                  <li>{{ $t('commonSecurityNote') }}</li>
                 </ul>
               </section>
               <section class="withdraw-card">
-                <h3>地址认证说明</h3>
-                <p class="faq-q">为什么要完成地址认证才可进行数字资产存款和取款？</p>
-                <p class="faq-a">根据监管要求,数字资产存款行为发起方的地址和取款行为接收方的地址必须为已认证过的地址,任何非认证过的地址转账均无法上账</p>
-                <p class="faq-q">如何进行地址认证？</p>
-                <p class="faq-a">在数字资产地址管理模块,完成地址绑定后进行地址认证,系统会随机生成一笔小额汇款金额,您需使用此次认证地址汇出指定金额至收款地址,系统确认收到即成功绑定</p>
-                <p class="faq-q">认证地址需支付小额资金问题？</p>
-                <p class="faq-a">地址认证完一次后,不需要再次认证,存款和取款可以使用同一认证地址,认证地址的资金在系统收到后会给您返还至资金账户</p>
+                <h3>{{ $t('addressFaqTitle') }}</h3>
+                <p class="faq-q">{{ $t('addressFaqQ1') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA1') }}</p>
+                <p class="faq-q">{{ $t('addressFaqQ2') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA2') }}</p>
+                <p class="faq-q">{{ $t('addressFaqQ3') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA3') }}</p>
               </section>
             </div>
           </div>
 
-          <h2 class="withdraw-records-title">取款记录</h2>
+          <h2 class="withdraw-records-title">{{ $t('withdrawRecords') }}</h2>
           <div class="withdraw-table-head">
             <span>{{ $t('text313') }}</span
-            ><span>数字货币</span><span>{{ $t('text285') }}</span><span>提现数量</span
-            ><span class="withdraw-th-icon">到账数量<i class="withdraw-info">ⓘ</i></span
-            ><span>{{ $t('text063') }}</span><span>到账地址</span><span>{{ $t('text286') }}</span
+            ><span>{{ $t('text314') }}</span><span>{{ $t('text285') }}</span><span>{{ $t('withdrawWithdrawAmount') }}</span
+            ><span class="withdraw-th-icon">{{ $t('withdrawReceiveAmount') }}<i class="withdraw-info">ⓘ</i></span
+            ><span>{{ $t('text063') }}</span><span>{{ $t('withdrawReceiveAddress') }}</span><span>{{ $t('text286') }}</span
             ><span>{{ $t('text065') }}</span>
           </div>
           <div
@@ -271,7 +274,7 @@ function submit() {
             ><span>{{ record.network }}</span
             ><span>{{ formatAmount(record.amount) }}</span
             ><span>{{ formatAmount(record.received) }}</span
-            ><span>{{ record.status }}</span
+            ><span>{{ tr(record.status) }}</span
             ><span>{{ record.address }}</span
             ><span>{{ record.remark }}</span
             ><span>—</span>
@@ -280,11 +283,11 @@ function submit() {
             v-if="!records.length"
             class="withdraw-empty"
           >
-            暂无数据
+            {{ $t('text066') }}
           </div>
           <p class="withdraw-footnote">
-            * 仅展示最近10条记录，如需更多记录，请查看
-            <a href="/bge/hk/zh-CN/user/report/wallet">存取款记录</a>
+            * {{ $t('recordsFootnote') }}
+            <a href="/bge/hk/zh-CN/user/report/wallet">{{ $t('recordsLink') }}</a>
           </p>
         </section>
       </main>

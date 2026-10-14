@@ -96,7 +96,7 @@ const menus = [
         </template>
         <nav
           class="site-header-company-menu"
-          aria-label="公司菜单"
+          :aria-label="$t('companyMenu')"
         >
           <a
             :class="{ active: active === 'about' }"

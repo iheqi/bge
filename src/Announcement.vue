@@ -30,23 +30,23 @@ const detailArticle = computed(() => {
     <SiteHeader active="announcement" />
 
     <section v-if="!detail" class="announcement-hero">
-      <h1>公告中心</h1>
-      <form class="announcement-search" @submit.prevent><input v-model="query" placeholder="请输入您的问题" /><button>搜索</button></form>
+      <h1>{{ $t('annTitle') }}</h1>
+      <form class="announcement-search" @submit.prevent><input v-model="query" :placeholder="$t('annPlaceholder')" /><button>{{ $t('text283') }}</button></form>
     </section>
 
     <main class="announcement-main" :class="{ 'is-detail': detail }">
       <section class="announcement-content">
         <template v-if="detail">
-          <a class="back-link" :href="base">← 返回公告列表</a>
+          <a class="back-link" :href="base">{{ $t('annBack') }}</a>
           <h1>{{ detailArticle.title }}</h1><time>{{ detailArticle.date }}</time>
-          <div class="article-body"><p>亲爱的用户：</p><p>我们高兴地通知您，我们的全站系统维护工作已顺利完成，目前所有服务已全面恢复正常运作。</p><p>再次衷心感谢您在维护期间的耐心配合、理解与支持。</p><p>HKBGE 团队<br />2026 年 7 月 14 日</p></div>
+          <div class="article-body"><p>{{ $t('annGreeting') }}</p><p>{{ $t('annBody1') }}</p><p>{{ $t('annBody2') }}</p><p>{{ $t('annTeam') }}<br />{{ $t('annDate') }}</p></div>
         </template>
         <template v-else>
-          <a v-for="item in filtered" :key="item.id" class="announcement-item" :href="`${base}/article/${item.id}`"><strong>{{ item.title }}</strong><time>{{ item.date }}</time></a>
-          <p v-if="!filtered.length" class="empty">暂无相关公告</p>
+          <a v-for="item in filtered" :key="item.id" class="announcement-item" :href="`${base}/article/${item.id}`"><strong>{{ tr(item.title) }}</strong><time>{{ item.date }}</time></a>
+          <p v-if="!filtered.length" class="empty">{{ $t('annEmpty') }}</p>
         </template>
       </section>
-      <aside class="hot-announcements"><h2>热门公告</h2><a v-for="item in hot" :key="item.id" :href="`${base}/article/${item.id}`"><span>★</span>{{ item.title }}</a></aside>
+      <aside class="hot-announcements"><h2>{{ $t('annHot') }}</h2><a v-for="item in hot" :key="item.id" :href="`${base}/article/${item.id}`"><span>★</span>{{ tr(item.title) }}</a></aside>
     </main>
     <Footer />
   </div>

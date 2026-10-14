@@ -1,29 +1,32 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { i18n } from './i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 const storageKey = 'bge-demo-api-records-v1'
 const seed = [{ id: 'demo-1', remarks: '行情查询', authorities: ['readonly'], ipAddresses: '192.0.2.10', state: 'valid', createdDate: '2026-10-08 10:20:00', apiKey: 'demo_api_readonly_001', secret: 'demo_secret_readonly_001' }, { id: 'demo-2', remarks: '交易策略', authorities: ['readonly', 'trade', 'withdraw'], ipAddresses: '198.51.100.20,198.51.100.21', state: 'overdue', createdDate: '2026-09-01 09:30:00', apiKey: 'demo_api_strategy_002', secret: 'demo_secret_strategy_002' }]
 let initial = seed
 try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (Array.isArray(saved) && saved.every(r => r.id && Array.isArray(r.authorities))) initial = saved } catch {}
 const rows = ref(initial)
-const authNames = { readonly: '读取', trade: '交易', withdraw: '划转' }
-const authText = row => row.authorities.map(a => authNames[a]).join(',')
+const authNames = { readonly: 'apiRead', trade: 'apiTrade', withdraw: 'text309' }
+const authText = (row) => row.authorities.map((a) => i18n.global.t(authNames[a])).join(',')
 const detail = ref(null), verification = ref(false), editId = ref(null)
 const codes = reactive({ sms: '', email: '', ga: '' })
 const formRef = ref()
 const form = reactive({ remarks: '', ipAddresses: '', authorities: ['readonly'] })
 let pending = null
 const rules = {
- remarks: [{ validator: (_, value, done) => done(value.trim() ? undefined : new Error('请输入备注')), trigger: 'blur' }],
+ remarks: [{ validator: (_, value, done) => done(value.trim() ? undefined : new Error(t('apiRemarkRequired'))), trigger: 'blur' }],
  ipAddresses: [{ validator: (_, value, done) => {
   const ips = value.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
   const valid = ips.every(ip => /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && ip.split('.').every(n => Number(n) <= 255))
-  done(!ips.length ? new Error('请输入IP地址') : ips.length > 10 ? new Error('最多支持配置10个IP') : !valid ? new Error('请输入正确的IPv4地址，多个地址以英文逗号分隔') : undefined)
+  done(!ips.length ? new Error(t('apiIpRequired')) : ips.length > 10 ? new Error(t('apiIpLimit')) : !valid ? new Error(t('apiIpInvalid')) : undefined)
  }, trigger: 'blur' }]
 }
-function persist() { try { localStorage.setItem(storageKey, JSON.stringify(rows.value)) } catch { ElMessage.warning('浏览器无法保存，本次变更仅在当前页面有效') } }
+function persist() { try { localStorage.setItem(storageKey, JSON.stringify(rows.value)) } catch { ElMessage.warning(t('apiStorageWarn')) } }
 function edit(row) {
- if (!row && rows.value.length >= 10) return ElMessage.warning('最多创建10个API Key')
+ if (!row && rows.value.length >= 10) return ElMessage.warning(t('apiLimit'))
  editId.value = row?.id ?? null
  Object.assign(form, { remarks: row?.remarks ?? '', ipAddresses: row?.ipAddresses ?? '', authorities: [...(row?.authorities ?? ['readonly'])] })
  formRef.value?.clearValidate()
@@ -40,11 +43,11 @@ function verify(action) {
  verification.value = true
 }
 function sendCode(channel) {
- ElMessage.success(`${channel}验证码已发送（演示）`)
+ ElMessage.success(t('apiCodeSent', { channel }))
 }
 function confirmVerification() {
  if (!/^\d{6}$/.test(codes.sms) || !/^\d{6}$/.test(codes.email) || !/^\d{6}$/.test(codes.ga)) {
-  return ElMessage.warning('演示验证码：短信与邮箱均为 123456，Google 验证码任意 6 位')
+  return ElMessage.warning(t('apiDemoHint'))
  }
  const action = pending
  pending = null
@@ -65,19 +68,19 @@ async function save() {
   }
   persist()
   resetForm()
-  ElMessage.success(id ? 'API修改成功' : 'API创建成功')
+  ElMessage.success(t(id ? 'apiUpdated' : 'apiCreated'))
  })
 }
 async function remove(row) {
- try { await ElMessageBox.confirm('删除后，API将会失效，是否确认删除？', '删除API', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' }) } catch { return }
- verify(() => { rows.value = rows.value.filter(r => r.id !== row.id); persist(); ElMessage.success('API已删除') })
+ try { await ElMessageBox.confirm(t('apiDeleteConfirm'), t('apiDeleteTitle'), { confirmButtonText: t('apiConfirm'), cancelButtonText: t('text183'), type: 'warning' }) } catch { return }
+ verify(() => { rows.value = rows.value.filter(r => r.id !== row.id); persist(); ElMessage.success(t('apiDeleted')) })
 }
-async function copy(value) { try { await navigator.clipboard.writeText(value); ElMessage.success('已复制') } catch { ElMessage.warning('复制失败，请手动选择复制') } }
+async function copy(value) { try { await navigator.clipboard.writeText(value); ElMessage.success(t('apiCopied')) } catch { ElMessage.warning(t('apiCopyFailed')) } }
 </script>
 <template>
  <section class="api-record api-key-records">
   <div class="api-head">
-   <h2 class="api-bar-title">{{ editId ? '编辑API Key' : $t('text051') }}</h2>
+   <h2 class="api-bar-title">{{ editId ? $t('apiEditTitle') : $t('text051') }}</h2>
    <a class="api-doc-link">{{ $t('text052') }}</a>
   </div>
   <div class="api-columns">
@@ -90,17 +93,17 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
     @submit.prevent="save"
    >
     <el-form-item
-     label="备注"
+     :label="$t('apiRemark')"
      prop="remarks"
      required
     >
      <el-input
       v-model="form.remarks"
-      placeholder="请输入 API Key备注名"
+      :placeholder="$t('apiRemarkPlaceholder')"
      />
     </el-form-item>
     <el-form-item
-     label="绑定IP地址"
+     :label="$t('apiBindIp')"
      prop="ipAddresses"
      required
     >
@@ -108,29 +111,29 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
       v-model="form.ipAddresses"
       type="textarea"
       :rows="3"
-      placeholder="为 API Key 绑定IP地址，以提高您账户的安全性"
+      :placeholder="$t('apiBindIpPlaceholder')"
      />
     </el-form-item>
-    <el-form-item label="权限">
+    <el-form-item :label="$t('apiPermissions')">
      <el-checkbox-group v-model="form.authorities">
       <el-checkbox
        value="readonly"
        disabled
-       >读取</el-checkbox
-      ><el-checkbox value="trade">交易</el-checkbox><el-checkbox value="withdraw">划转</el-checkbox>
+       >{{ $t('apiRead') }}</el-checkbox
+      ><el-checkbox value="trade">{{ $t('apiTrade') }}</el-checkbox><el-checkbox value="withdraw">{{ $t('text309') }}</el-checkbox>
      </el-checkbox-group>
     </el-form-item>
     <button
      class="api-submit"
      type="submit"
     >
-     {{ editId ? '修改' : '创建' }}
+     {{ editId ? $t('apiModify') : $t('apiCreateBtn') }}
     </button>
     <a
      v-if="editId"
      class="api-cancel-edit"
      @click="resetForm"
-     >取消编辑</a
+     >{{ $t('apiCancelEdit') }}</a>
     >
    </el-form>
    <div class="api-notes">
@@ -145,50 +148,50 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
    </div>
   </div>
 
-  <h2 class="api-bar-title api-record-title">API Key记录</h2>
+  <h2 class="api-bar-title api-record-title">{{ $t('apiRecordsTitle') }}</h2>
   <el-table
    :data="rows"
    row-key="id"
-   empty-text="暂无数据"
+   :empty-text="$t('text066')"
    :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
   >
    <el-table-column
     prop="remarks"
-    label="备注名"
+    :label="$t('apiRemarkColumn')"
     min-width="180"
    />
    <el-table-column
-    label="权限"
+    :label="$t('apiPermissions')"
     min-width="200"
    ><template #default="{ row }">{{ authText(row) }}</template></el-table-column>
    <el-table-column
-    label="状态"
+    :label="$t('text063')"
     width="120"
-   ><template #default="{ row }"><span :class="{ expired: row.state === 'overdue' }">{{ row.state === 'valid' ? '有效' : '失效' }}</span></template></el-table-column>
+   ><template #default="{ row }"><span :class="{ expired: row.state === 'overdue' }">{{ row.state === 'valid' ? $t('apiValid') : $t('apiInvalid') }}</span></template></el-table-column>
    <el-table-column
     prop="createdDate"
-    label="创建时间"
+    :label="$t('text064')"
     min-width="190"
    />
    <el-table-column
-    label="操作"
+    :label="$t('text065')"
     width="210"
     fixed="right"
    ><template #default="{ row }"><el-button
     link
     class="api-action"
     @click="verify(() => detail = row)"
-    >查看</el-button
+    >{{ $t('apiView') }}</el-button
    ><el-button
     link
     class="api-action"
     @click="edit(row)"
-    >编辑</el-button
+    >{{ $t('apiEdit') }}</el-button
    ><el-button
     link
     class="api-action api-danger"
     @click="remove(row)"
-    >删除</el-button></template></el-table-column>
+    >{{ $t('text182') }}</el-button></template></el-table-column>
   </el-table>
 
   <el-dialog
@@ -198,38 +201,38 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
    class="verify-dialog"
    @closed="pending = null"
   >
-   <template #header><h3 class="verify-title">安全验证</h3></template>
+   <template #header><h3 class="verify-title">{{ $t('apiVerifyTitle') }}</h3></template>
    <div class="verify-field">
-    <p>输入 150****8881 收到的验证码</p>
+    <p>{{ $t('apiSmsLabel') }}</p>
     <label class="verify-line"><input
      v-model="codes.sms"
-     placeholder="请输入短信验证码"
+     :placeholder="$t('apiSmsPlaceholder')"
      maxlength="6"
     /><button
      type="button"
-     @click="sendCode('短信')"
+     @click="sendCode(t('apiSmsChannel'))"
     >
-     发送
+     {{ $t('apiSend') }}
     </button></label>
    </div>
    <div class="verify-field">
-    <p>输入 heqi**gic@gmail.com 收到的验证码</p>
+    <p>{{ $t('apiEmailLabel') }}</p>
     <label class="verify-line"><input
      v-model="codes.email"
-     placeholder="输入邮箱验证码"
+     :placeholder="$t('apiEmailPlaceholder')"
      maxlength="6"
     /><button
      type="button"
-     @click="sendCode('邮箱')"
+     @click="sendCode(t('apiEmailChannel'))"
     >
-     发送
+     {{ $t('apiSend') }}
     </button></label>
    </div>
    <div class="verify-field">
-    <p>请输入Google验证码</p>
+    <p>{{ $t('apiGaLabel') }}</p>
     <label class="verify-line"><input
      v-model="codes.ga"
-     placeholder="请输入Google验证码"
+     :placeholder="$t('apiGaLabel')"
      maxlength="6"
     /></label>
    </div>
@@ -239,22 +242,22 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
      type="button"
      @click="verification = false"
     >
-     取消
+     {{ $t('text183') }}
     </button>
     <button
      class="verify-confirm"
      type="button"
      @click="confirmVerification"
     >
-     确定
+     {{ $t('transferConfirm') }}
     </button>
    </div>
-   <p class="verify-hint">演示验证码：短信与邮箱均为 123456，Google 验证码任意 6 位</p>
+   <p class="verify-hint">{{ $t('apiDemoHint') }}</p>
   </el-dialog>
 
   <el-dialog
    :model-value="!!detail"
-   title="查看API"
+   :title="$t('apiViewTitle')"
    width="760px"
    center
    @close="detail = null"
@@ -263,15 +266,15 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
     v-if="detail"
     class="key-details"
    >
-    <div><label>备注名</label><p>{{ detail.remarks }}</p><label>权限</label><p>{{ authText(detail) }}</p><label>绑定IP地址</label><p>{{ detail.ipAddresses }}</p></div><div><label>API Key</label><p>{{ detail.apiKey }} <el-button
+    <div><label>{{ $t('apiRemarkColumn') }}</label><p>{{ detail.remarks }}</p><label>{{ $t('apiPermissions') }}</label><p>{{ authText(detail) }}</p><label>{{ $t('apiBindIp') }}</label><p>{{ detail.ipAddresses }}</p></div><div><label>API Key</label><p>{{ detail.apiKey }} <el-button
      link
      class="api-action"
      @click="copy(detail.apiKey)"
-     >复制</el-button></p><label>秘钥</label><p>{{ detail.secret }} <el-button
+     >{{ $t('depCopy') }}</el-button></p><label>{{ $t('apiSecret') }}</label><p>{{ detail.secret }} <el-button
      link
      class="api-action"
      @click="copy(detail.secret)"
-     >复制</el-button></p></div>
+     >{{ $t('depCopy') }}</el-button></p></div>
    </div>
   </el-dialog>
  </section>

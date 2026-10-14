@@ -4,6 +4,9 @@ import UserSidebar from './UserSidebar.vue'
 import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
+import { i18n, tr } from './i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 const coins = [
   { symbol: 'HKD', name: '港币', glyph: 'HK$', fee: 0, min: 100, limit: 5000000, balance: 68000 },
@@ -39,11 +42,11 @@ function fillPercent(percent) {
 }
 function submit() {
   const value = Number(amount.value)
-  if (!bank.value) return ElMessage.warning(`暂无${coin.value}银行卡，请先添加`)
-  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning('请输入取款金额')
-  if (value < active.value.min) return ElMessage.warning(`最小取款金额为 ${active.value.min} ${coin.value}`)
-  if (value > available.value) return ElMessage.warning('可用余额不足')
-  if (value > remaining.value) return ElMessage.warning('超出 24H 剩余取款额度')
+  if (!bank.value) return ElMessage.warning(t('fiatNoCard', { coin: coin.value }))
+  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning(t('fiatAmountPlaceholder'))
+  if (value < active.value.min) return ElMessage.warning(t('fiatMinMessage', { min: active.value.min, coin: coin.value }))
+  if (value > available.value) return ElMessage.warning(t('insufficientBalance'))
+  if (value > remaining.value) return ElMessage.warning(t('withdrawOverQuota'))
   balances.value[coin.value] = available.value - value
   records.value.unshift({
     time: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-'),
@@ -57,7 +60,7 @@ function submit() {
     status: '处理中',
   })
   amount.value = ''
-  ElMessage.success('取款申请已提交')
+  ElMessage.success(t('withdrawSubmitted'))
 }
 </script>
 
@@ -68,10 +71,10 @@ function submit() {
       <UserSidebar />
       <main class="fiat-main">
         <section class="fiat-box">
-          <h1 class="fiat-title">法币取款</h1>
+          <h1 class="fiat-title">{{ $t('fiatWithdrawTitle') }}</h1>
           <div class="fiat-columns">
             <div class="fiat-form">
-              <p class="fiat-label">选择取款币种</p>
+              <p class="fiat-label">{{ $t('fiatChooseCoin') }}</p>
               <el-select
                 :model-value="coin"
                 class="fiat-select"
@@ -83,16 +86,16 @@ function submit() {
                   :label="item.symbol"
                   :value="item.symbol"
                 >
-                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ item.name }}</small></span>
+                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ tr(item.name) }}</small></span>
                 </el-option>
               </el-select>
 
               <div class="fiat-card-head">
-                <p class="fiat-label">选择您的收款银行卡</p>
+                <p class="fiat-label">{{ $t('fiatChooseCard') }}</p>
                 <a
                   class="fiat-link"
                   href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add"
-                  >去添加银行卡</a
+                  >{{ $t('fiatAddCard') }}</a
                 >
               </div>
               <div
@@ -162,16 +165,16 @@ function submit() {
                     fill="#fff"
                   />
                 </svg>
-                <p>暂无{{ coin }}银行卡，请先添加</p>
+                <p>{{ $t('fiatNoCard', { coin }) }}</p>
               </div>
 
               <div class="fiat-amount">
-                <p class="fiat-label">取款金额</p>
-                <p class="fiat-available">可用余额: {{ formatAmount(available) }} {{ coin }}</p>
+                <p class="fiat-label">{{ $t('fiatWithdrawAmount') }}</p>
+                <p class="fiat-available">{{ $t('availableBalance') }}: {{ formatAmount(available) }} {{ coin }}</p>
                 <label class="fiat-input-line">
                   <input
                     v-model="amount"
-                    placeholder="请输入取款金额"
+                    :placeholder="$t('fiatAmountPlaceholder')"
                   /><b>{{ coin }}</b>
                 </label>
                 <div class="fiat-percent">
@@ -188,7 +191,7 @@ function submit() {
                   v-if="bank"
                   class="fiat-summary"
                 >
-                  手续费：<b>{{ active.fee ? `${active.fee} ${coin}` : '免费' }}</b>　汇出金额：<b>{{ formatAmount(received) }} {{ coin }}</b>
+                  {{ $t('fiatSummaryFee') }}<b>{{ active.fee ? `${active.fee} ${coin}` : $t('text227') }}</b>　{{ $t('fiatSummarySent') }}<b>{{ formatAmount(received) }} {{ coin }}</b>
                 </p>
               </div>
 
@@ -197,29 +200,29 @@ function submit() {
                 type="button"
                 @click="submit"
               >
-                提交取款申请
+                {{ $t('fiatSubmit') }}
               </button>
             </div>
 
             <div class="fiat-aside">
-              <h3>取款说明</h3>
+              <h3>{{ $t('withdrawNotes') }}</h3>
               <div class="fiat-aside-box">
-                <p class="fiat-quota">24H剩余取款额度：{{ formatAmount(remaining) }}/{{ formatAmount(active.limit) }} {{ coin }}</p>
+                <p class="fiat-quota">{{ $t('withdrawQuota') }}{{ formatAmount(remaining) }}/{{ formatAmount(active.limit) }} {{ coin }}</p>
                 <ul>
-                  <li>最小取款金额为：{{ active.min }} {{ coin }}。</li>
-                  <li>预计到账时间：1-2 个工作日，以银行实际处理时间为准。</li>
-                  <li>为保障资金安全，当您账户安全策略变更、密码修改、我们会进行人工审核，请耐心等待工作人员电话或邮件联系。</li>
-                  <li>请务必确认电脑及浏览器安全，防止信息被篡改或泄露。</li>
+                  <li>{{ $t('fiatMinAmount', { min: active.min, coin }) }}</li>
+                  <li>{{ $t('fiatArrivalTime') }}</li>
+                  <li>{{ $t('withdrawNote2') }}</li>
+                  <li>{{ $t('commonSecurityNote') }}</li>
                 </ul>
               </div>
             </div>
           </div>
 
-          <h2 class="fiat-records-title">取款记录</h2>
+          <h2 class="fiat-records-title">{{ $t('withdrawRecords') }}</h2>
           <div class="fiat-table-head">
             <span>{{ $t('text313') }}</span
-            ><span>法币</span><span>取款金额</span><span>手续费</span><span>汇出金额</span
-            ><span>收款银行卡</span><span>银行卡标签</span><span>支付时间</span><span>{{ $t('text063') }}</span
+            ><span>{{ $t('text308') }}</span><span>{{ $t('fiatWithdrawAmount') }}</span><span>{{ $t('withdrawFeeLabel') }}</span><span>{{ $t('fiatSentColumn') }}</span
+            ><span>{{ $t('fiatCardColumn') }}</span><span>{{ $t('fiatCardTag') }}</span><span>{{ $t('fiatPayTime') }}</span><span>{{ $t('text063') }}</span
             ><span>{{ $t('text065') }}</span>
           </div>
           <div
@@ -235,18 +238,18 @@ function submit() {
             ><span>{{ record.account }}</span
             ><span>{{ record.tag }}</span
             ><span>{{ record.payTime }}</span
-            ><span>{{ record.status }}</span
+            ><span>{{ tr(record.status) }}</span
             ><span>—</span>
           </div>
           <div
             v-if="!records.length"
             class="fiat-empty"
           >
-            暂无数据
+            {{ $t('text066') }}
           </div>
           <p class="fiat-footnote">
-            * 仅展示最近10条记录，如需更多记录，请查看
-            <a href="/bge/hk/zh-CN/user/report/wallet">存取款记录</a>
+            * {{ $t('recordsFootnote') }}
+            <a href="/bge/hk/zh-CN/user/report/wallet">{{ $t('recordsLink') }}</a>
           </p>
         </section>
       </main>

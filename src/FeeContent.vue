@@ -143,9 +143,9 @@ const sellExample = [
               <th colspan="2">{{ $t('text429') }}</th>
             </tr>
             <tr>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ 'Lv 0 折扣 0%' }}</small></th>
+              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount') }}</small></th>
               <th class="fee-base">{{ $t('text431') }}</th>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ 'Lv 0 折扣 0%' }}</small></th>
+              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount') }}</small></th>
               <th class="fee-base">{{ $t('text431') }}</th>
             </tr>
           </thead>

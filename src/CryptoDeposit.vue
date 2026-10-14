@@ -5,6 +5,9 @@ import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { InfoFilled } from '@element-plus/icons-vue'
+import { i18n, tr } from './i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 const coins = [
   { symbol: 'ETH', name: '以太坊', glyph: '◆', network: 'eth-', chain: 'ETH', min: 0.00001, confirmations: 12 },
@@ -29,7 +32,7 @@ async function copyAddress() {
   } catch {
     /* The demo keeps working when the clipboard is unavailable. */
   }
-  ElMessage.success('地址已复制')
+  ElMessage.success(t('depositCopied'))
 }
 </script>
 
@@ -40,13 +43,13 @@ async function copyAddress() {
       <UserSidebar />
       <main class="deposit-main">
         <section class="deposit-box">
-          <h1 class="deposit-title">数字资产存款</h1>
+          <h1 class="deposit-title">{{ $t('depositTitle') }}</h1>
           <div class="deposit-notice">
-            <span class="deposit-notice-icon"><el-icon><InfoFilled /></el-icon></span>{{ $t('text277') }}<a href="/bge/hk/zh-CN/user/payment/crypto">去认证</a>
+            <span class="deposit-notice-icon"><el-icon><InfoFilled /></el-icon></span>{{ $t('text277') }}<a href="/bge/hk/zh-CN/user/payment/crypto">{{ $t('withdrawGoVerify') }}</a>
           </div>
           <div class="deposit-columns">
             <div class="deposit-form">
-              <p class="deposit-label">存款币种</p>
+              <p class="deposit-label">{{ $t('depositCoin') }}</p>
               <el-select
                 :model-value="coin"
                 class="deposit-select"
@@ -58,11 +61,11 @@ async function copyAddress() {
                   :label="item.symbol"
                   :value="item.symbol"
                 >
-                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ item.name }}</small></span>
+                  <span class="coin-option"><i>{{ item.glyph }}</i>{{ item.symbol }}<small>{{ tr(item.name) }}</small></span>
                 </el-option>
               </el-select>
 
-              <p class="deposit-label deposit-network-label">存款网络及地址</p>
+              <p class="deposit-label deposit-network-label">{{ $t('depositNetworkAddress') }}</p>
               <span class="network-chip">{{ active.network }}</span>
 
               <div
@@ -148,11 +151,11 @@ async function copyAddress() {
                     stroke-linecap="round"
                   />
                 </svg>
-                <p>您的{{ coin }}在{{ active.network }}网络地址未认证</p>
+                <p>{{ $t('withdrawUnverified', { coin, network: active.network }) }}</p>
                 <a
                   class="deposit-verify"
                   href="/bge/hk/zh-CN/user/payment/crypto/add"
-                  >立即认证</a
+                  >{{ $t('withdrawVerifyNow') }}</a
                 >
               </div>
 
@@ -162,49 +165,49 @@ async function copyAddress() {
               >
                 <span class="deposit-qr" />
                 <div class="deposit-address-info">
-                  <p>存款地址</p>
+                  <p>{{ $t('depositAddressLabel') }}</p>
                   <b>{{ wallet.address }}</b>
                   <button
                     class="deposit-copy"
                     type="button"
                     @click="copyAddress"
                   >
-                    复制地址
+                    {{ $t('depositCopyAddress') }}
                   </button>
-                  <small>{{ wallet.remark && wallet.remark !== '—' ? `地址备注：${wallet.remark}` : '' }}</small>
+                  <small>{{ wallet.remark && wallet.remark !== '—' ? $t('depositRemark', { remark: wallet.remark }) : '' }}</small>
                 </div>
               </div>
             </div>
 
             <div class="deposit-aside">
-              <h3>存款说明</h3>
+              <h3>{{ $t('depositNotes') }}</h3>
               <div class="deposit-aside-box">
-                <p class="deposit-min">最小存款金额： {{ active.min }} {{ coin }}</p>
+                <p class="deposit-min">{{ $t('depositMinLabel', { min: active.min, coin }) }}</p>
                 <ul>
-                  <li>请勿向上述地址充值任何非 {{ coin }} 资产，否则资产将不可找回。</li>
-                  <li>您充值至上述地址后，需要整个网络节点的确认，{{ active.confirmations }}次网络确认后到账。</li>
-                  <li>最小充值金额：{{ active.min }} {{ coin }}，小于最小金额的充值将不会上账且无法退回。</li>
-                  <li>您的充值地址不会经常改变，可以重复充值；如有更改，我们会尽量通过网站公告或邮件通知您。</li>
-                  <li>请务必确认电脑及浏览器安全，防止信息被篡改或泄露。</li>
+                  <li>{{ $t('depositNote1', { coin }) }}</li>
+                  <li>{{ $t('depositNote2', { confirmations: active.confirmations }) }}</li>
+                  <li>{{ $t('depositNote3', { min: active.min, coin }) }}</li>
+                  <li>{{ $t('depositNote4') }}</li>
+                  <li>{{ $t('commonSecurityNote') }}</li>
                 </ul>
               </div>
-              <h3 class="deposit-faq-title">地址认证说明</h3>
+              <h3 class="deposit-faq-title">{{ $t('addressFaqTitle') }}</h3>
               <div class="deposit-aside-box">
-                <p class="faq-q">为什么要完成地址认证才可进行数字资产存款和取款？</p>
-                <p class="faq-a">根据监管要求,数字资产存款行为发起方的地址和取款行为接收方的地址必须为已认证过的地址,任何非认证过的地址转账均无法上账</p>
-                <p class="faq-q">如何进行地址认证？</p>
-                <p class="faq-a">在数字资产地址管理模块,完成地址绑定后进行地址认证,系统会随机生成一笔小额汇款金额,您需使用此次认证地址汇出指定金额至收款地址,系统确认收到即成功绑定</p>
-                <p class="faq-q">认证地址需支付小额资金问题？</p>
-                <p class="faq-a">地址认证完一次后,不需要再次认证,存款和取款可以使用同一认证地址,认证地址的资金在系统收到后会给您返还至资金账户</p>
+                <p class="faq-q">{{ $t('addressFaqQ1') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA1') }}</p>
+                <p class="faq-q">{{ $t('addressFaqQ2') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA2') }}</p>
+                <p class="faq-q">{{ $t('addressFaqQ3') }}</p>
+                <p class="faq-a">{{ $t('addressFaqA3') }}</p>
               </div>
             </div>
           </div>
 
-          <h2 class="deposit-records-title">存款记录</h2>
+          <h2 class="deposit-records-title">{{ $t('depositRecords') }}</h2>
           <div class="deposit-table-head">
             <span>{{ $t('text313') }}</span
-            ><span>数字货币</span><span>{{ $t('text285') }}</span><span>{{ $t('text315') }}</span
-            ><span>{{ $t('text063') }}</span><span>发起方地址</span><span>{{ $t('text286') }}</span>
+            ><span>{{ $t('text314') }}</span><span>{{ $t('text285') }}</span><span>{{ $t('text315') }}</span
+            ><span>{{ $t('text063') }}</span><span>{{ $t('text316') }}</span><span>{{ $t('text286') }}</span>
           </div>
           <div
             v-for="(record, index) in records"
@@ -223,11 +226,11 @@ async function copyAddress() {
             v-if="!records.length"
             class="deposit-empty"
           >
-            暂无数据
+            {{ $t('text066') }}
           </div>
           <p class="deposit-footnote">
-            * 仅展示最近10条记录，如需更多记录，请查看
-            <a href="/bge/hk/zh-CN/user/report/wallet">存取款记录</a>
+            * {{ $t('recordsFootnote') }}
+            <a href="/bge/hk/zh-CN/user/report/wallet">{{ $t('recordsLink') }}</a>
           </p>
         </section>
       </main>

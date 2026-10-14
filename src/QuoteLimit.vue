@@ -1,5 +1,6 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
+import { tr } from './i18n'
 import Footer from './Footer.vue'
 
 const changes = [
@@ -7,65 +8,55 @@ const changes = [
   ['恢复额度', '数字货币卖出成法币（如BTC/USD，ETH/HKD）', '委托成交'],
   ['恢复额度', '撤销法币购买数字货币(如BTC/USD，ETH/HKD)的委托单', '委托撤销'],
 ]
-const holders = [
-  ['总共', '1,500,000,000.00 HKD'],
-  ['已用 0%', '0.00 HKD'],
-  ['剩余', '1,500,000,000.00 HKD'],
-]
-const position = [
-  ['总共', '3,000,000,000.00 HKD'],
-  ['已用 100%', '2,059,268,000,953.32 HKD'],
-  ['剩余', '超出 2,056,268,000,953.32 HKD'],
-]
 </script>
 
 <template>
   <div class="user-page quote-page">
     <SiteHeader active="assets" />
     <main class="quote-main">
-      <h1>账户持仓说明</h1>
+      <h1>{{ $t('quotaTitle') }}</h1>
       <div class="quote-columns">
         <div class="quote-body">
-          <h2>持仓限额说明</h2>
+          <h2>{{ $t('quotaHoldTitle') }}</h2>
           <ol>
-            <li>仓位持仓限额是根据您在身份认证(KYC)验证期间提交的资产证明和风险评估的结果而确定的数值。这是您可以在您的账户中持有的虚拟资产的最大值。剩余仓位限制是您可以使用法定货币购买的账户中虚拟资产的剩余价值。当您持有的虚拟资产价值超过仓位限制时，您可能不再能够使用 HKBGE 以法定货币购买虚拟资产，但仍然可以进行出售操作。</li>
-            <li>仅法定货币交易对的购买受到仓位限制。虚拟资产交易对之间的买卖（例如BTC/USDC）不受限制，每天的仓位限制恢复不会超过每日交易限制。</li>
-            <li>虚拟资产的存款入账价值将被计算为已使用的仓位限制，而虚拟资产成功提款价值将被视为恢复已使用的仓位限制。</li>
-            <li>如果仓位限制剩余为零，或者客户希望申请更大的限制，您可能需要联系我们，并相应提供更多的资产证明。</li>
+            <li>{{ $t('quotaHoldBody1') }}</li>
+            <li>{{ $t('quotaHoldBody2') }}</li>
+            <li>{{ $t('quotaHoldBody3') }}</li>
+            <li>{{ $t('quotaHoldBody4') }}</li>
           </ol>
 
-          <h2>每日交易限额说明</h2>
+          <h2>{{ $t('quotaDailyTitle') }}</h2>
           <ol>
-            <li>每日交易限制（UTC+8时区，00:00-23:59:59）是您每天可以用法定货币购买虚拟资产的价值。这个价值每天在00:00时重置，额度为持仓限额的一半。</li>
-            <li>以下行为会使用/恢复您的每日交易限额</li>
+            <li>{{ $t('quotaDailyBody1') }}</li>
+            <li>{{ $t('quotaDailyBody2') }}</li>
           </ol>
           <table class="quote-table">
             <thead>
-              <tr><th>额度变化</th><th>操作</th><th>触发条件</th></tr>
+              <tr><th>{{ $t('quotaChange') }}</th><th>{{ $t('quotaAction') }}</th><th>{{ $t('quotaTrigger') }}</th></tr>
             </thead>
             <tbody>
               <tr
                 v-for="row in changes"
                 :key="row[1]"
               >
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
+                <td>{{ tr(row[0]) }}</td>
+                <td>{{ tr(row[1]) }}</td>
+                <td>{{ tr(row[2]) }}</td>
               </tr>
             </tbody>
           </table>
 
-          <h2>每日交易额度变动记录</h2>
+          <h2>{{ $t('quotaRecordsTitle') }}</h2>
           <table class="quote-table quote-records">
             <thead>
               <tr>
-                <th>时间</th><th>变动类型</th><th>操作</th><th>交易对</th><th>变动金额(HKD)</th><th>剩余金额(HKD)</th>
+                <th>{{ $t('text313') }}</th><th>{{ $t('quotaChangeType') }}</th><th>{{ $t('quotaAction') }}</th><th>{{ $t('text247') }}</th><th>{{ $t('quotaChangeAmount') }}</th><th>{{ $t('quotaLeftAmount') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>2026-09-01 17:15:03</td>
-                <td>每日恢复额度</td>
+                <td>{{ tr('每日恢复额度') }}</td>
                 <td>—</td>
                 <td>—</td>
                 <td class="positive">+1,500,000,000.00</td>
@@ -80,36 +71,42 @@ const position = [
 
         <div class="quote-aside">
           <section class="quote-card">
-            <h3>风险评测</h3>
+            <h3>{{ $t('quotaRiskTitle') }}</h3>
             <dl>
               <div>
-                <dt>风险等级</dt>
-                <dd>极高风险承受能力 <span class="quote-bars"><i /><i /><i /><i /><i /></span></dd>
+                <dt>{{ $t('quotaRiskLevel') }}</dt>
+                <dd>{{ $t('assetRiskLevel') }} <span class="quote-bars"><i /><i /><i /><i /><i /></span></dd>
               </div>
-              <div><dt>测评时间</dt><dd>2026-08-18</dd></div>
+              <div><dt>{{ $t('quotaAssessedAt') }}</dt><dd>2026-08-18</dd></div>
             </dl>
-            <p class="quote-note">账户限额取决于您的风险测评等级和流动资产净值</p>
+            <p class="quote-note">{{ $t('quotaRiskNote') }}</p>
           </section>
           <section class="quote-card">
-            <h3>帐户限额</h3>
-            <p class="quote-meter-title">当日交易限额</p>
+            <h3>{{ $t('assetQuota') }}</h3>
+            <p class="quote-meter-title">{{ $t('quotaDailyLimit') }}</p>
             <span class="quote-meter"><i style="width: 0" /></span>
             <dl>
-              <div
-                v-for="row in holders"
-                :key="row[0]"
-              >
-                <dt>{{ row[0] }}</dt><dd>{{ row[1] }}</dd>
+              <div>
+                <dt>{{ $t('quotaTotal') }}</dt><dd>1,500,000,000.00 HKD</dd>
+              </div>
+              <div>
+                <dt>{{ $t('text266') }} 0%</dt><dd>0.00 HKD</dd>
+              </div>
+              <div>
+                <dt>{{ $t('quotaLeft') }}</dt><dd>1,500,000,000.00 HKD</dd>
               </div>
             </dl>
-            <p class="quote-meter-title">账户持仓额度</p>
+            <p class="quote-meter-title">{{ $t('quotaPositionLimit') }}</p>
             <span class="quote-meter filled"><i style="width: 100%" /></span>
             <dl>
-              <div
-                v-for="row in position"
-                :key="row[0]"
-              >
-                <dt>{{ row[0] }}</dt><dd :class="{ over: row[1].startsWith('超出') }">{{ row[1] }}</dd>
+              <div>
+                <dt>{{ $t('quotaTotal') }}</dt><dd>3,000,000,000.00 HKD</dd>
+              </div>
+              <div>
+                <dt>{{ $t('text266') }} 100%</dt><dd>2,059,268,000,953.32 HKD</dd>
+              </div>
+              <div>
+                <dt>{{ $t('quotaLeft') }}</dt><dd class="over">{{ $t('assetQuotaOver') }} 2,056,268,000,953.32 HKD</dd>
               </div>
             </dl>
           </section>

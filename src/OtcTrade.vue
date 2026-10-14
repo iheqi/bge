@@ -2,6 +2,7 @@
 import SiteHeader from './SiteHeader.vue'
 import Footer from './Footer.vue'
 import { computed, ref } from 'vue'
+import { formatCell } from './i18n'
 import { Calendar, Close, UploadFilled } from '@element-plus/icons-vue'
 
 const tab = ref('intent')
@@ -70,31 +71,31 @@ function cancelOrder(order) { order.status = '已撤单' }
       <section class="otc-trade-box">
         <div class="otc-trade-head">
           <h1>{{ $t('text291') }}</h1>
-          <button class="otc-primary" @click="showForm = true">下单</button>
+          <button class="otc-primary" @click="showForm = true">{{ $t('otcOrderBtn') }}</button>
         </div>
         <div class="sub-tabs">
           <span :class="{ active: tab === 'intent' }" @click="tab = 'intent'">{{ $t('text317') }}</span>
           <span :class="{ active: tab === 'match' }" @click="tab = 'match'">{{ $t('text318') }}</span>
         </div>
         <div class="filters">
-          <el-select v-model="filterPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="filterStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待成交" value="待成交" /><el-option label="已撤单" value="已撤单" /></el-select><el-date-picker v-model="filterRange" class="date-picker" type="daterange" value-format="YYYY-MM-DD" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" aria-label="日期范围" /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button><button @click="resetFilters">{{ $t('text299') }}</button>
+          <el-select v-model="filterPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="filterStatus" class="filter-select" :aria-label="$t('text063')"><el-option :label="$t('otcAllStatus')" value="all" /><el-option :label="$t('recordPending')" value="待成交" /><el-option :label="$t('recordCancelled')" value="已撤单" /></el-select><el-date-picker v-model="filterRange" class="date-picker" type="daterange" value-format="YYYY-MM-DD" range-separator="-" :start-placeholder="$t('otcStartDate')" :end-placeholder="$t('otcEndDate')" :aria-label="$t('otcStartDate') + ' - ' + $t('otcEndDate')" /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button><button @click="resetFilters">{{ $t('text299') }}</button>
         </div>
         <el-table
           v-if="tab === 'intent'"
           :data="visibleOrders"
           class="report-table"
           :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
-          empty-text="暂无数据"
+          :empty-text="$t('text066')"
         >
           <el-table-column prop="time" :label="$t('text313')" min-width="170" align="center" />
           <el-table-column prop="pair" :label="$t('text247')" min-width="120" align="center" />
-          <el-table-column prop="side" :label="$t('text302')" min-width="100" align="center" />
+          <el-table-column :formatter="formatCell" prop="side" :label="$t('text302')" min-width="100" align="center" />
           <el-table-column prop="quantity" :label="$t('text323')" min-width="150" align="center" />
           <el-table-column prop="price" :label="$t('text407')" min-width="150" align="center" />
-          <el-table-column prop="validity" label="有效期（小时）" min-width="140" align="center" />
-          <el-table-column prop="status" :label="$t('text063')" min-width="100" align="center" />
+          <el-table-column prop="validity" :label="$t('otcValidityHours')" min-width="140" align="center" />
+          <el-table-column :formatter="formatCell" prop="status" :label="$t('text063')" min-width="100" align="center" />
           <el-table-column :label="$t('text065')" width="100" align="center">
-            <template #default="{ row }"><button v-if="row.status === '待成交'" class="otc-cancel" @click="cancelOrder(row)">撤单</button><span v-else>--</span></template>
+            <template #default="{ row }"><button v-if="row.status === '待成交'" class="otc-cancel" @click="cancelOrder(row)">{{ $t('otcCancelOrder') }}</button><span v-else>--</span></template>
           </el-table-column>
         </el-table>
         <el-table
@@ -102,18 +103,18 @@ function cancelOrder(order) { order.status = '已撤单' }
           :data="matchOrders"
           class="report-table"
           :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
-          empty-text="暂无数据"
+          :empty-text="$t('text066')"
         >
           <el-table-column prop="time" :label="$t('text313')" min-width="170" align="center" />
-          <el-table-column prop="side" :label="$t('text302')" min-width="100" align="center" />
-          <el-table-column prop="pay" label="支付金额" min-width="130" align="center" />
-          <el-table-column prop="gain" label="获得金额" min-width="140" align="center" />
-          <el-table-column prop="fee" label="手续费" min-width="120" align="center" />
-          <el-table-column prop="dealPrice" label="成交单价" min-width="120" align="center" />
+          <el-table-column :formatter="formatCell" prop="side" :label="$t('text302')" min-width="100" align="center" />
+          <el-table-column prop="pay" :label="$t('otcPayAmount')" min-width="130" align="center" />
+          <el-table-column prop="gain" :label="$t('otcGainAmount')" min-width="140" align="center" />
+          <el-table-column prop="fee" :label="$t('withdrawFeeLabel')" min-width="120" align="center" />
+          <el-table-column prop="dealPrice" :label="$t('otcDealPrice')" min-width="120" align="center" />
           <el-table-column prop="maxPrice" :label="$t('text407')" min-width="140" align="center" />
-          <el-table-column prop="orderType" label="委托类型" min-width="120" align="center" />
-          <el-table-column prop="validity" label="有效期（小时）" min-width="130" align="center" />
-          <el-table-column prop="status" :label="$t('text063')" min-width="100" align="center" />
+          <el-table-column :formatter="formatCell" prop="orderType" :label="$t('otcOrderType')" min-width="120" align="center" />
+          <el-table-column prop="validity" :label="$t('otcValidityHours')" min-width="130" align="center" />
+          <el-table-column :formatter="formatCell" prop="status" :label="$t('text063')" min-width="100" align="center" />
         </el-table>
         <div class="pager">‹　›</div>
       </section>

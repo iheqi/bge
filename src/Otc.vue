@@ -46,7 +46,7 @@ const faqs = [
             <h3>{{ $t('text215') }}</h3>
           </article>
         </div>
-        <div class="otc-actions"><button class="contact-btn">{{ $t('text216') }}</button><a class="otc-trade-btn" href="/bge/hk/zh-CN/otc/trade">去交易</a></div>
+        <div class="otc-actions"><button class="contact-btn">{{ $t('text216') }}</button><a class="otc-trade-btn" href="/bge/hk/zh-CN/otc/trade">{{ $t('otcGoTrade') }}</a></div>
       </section>
       <section class="steps-section">
         <h2>{{ $t('text217') }}</h2>

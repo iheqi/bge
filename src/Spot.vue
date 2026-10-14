@@ -5,7 +5,7 @@ import SiteHeader from './SiteHeader.vue'
 <template>
   <div class="spot-page">
     <SiteHeader active="spot" />
-    <main class="spot-screenshot"><img src="/images/spot-trading-demo.png" alt="现货交易页面" /></main>
+    <main class="spot-screenshot"><img src="/images/spot-trading-demo.png" :alt="$t('spotPageAlt')" /></main>
   </div>
 </template>
 

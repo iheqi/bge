@@ -1,6 +1,6 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
-import { tr } from './i18n'
+import { formatCell, tr } from './i18n'
 import { Tickets } from '@element-plus/icons-vue'
 import { computed, ref, watch } from 'vue'
 const path = window.location.pathname
@@ -153,12 +153,12 @@ const columns = () => {
               ><span :class="{ active: spotTab === 'deals' }" @click="spotTab = 'deals'">{{ $t('text296') }}</span>
             </div>
             <div v-if="spotTab !== 'deals'" class="filters">
-              <el-select v-model="spotPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotOrderType" class="filter-select" aria-label="订单类型"><el-option label="全部订单类型" value="all" /><el-option label="限价单" value="limit" /><el-option label="市价单" value="market" /></el-select
+              <el-select v-model="spotPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotOrderType" class="filter-select" :aria-label="$t('otcOrderType')"><el-option :label="$t('allOrderTypes')" value="all" /><el-option label="限价单" value="limit" /><el-option label="市价单" value="market" /></el-select
               ><button class="yellow">{{ $t('text283') }}</button
               ><button>{{ $t('text299') }}</button>
             </div>
             <div v-else class="filters">
-              <el-select v-model="spotPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotSide" class="filter-select" aria-label="买卖方向"><el-option label="全部方向" value="all" /><el-option label="买入" value="buy" /><el-option label="卖出" value="sell" /></el-select><button class="yellow">{{ $t('text283') }}</button><button>{{ $t('text299') }}</button>
+              <el-select v-model="spotPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /><el-option label="BTC/USD" value="BTC/USD" /></el-select><el-select v-model="spotSide" class="filter-select" :aria-label="$t('text302')"><el-option :label="$t('allSides')" value="all" /><el-option label="买入" value="buy" /><el-option label="卖出" value="sell" /></el-select><button class="yellow">{{ $t('text283') }}</button><button>{{ $t('text299') }}</button>
             </div>
             <div v-if="spotTab === 'current'" class="table-head spot-head">
               <span>{{ $t('text300') }}</span
@@ -172,10 +172,10 @@ const columns = () => {
               ><span>{{ $t('text065') }}</span>
             </div>
             <div v-else-if="spotTab === 'history'" class="table-head spot-head">
-              <span>委托时间</span><span>交易对</span><span>订单类型</span><span>买卖方向</span><span>委托价格</span><span>委托数量</span><span>成交均价</span><span>成交数量</span><span>成交金额</span><span>成交状态</span><span>详情</span>
+              <span>{{ tr('委托时间') }}</span><span>{{ tr('交易对') }}</span><span>{{ tr('订单类型') }}</span><span>{{ tr('买卖方向') }}</span><span>{{ tr('委托价格') }}</span><span>{{ tr('委托数量') }}</span><span>{{ tr('成交均价') }}</span><span>{{ tr('成交数量') }}</span><span>{{ tr('成交金额') }}</span><span>{{ tr('成交状态') }}</span><span>{{ tr('详情') }}</span>
             </div>
             <div v-else class="table-head spot-head">
-              <span>成交时间</span><span>交易对</span><span>买卖方向</span><span>成交价格</span><span>成交数量</span><span>成交金额</span><span>手续费</span><span>成交角色</span>
+              <span>{{ tr('成交时间') }}</span><span>{{ tr('交易对') }}</span><span>{{ tr('买卖方向') }}</span><span>{{ tr('成交价格') }}</span><span>{{ tr('成交数量') }}</span><span>{{ tr('成交金额') }}</span><span>{{ tr('手续费') }}</span><span>{{ tr('成交角色') }}</span>
             </div></template
           ><template v-else-if="type === 'wallet'"
             ><div class="sub-tabs">
@@ -185,15 +185,15 @@ const columns = () => {
               ><span :class="{ active: walletTab === 'quick' }" @click="walletTab = 'quick'">{{ $t('text310') }}</span>
             </div>
             <div class="filters">
-              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletDirection" aria-label="存取款类型" class="filter-select">
+              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletDirection" :aria-label="$t('walletDirection')" class="filter-select">
                 <el-option :label="tr('存款')" value="deposit" />
                 <el-option :label="tr('取款')" value="withdraw" />
               </el-select>
-              <el-select v-model="walletCoin" aria-label="币种" class="filter-select">
+              <el-select v-model="walletCoin" :aria-label="$t('text345')" class="filter-select">
                 <el-option :label="tr('全部币种')" value="all" />
                 <el-option v-for="coin in walletCoins" :key="coin" :label="coin" :value="coin" />
               </el-select>
-              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletStatus" aria-label="状态" class="filter-select">
+              <el-select v-if="['fiat', 'digital'].includes(walletTab)" v-model="walletStatus" :aria-label="$t('text063')" class="filter-select">
                 <el-option :label="tr('全部状态')" value="all" />
                 <el-option :label="tr('处理中')" value="pending" />
                 <el-option :label="tr('已完成')" value="completed" />
@@ -229,7 +229,7 @@ const columns = () => {
               ><span :class="{ active: otcTab === 'match' }" @click="otcTab = 'match'">{{ $t('text318') }}</span>
             </div>
             <div class="filters">
-              <el-select v-model="otcPair" class="filter-select" aria-label="交易对"><el-option label="全部交易对" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /></el-select><el-select v-model="otcStatus" class="filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="待处理" value="pending" /><el-option label="已完成" value="completed" /><el-option label="已取消" value="cancelled" /></el-select
+              <el-select v-model="otcPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /></el-select><el-select v-model="otcStatus" class="filter-select" :aria-label="$t('text063')"><el-option :label="$t('otcAllStatus')" value="all" /><el-option :label="$t('statusPending')" value="pending" /><el-option label="已完成" value="completed" /><el-option :label="$t('statusCancelled')" value="cancelled" /></el-select
               ><el-date-picker
                 v-model="otcRange"
                 class="date-picker"
@@ -248,7 +248,7 @@ const columns = () => {
               ><span>{{ $t('text321') }}</span
               ><span>{{ $t('text322') }}</span
               ><span>{{ $t('text323') }}</span
-              ><span>最高购买单价</span><span>委托类型</span><span>有效期（小时）</span><span>{{ $t('text063') }}</span>
+              ><span>{{ tr('最高购买单价') }}</span><span>{{ tr('委托类型') }}</span><span>{{ tr('有效期（小时）') }}</span><span>{{ $t('text063') }}</span>
             </div></template
           ><template v-else
             ><div class="sub-tabs">
@@ -263,8 +263,8 @@ const columns = () => {
               ><span>{{ $t('text065') }}</span>
             </div></template
           >
-          <el-table :data="mockRows.map(row => Object.fromEntries(row.map((cell, index) => [String(index), cell])))" class="report-table" :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }" empty-text="暂无数据">
-            <el-table-column v-for="(column, index) in columns()" :key="column" :prop="String(index)" :label="column" min-width="130" align="center" />
+          <el-table :data="mockRows.map(row => Object.fromEntries(row.map((cell, index) => [String(index), cell])))" class="report-table" :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }" :empty-text="$t('text066')">
+            <el-table-column v-for="(column, index) in columns()" :key="column" :formatter="formatCell" :prop="String(index)" :label="tr(column)" min-width="130" align="center" />
           </el-table>
           <div class="pager">‹　›</div>
         </section>

@@ -74,7 +74,7 @@ const usageCodes = (usage) =>
               <a class="add-btn" href="/bge/hk/zh-CN/user/payment/crypto/add">{{ $t('text279') }}</a>
             </div>
             <div class="wallet-filters">
-              <el-select v-model="walletFilterCoin" class="wallet-filter-select" aria-label="币种"><el-option label="全部币种" value="all" /><el-option label="ETH" value="ETH" /><el-option label="BTC" value="BTC" /><el-option label="USDT" value="USDT" /><el-option label="USDC" value="USDC" /></el-select><el-select v-model="walletFilterStatus" class="wallet-filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option label="已认证" value="verified" /><el-option label="未认证" value="unverified" /><el-option label="已过期" value="expired" /></el-select
+              <el-select v-model="walletFilterCoin" class="wallet-filter-select" aria-label="币种"><el-option label="全部币种" value="all" /><el-option label="ETH" value="ETH" /><el-option label="BTC" value="BTC" /><el-option label="USDT" value="USDT" /><el-option label="USDC" value="USDC" /></el-select><el-select v-model="walletFilterStatus" class="wallet-filter-select" aria-label="状态"><el-option label="全部状态" value="all" /><el-option :label="$t('statusVerified')" value="verified" /><el-option :label="$t('statusUnverified')" value="unverified" /><el-option :label="$t('statusExpired')" value="expired" /></el-select
               ><input :placeholder="$t('text282')" /><button class="search-btn">
                 {{ $t('text283') }}
               </button>
@@ -91,7 +91,7 @@ const usageCodes = (usage) =>
             <div v-if="!walletRecord" class="payment-empty">
               ♨<small>{{ $t('text066') }}</small>
             </div>
-            <div v-else class="wallet-saved-row"><span>{{ walletRecord.address.slice(0, 10) }}...{{ walletRecord.address.slice(-8) }}</span><span>{{ walletRecord.network }}</span><span>{{ walletRecord.remark }} ✎</span><span>{{ walletRecord.coin }}</span><span class="wallet-unverified">{{ walletRecord.status }}</span><span>{{ walletRecord.expires }}</span><span><button class="wallet-action">认证</button><button class="wallet-delete">删除</button></span></div></template
+            <div v-else class="wallet-saved-row"><span>{{ walletRecord.address.slice(0, 10) }}...{{ walletRecord.address.slice(-8) }}</span><span>{{ walletRecord.network }}</span><span>{{ walletRecord.remark }} ✎</span><span>{{ walletRecord.coin }}</span><span class="wallet-unverified">{{ tr(walletRecord.status) }}</span><span>{{ walletRecord.expires }}</span><span><button class="wallet-action">{{ $t('walletVerifyBtn') }}</button><button class="wallet-delete">{{ $t('text182') }}</button></span></div></template
           >
         </section>
       </main>

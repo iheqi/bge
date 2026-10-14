@@ -43,15 +43,15 @@ const submitEmail = () => { emailSubmitted.value = true }
     <div v-if="bindPhone" class="user-layout">
       <UserSidebar />
       <main class="phone-binding">
-      <div class="binding-breadcrumb"><b>账户安全</b><span>/</span><span>绑定手机</span></div>
+      <div class="binding-breadcrumb"><b>{{ $t('text010') }}</b><span>/</span><span>{{ $t('secBindPhone') }}</span></div>
       <form class="binding-form" @submit.prevent="confirmBind">
-        <label>手机</label>
-        <div class="phone-input" :class="{ invalid: !phone && submitted }"><span>✤</span><b>+852</b><input v-model="phone" type="tel" placeholder="请输入手机号" /></div>
-        <small v-if="!phone && submitted">请输入手机号</small>
-        <label><i>*</i>验证码</label>
-        <div class="phone-input" :class="{ invalid: !code && submitted }"><input v-model="code" placeholder="请输入验证码" /><button type="button" @click="sendCode">获取验证码</button></div>
-        <small v-if="!code && submitted">请输入验证码</small>
-        <button class="binding-submit" type="submit">确认</button>
+        <label>{{ $t('secPhone') }}</label>
+        <div class="phone-input" :class="{ invalid: !phone && submitted }"><span>✤</span><b>+852</b><input v-model="phone" type="tel" :placeholder="$t('secPhonePlaceholder')" /></div>
+        <small v-if="!phone && submitted">{{ $t('secPhonePlaceholder') }}</small>
+        <label><i>*</i>{{ $t('secCode') }}</label>
+        <div class="phone-input" :class="{ invalid: !code && submitted }"><input v-model="code" :placeholder="$t('secCodePlaceholder')" /><button type="button" @click="sendCode">{{ $t('secGetCode') }}</button></div>
+        <small v-if="!code && submitted">{{ $t('secCodePlaceholder') }}</small>
+        <button class="binding-submit" type="submit">{{ $t('apiConfirm') }}</button>
       </form>
       </main>
     </div>
@@ -59,25 +59,25 @@ const submitEmail = () => { emailSubmitted.value = true }
       <UserSidebar />
       <main class="security-main">
         <section v-if="resetPage" class="reset-password-page">
-          <div class="reset-breadcrumb"><b>账户安全</b><span>/</span><span>更改登录密码</span></div>
+          <div class="reset-breadcrumb"><b>账户安全</b><span>/</span><span>{{ $t('secChangePwd') }}</span></div>
           <div class="password-form">
-            <div class="password-warning">ⓘ <span>为保障您的账户安全，更改密码后24小时内禁止出金或提币</span></div>
+            <div class="password-warning">ⓘ <span>{{ $t('secPwdWarning') }}</span></div>
             <form @submit.prevent="submitPassword">
-              <label><i>*</i>旧登录密码<div class="password-input" :class="{ invalid: passwordSubmitted && !oldPassword }"><input v-model="oldPassword" :type="showOldPassword ? 'text' : 'password'" placeholder="请输入旧登录密码" /><button type="button" @click="showOldPassword = !showOldPassword">◉</button></div><small v-if="passwordSubmitted && !oldPassword">请输入旧密码</small></label>
-              <label>新登录密码<div class="password-input"><input v-model="newPassword" :type="showNewPassword ? 'text' : 'password'" placeholder="请输入新登录密码" /><button type="button" @click="showNewPassword = !showNewPassword">◉</button></div></label>
-              <label>确认新登录密码<div class="password-input"><input v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" placeholder="请确认新登录密码" /><button type="button" @click="showConfirmPassword = !showConfirmPassword">◉</button></div></label>
-              <button class="password-submit" type="submit">确认</button>
+              <label><i>*</i>{{ $t('secOldPwd') }}<div class="password-input" :class="{ invalid: passwordSubmitted && !oldPassword }"><input v-model="oldPassword" :type="showOldPassword ? 'text' : 'password'" :placeholder="$t('secOldPwdPlaceholder')" /><button type="button" @click="showOldPassword = !showOldPassword">◉</button></div><small v-if="passwordSubmitted && !oldPassword">{{ $t('secOldPwdRequired') }}</small></label>
+              <label>{{ $t('secNewPwd') }}<div class="password-input"><input v-model="newPassword" :type="showNewPassword ? 'text' : 'password'" :placeholder="$t('secNewPwdPlaceholder')" /><button type="button" @click="showNewPassword = !showNewPassword">◉</button></div></label>
+              <label>{{ $t('secConfirmPwd') }}<div class="password-input"><input v-model="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" :placeholder="$t('secConfirmPwdPlaceholder')" /><button type="button" @click="showConfirmPassword = !showConfirmPassword">◉</button></div></label>
+              <button class="password-submit" type="submit">{{ $t('apiConfirm') }}</button>
             </form>
           </div>
         </section>
         <section v-else-if="bindEmailPage" class="reset-password-page email-page">
-          <div class="reset-breadcrumb"><b>账户安全</b><span>/</span><span>更改邮箱</span></div>
+          <div class="reset-breadcrumb"><b>账户安全</b><span>/</span><span>{{ $t('text028') }}</span></div>
           <div class="password-form">
-            <div class="password-warning">ⓘ <span>为保障您的账户安全，更改邮箱后24小时内禁止出金或提币</span></div>
+            <div class="password-warning">ⓘ <span>{{ $t('secEmailWarning') }}</span></div>
             <form @submit.prevent="submitEmail">
-              <label>邮箱地址<div class="password-input" :class="{ invalid: emailSubmitted && !email }"><input v-model="email" type="email" placeholder="邮箱地址" /></div><small v-if="emailSubmitted && !email">请输入邮箱地址</small></label>
-              <label><i>*</i>验证码<div class="password-input" :class="{ invalid: emailSubmitted && !emailCode }"><input v-model="emailCode" placeholder="请输入验证码" /><button type="button" @click="sendEmailCode">获取验证码</button></div><small v-if="emailSubmitted && !emailCode">请输入验证码</small></label>
-              <button class="password-submit" type="submit">确认</button>
+              <label>{{ $t('secEmailAddress') }}<div class="password-input" :class="{ invalid: emailSubmitted && !email }"><input v-model="email" type="email" :placeholder="$t('secEmailAddress')" /></div><small v-if="emailSubmitted && !email">{{ $t('secEmailRequired') }}</small></label>
+              <label><i>*</i>验证码<div class="password-input" :class="{ invalid: emailSubmitted && !emailCode }"><input v-model="emailCode" placeholder="请输入验证码" /><button type="button" @click="sendEmailCode">获取验证码</button></div><small v-if="emailSubmitted && !emailCode">{{ $t('secCodePlaceholder') }}</small></label>
+              <button class="password-submit" type="submit">{{ $t('apiConfirm') }}</button>
             </form>
           </div>
         </section>

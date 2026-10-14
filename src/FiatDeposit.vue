@@ -4,6 +4,9 @@ import UserSidebar from './UserSidebar.vue'
 import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
+import { i18n, tr } from './i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 import { CopyDocument, InfoFilled, UploadFilled, WarningFilled } from '@element-plus/icons-vue'
 
 const coins = [
@@ -36,10 +39,10 @@ const requested = decodeURIComponent(window.location.pathname.split('/deposit/')
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'HKD')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 const bankRows = computed(() => [
-  { label: '收款人名称', value: active.value.account.holder },
-  { label: '银行名称', value: active.value.account.bank },
-  { label: '银行账号', value: active.value.account.number },
-  { label: '收款银行地址', value: active.value.account.branch },
+  { label: 'depRow1', value: active.value.account.holder },
+  { label: 'depRow2', value: active.value.account.bank },
+  { label: 'depRow3', value: active.value.account.number },
+  { label: 'depRow4', value: active.value.account.branch },
 ])
 const bank = ref(JSON.parse(localStorage.getItem('bge-bank-record') || 'null'))
 const records = ref([])
@@ -63,7 +66,7 @@ async function copyValue(value) {
   } catch {
     /* The demo keeps working when the clipboard is unavailable. */
   }
-  ElMessage.success('已复制')
+  ElMessage.success(t('depCopied'))
 }
 function pickFile() {
   fileInput.value?.click()
@@ -75,10 +78,10 @@ function onFile(event) {
 }
 function submit() {
   const value = Number(amount.value)
-  if (!bank.value) return ElMessage.warning(`暂无${coin.value}银行卡，请先添加`)
-  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning('请输入存款金额')
-  if (value < active.value.min) return ElMessage.warning(`每次存款最少为 ${active.value.min}.00 ${coin.value}`)
-  if (!proofName.value) return ElMessage.warning('请上传已汇款凭证')
+  if (!bank.value) return ElMessage.warning(t('fiatNoCard', { coin: coin.value }))
+  if (!Number.isFinite(value) || value <= 0) return ElMessage.warning(t('depAmountPlaceholder'))
+  if (value < active.value.min) return ElMessage.warning(t('depMinMessage', { min: `${active.value.min}.00`, coin: coin.value }))
+  if (!proofName.value) return ElMessage.warning(t('depProofRequired'))
   records.value.unshift({
     time: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-'),
     coin: coin.value,
@@ -89,7 +92,7 @@ function submit() {
   })
   amount.value = ''
   proofName.value = ''
-  ElMessage.success('存款请求已提交')
+  ElMessage.success(t('depSubmitted'))
 }
 </script>
 
@@ -100,7 +103,7 @@ function submit() {
       <UserSidebar />
       <main class="dep-main">
         <section class="dep-box">
-          <h1 class="dep-title">法币存款</h1>
+          <h1 class="dep-title">{{ $t('fiatDepositTitle') }}</h1>
           <div class="dep-columns">
             <div class="dep-step">
               <span class="dep-badge">Step 1</span>
@@ -145,11 +148,11 @@ function submit() {
                   </text>
                 </svg>
                 <div>
-                  <b>请将您要存款的金额汇款至下方公司收款银行卡</b>
-                  <small>汇款银行卡必须为本人且在交易所已绑定,否则不予上账</small>
+                  <b>{{ $t('depHint1') }}</b>
+                  <small>{{ $t('depHint1Sub') }}</small>
                 </div>
               </div>
-              <p class="dep-label dep-coin-label">选择存款币种</p>
+              <p class="dep-label dep-coin-label">{{ $t('depositCoin') }}</p>
               <el-select
                 :model-value="coin"
                 class="dep-select"
@@ -167,19 +170,19 @@ function submit() {
 
               <div class="dep-receipt">
                 <p class="dep-receipt-warn">
-                  <el-icon><WarningFilled /></el-icon>请核对存款币种后汇款至下方公司收款银行卡
+                  <el-icon><WarningFilled /></el-icon>{{ $t('depWarn') }}
                 </p>
                 <dl>
                   <div
                     v-for="row in bankRows"
                     :key="row.label"
                   >
-                    <dt>{{ row.label }}</dt>
+                    <dt>{{ $t(row.label) }}</dt>
                     <dd>
                       {{ row.value }}<button
                         class="dep-copy"
                         type="button"
-                        :aria-label="`复制${row.label}`"
+                        :aria-label="`${$t('depCopy')}${$t(row.label)}`"
                         @click="copyValue(row.value)"
                       >
                         <el-icon><CopyDocument /></el-icon>
@@ -187,15 +190,15 @@ function submit() {
                     </dd>
                   </div>
                 </dl>
-                <p class="dep-receipt-min">每次存款 最少为 {{ active.min }}.00 {{ coin }}</p>
+                <p class="dep-receipt-min">{{ $t('depMin', { min: `${active.min}.00`, coin }) }}</p>
               </div>
 
               <div class="dep-cards-head">
-                <p class="dep-label">选择本次汇款银行卡</p>
+                <p class="dep-label">{{ $t('depChooseCard') }}</p>
                 <a
                   class="dep-link"
                   href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add"
-                  >去添加银行卡</a
+                  >{{ $t('fiatAddCard') }}</a>
                 >
               </div>
               <div
@@ -265,7 +268,7 @@ function submit() {
                     fill="#fff"
                   />
                 </svg>
-                <p>暂无{{ coin }}银行卡，请先添加</p>
+                <p>{{ $t('fiatNoCard', { coin }) }}</p>
               </div>
             </div>
 
@@ -299,34 +302,34 @@ function submit() {
                   />
                 </svg>
                 <div>
-                  <b>汇款后,请填写存款申请单,上传汇款凭证</b>
-                  <small>请仔细阅读存款说明,我们将在收到汇款后第一时间给您上账</small>
+                  <b>{{ $t('depHint2') }}</b>
+                  <small>{{ $t('depHint2Sub') }}</small>
                 </div>
               </div>
-              <p class="dep-label dep-amount-label">存款金额</p>
+              <p class="dep-label dep-amount-label">{{ $t('depositAmount') }}</p>
               <label class="dep-input-line">
                 <input
                   v-model="amount"
-                  placeholder="请输入存款金额"
+                  :placeholder="$t('depAmountPlaceholder')"
                 /><b>{{ coin }}</b>
               </label>
-              <p class="dep-note">* 转账金额与实际汇款金额必须保持一致，否则不予入账</p>
+              <p class="dep-note">* {{ $t('depNote') }}</p>
 
-              <p class="dep-label dep-proof-label">上传已汇款凭证 <el-icon class="dep-proof-info"><InfoFilled /></el-icon></p>
+              <p class="dep-label dep-proof-label">{{ $t('depUploadProof') }} <el-icon class="dep-proof-info"><InfoFilled /></el-icon></p>
               <div class="dep-proof-actions">
                 <button
                   class="dep-proof-upload"
                   type="button"
                   @click="pickFile"
                 >
-                  上传凭证
+                  {{ $t('depUploadBtn') }}
                 </button>
                 <button
                   class="dep-proof-sample"
                   type="button"
                   @click="showSample = true"
                 >
-                  汇款凭证示例
+                  {{ $t('depSampleBtn') }}
                 </button>
               </div>
               <button
@@ -335,7 +338,7 @@ function submit() {
                 @click="pickFile"
               >
                 <el-icon><UploadFilled /></el-icon>
-                <span>拖拽或<br />点击上传</span>
+                <span>{{ $t('depDropzoneA') }}<br />{{ $t('depDropzoneB') }}</span>
               </button>
               <p
                 v-if="proofName"
@@ -346,7 +349,7 @@ function submit() {
                   type="button"
                   @click="proofName = ''"
                 >
-                  移除
+                  {{ $t('depRemove') }}
                 </button>
               </p>
               <input
@@ -362,7 +365,7 @@ function submit() {
                 type="button"
                 @click="submit"
               >
-                提交存款请求
+                {{ $t('depSubmit') }}
               </button>
             </div>
           </div>
@@ -370,27 +373,27 @@ function submit() {
           <section class="dep-doc">
             <header>
               <el-icon class="dep-doc-warn"><WarningFilled /></el-icon>
-              <h3>存款说明</h3>
+              <h3>{{ $t('depositNotes') }}</h3>
               <button
                 type="button"
                 @click="docsCollapsed = !docsCollapsed"
               >
-                {{ docsCollapsed ? '展开' : '收起' }}
+                {{ docsCollapsed ? $t('depExpand') : $t('depCollapse') }}
               </button>
             </header>
             <ul v-show="!docsCollapsed">
-              <li>汇款人必须为账户本人，且使用在交易所已绑定的银行卡，否则不予上账。</li>
-              <li>转账金额需与实际汇款金额完全一致，否则不予入账。</li>
-              <li>汇款后请及时提交存款申请并上传汇款凭证，我们将在收到汇款后第一时间为您上账。</li>
-              <li>到账时间：1-2 个工作日，具体以银行处理进度为准。</li>
-              <li>请务必确认电脑及浏览器安全，防止信息被篡改或泄露。</li>
+              <li>{{ $t('depDocNote1') }}</li>
+              <li>{{ $t('depDocNote2') }}</li>
+              <li>{{ $t('depDocNote3') }}</li>
+              <li>{{ $t('depDocNote4') }}</li>
+              <li>{{ $t('commonSecurityNote') }}</li>
             </ul>
           </section>
 
-          <h2 class="dep-records-title">存款记录</h2>
+          <h2 class="dep-records-title">{{ $t('depositRecords') }}</h2>
           <div class="dep-table-head">
             <span>{{ $t('text313') }}</span
-            ><span>法币</span><span>汇款金额</span><span>汇款银行卡</span><span>银行卡标签</span
+            ><span>{{ $t('text308') }}</span><span>{{ $t('depRemitColumn') }}</span><span>{{ $t('depRemitCard') }}</span><span>{{ $t('fiatCardTag') }}</span
             ><span>{{ $t('text063') }}</span><span>{{ $t('text065') }}</span>
           </div>
           <div
@@ -403,18 +406,18 @@ function submit() {
             ><span>{{ formatAmount(record.amount) }}</span
             ><span>{{ record.account }}</span
             ><span>{{ record.tag }}</span
-            ><span>{{ record.status }}</span
+            ><span>{{ tr(record.status) }}</span
             ><span>—</span>
           </div>
           <div
             v-if="!records.length"
             class="dep-empty"
           >
-            暂无数据
+            {{ $t('text066') }}
           </div>
           <p class="dep-footnote">
-            * 仅展示最近10条记录，如需更多记录，请查看
-            <a href="/bge/hk/zh-CN/user/report/wallet">存取款记录</a>
+            * {{ $t('recordsFootnote') }}
+            <a href="/bge/hk/zh-CN/user/report/wallet">{{ $t('recordsLink') }}</a>
           </p>
         </section>
       </main>
@@ -423,19 +426,19 @@ function submit() {
 
     <el-dialog
       v-model="showSample"
-      title="汇款凭证示例"
+      :title="$t('depSampleBtn')"
       width="420px"
     >
       <div class="dep-sample">
         <p class="dep-sample-title">{{ active.account.bank }}</p>
         <dl>
-          <div><dt>汇款日期</dt><dd>2026-10-13</dd></div>
-          <div><dt>汇款人</dt><dd>heqi**gic</dd></div>
-          <div><dt>收款账号</dt><dd>{{ active.account.number }}</dd></div>
-          <div><dt>汇款金额</dt><dd>{{ coin }} 10,000.00</dd></div>
-          <div><dt>流水号</dt><dd>SCB202610130001</dd></div>
+          <div><dt>{{ $t('depSampleDate') }}</dt><dd>2026-10-13</dd></div>
+          <div><dt>{{ $t('depSampleBy') }}</dt><dd>heqi**gic</dd></div>
+          <div><dt>{{ $t('depSampleAccount') }}</dt><dd>{{ active.account.number }}</dd></div>
+          <div><dt>{{ $t('depRemitColumn') }}</dt><dd>{{ coin }} 10,000.00</dd></div>
+          <div><dt>{{ $t('depSampleRef') }}</dt><dd>SCB202610130001</dd></div>
         </dl>
-        <p class="dep-sample-note">截图或电子回单均可，需清晰显示以上信息</p>
+        <p class="dep-sample-note">{{ $t('depSampleNote') }}</p>
       </div>
     </el-dialog>
   </div>

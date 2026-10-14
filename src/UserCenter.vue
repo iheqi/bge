@@ -188,12 +188,12 @@ function confirmTransfer() {
           </div><div v-if="!assets" class="dashboard-cards">
             <section class="dashboard-card activity-card">
               <header><h2>{{ $t('text047') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
-              <div class="activity-row"><span>OSX Chrome 154.0.0.0<small>2026-10-08 15:33:28</small></span><b>116.49.145.110<small>登录</small></b></div>
-              <div class="activity-row"><span>OSX Chrome 152.0.0.0<small>2026-09-23 15:55:22</small></span><b>116.49.145.110<small>登录</small></b></div>
+              <div class="activity-row"><span>OSX Chrome 154.0.0.0<small>2026-10-08 15:33:28</small></span><b>116.49.145.110<small>{{ tr('登录') }}</small></b></div>
+              <div class="activity-row"><span>OSX Chrome 152.0.0.0<small>2026-09-23 15:55:22</small></span><b>116.49.145.110<small>{{ tr('登录') }}</small></b></div>
             </section>
             <section class="dashboard-card security-card">
-              <header><h2>{{ $t('text010').replace('账户安全', '安全中心') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
-              <div class="security-grid"><a href="/bge/hk/zh-CN/user/security"><b>邮箱验证</b><small>更改邮箱</small></a><a href="/bge/hk/zh-CN/user/security"><b>手机验证</b><small class="warning">未绑定</small></a><a href="/bge/hk/zh-CN/user/security"><b>谷歌验证</b><small>更改GA</small></a><a href="/bge/hk/zh-CN/user/security"><b>登录密码</b><small>更改密码</small></a></div>
+              <header><h2>{{ $t('dashSecurityCenter') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
+              <div class="security-grid"><a href="/bge/hk/zh-CN/user/security"><b>{{ $t('dashEmailVerify') }}</b><small>{{ tr('更改邮箱') }}</small></a><a href="/bge/hk/zh-CN/user/security"><b>{{ $t('dashPhoneVerify') }}</b><small class="warning">{{ tr('未绑定') }}</small></a><a href="/bge/hk/zh-CN/user/security"><b>{{ $t('dashGaVerify') }}</b><small>{{ tr('更改GA') }}</small></a><a href="/bge/hk/zh-CN/user/security"><b>{{ tr('登录密码') }}</b><small>{{ tr('更改密码') }}</small></a></div>
             </section>
             <section class="dashboard-card quick-links">
               <a href="/bge/hk/zh-CN/user/api"><b>{{ $t('text013') }}</b><span>›</span></a>
@@ -209,22 +209,22 @@ function confirmTransfer() {
           </section>
           <div class="asset-panels">
             <section class="asset-panel risk-panel">
-              <h3>风险测评</h3>
+              <h3>{{ $t('assetRisk') }}</h3>
               <div class="risk-level">
-                <b>极高风险承受能力</b><span class="risk-bars"><i /><i /><i /><i /><i /></span>
+                <b>{{ $t('assetRiskLevel') }}</b><span class="risk-bars"><i /><i /><i /><i /><i /></span>
               </div>
               <p class="risk-date">2026-08-18</p>
             </section>
             <section class="asset-panel quota-panel">
               <header>
-                <h3>账户限额</h3>
-                <a href="/bge/hk/zh-CN/quote-limit">限额说明</a>
+                <h3>{{ $t('assetQuota') }}</h3>
+                <a href="/bge/hk/zh-CN/quote-limit">{{ $t('assetQuotaLink') }}</a>
               </header>
               <div class="quota-grid">
-                <div><b>HKD 3,000,000,000.00</b><small>持仓限额(累计)</small></div>
-                <div><b class="over">超出 HKD 2,056,268,000,953.32</b><small>持仓剩余额度</small></div>
-                <div><b>HKD 1,500,000,000.00</b><small>交易限额(每日)</small></div>
-                <div><b>HKD 1,500,000,000.00</b><small>交易剩余额度(今日)</small></div>
+                <div><b>HKD 3,000,000,000.00</b><small>{{ $t('assetQuotaHolding') }}</small></div>
+                <div><b class="over">{{ $t('assetQuotaOver') }} HKD 2,056,268,000,953.32</b><small>{{ $t('assetQuotaHoldingLeft') }}</small></div>
+                <div><b>HKD 1,500,000,000.00</b><small>{{ $t('assetQuotaDaily') }}</small></div>
+                <div><b>HKD 1,500,000,000.00</b><small>{{ $t('assetQuotaDailyLeft') }}</small></div>
               </div>
             </section>
           </div>
@@ -287,7 +287,7 @@ function confirmTransfer() {
               v-if="!visibleCoins.length"
               class="asset-empty"
             >
-              暂无数据
+              {{ $t('text066') }}
             </div>
           </section></template
         >

@@ -2,59 +2,43 @@
 import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
 import { ElMessage } from 'element-plus'
+import { i18n } from './i18n'
 import { ref } from 'vue'
 
 const mode = ref('remote')
 const remoteDocs = [
-  '你的香港身份证/护照',
-  '你的居住地址证明（最近3个月内）',
-  '最近12个月内签发的专业投资者资产证明',
-  '资产证明（最近12个月内）',
-  '虚拟投资经验证明',
-  '雇主的同意书（如适用）',
+  'personDocId',
+  'personDocAddress',
+  'personDocProfessional',
+  'personDocAssets',
+  'personDocExperience',
+  'personDocEmployer',
 ]
 const remoteMethods = [
-  '从您在香港的个人银行账户转账不少于10,000港元/1,500美元',
-  '签发不少于10,000港币/1,500美元的个人支票',
-  '寻找合格的见证人',
+  'personMethodTransfer',
+  'personMethodCheque',
+  'personMethodWitness',
 ]
 const onsiteDocs = [
-  { title: '你的香港身份证/护照' },
-  { title: '最近3个月内的住址证明' },
+  { title: 'personDocId' },
+  { title: 'personDocAddressShort' },
   {
-    title: '最近12个月内签发的专业投资者资产证明',
-    note: [
-      '请提供下列证明文件中的一种：',
-      '即：不少于800万港元或等值的任何外币的投资组合，包括股票、债券、单位信托、股票挂钩投资、存款证、现金或现金等值的存款，列明在：',
-      'a. 由审计师或注册会计师在开户日前12个月内出具的证明',
-      'b. 由注册机构或持牌公司在开户日期前12个月内出具的保管人报表',
-    ],
+    title: 'personDocProfessional',
+    note: ['personNoteProvide', 'personNote8m', 'personNoteAuditor', 'personNoteCustodian'],
   },
   {
-    title: '最近12个月内的资产证明',
-    note: [
-      '请提供下列证明文件中的一种：',
-      '即：以任何外币组成的投资组合，包括股票、债券、单位信托基金、股票挂钩投资、存款证、现金或现金等价物存款和虚拟资产，说明如下：',
-      'a. 由审计师或注册会计师在开户日前12个月内出具的证明',
-      'b. 由注册机构或持牌公司在开户日期前12个月内出具的保管人声明',
-      '注意：',
-      '该证明将被视为未来账户的持仓限额和每日交易限额的依据。',
-    ],
+    title: 'personDocAssetsShort',
+    note: ['personNoteProvide', 'personNoteAny', 'personNoteAuditor', 'personNoteCustodianDecl', 'personNoteAttention', 'personNoteBasis'],
   },
   {
-    title: '虚拟投资经验证明（以下任选其一）:',
-    note: [
-      'a. 账户记录显示最近连续3年内有多次交易',
-      'b. 虚拟资产相关课程的证书',
-      'c. 虚拟资产方面的相关工作经验证明',
-      '如果以上都不能提供，我们将为客户安排随后的在线相关培训',
-    ],
+    title: 'personDocExpChoose',
+    note: ['personExpTrades', 'personExpCourse', 'personExpWork', 'personExpTraining'],
   },
-  { title: '雇主的同意书（如适用）' },
+  { title: 'personDocEmployer' },
 ]
 
 function next() {
-  ElMessage.info('资料填写页（Demo 中略）')
+  ElMessage.info(i18n.global.t('personNextDemo'))
 }
 </script>
 
@@ -65,12 +49,12 @@ function next() {
       <UserSidebar />
       <main class="person-main">
         <section class="person-box">
-          <h1 class="person-title">个人认证（专业投资者）</h1>
+          <h1 class="person-title">{{ $t('personTitle') }}</h1>
 
           <div class="person-hero">
             <div class="person-hero-text">
-              <b>个人资料</b>
-              <span>个人相关的身份、税务、地址资料</span>
+              <b>{{ $t('personProfile') }}</b>
+              <span>{{ $t('personProfileDesc') }}</span>
             </div>
             <svg
               class="person-hero-art"
@@ -191,22 +175,22 @@ function next() {
               :class="{ active: mode === 'remote' }"
               @click="mode = 'remote'"
             >
-              非亲身开户
+              {{ $t('personRemote') }}
             </button>
             <button
               type="button"
               :class="{ active: mode === 'onsite' }"
               @click="mode = 'onsite'"
             >
-              亲身见证
+              {{ $t('personOnsite') }}
             </button>
           </div>
 
           <template v-if="mode === 'remote'">
             <div class="person-steps">
               <div class="person-steps-text">
-                <p><span class="person-step-label">Step</span> <b class="person-step-no">1</b> 申请填写　—　<b>2</b> 提交　—　<b>3</b> 审核</p>
-                <small>申请全程大约需时 5~15分钟</small>
+                <p><span class="person-step-label">Step</span> <b class="person-step-no">1</b> {{ $t('personStepApply') }}　—　<b>2</b> {{ $t('personStepSubmit') }}　—　<b>3</b> {{ $t('personStepReview') }}</p>
+                <small>{{ $t('personStepTime') }}</small>
               </div>
               <svg
                 class="person-steps-art"
@@ -272,37 +256,37 @@ function next() {
               </svg>
             </div>
 
-            <div class="person-chip-row"><span class="person-chip">请准备以下内容</span></div>
+            <div class="person-chip-row"><span class="person-chip">{{ $t('personPrepareTitle') }}</span></div>
             <ol class="person-list">
               <li
                 v-for="doc in remoteDocs"
                 :key="doc"
               >
-                {{ doc }}
+                {{ $t(doc) }}
               </li>
             </ol>
 
-            <div class="person-chip-row"><span class="person-chip">请选择以下三种验证方法中的一种</span></div>
+            <div class="person-chip-row"><span class="person-chip">{{ $t('personMethodsTitle') }}</span></div>
             <ol class="person-list">
               <li
                 v-for="method in remoteMethods"
                 :key="method"
               >
-                {{ method }}
+                {{ $t(method) }}
               </li>
             </ol>
           </template>
 
           <template v-else>
             <div class="person-onsite">
-              <p class="person-onsite-title">你可以亲自到我们的办公室开立账户</p>
-              <p class="person-onsite-sub">请您携带以下文件:</p>
+              <p class="person-onsite-title">{{ $t('depHintTitle') }}</p>
+              <p class="person-onsite-sub">{{ $t('personOnsiteSub') }}</p>
               <ol class="person-onsite-list">
                 <li
                   v-for="doc in onsiteDocs"
                   :key="doc.title"
                 >
-                  <b>{{ doc.title }}</b>
+                  <b>{{ $t(doc.title) }}</b>
                   <div
                     v-if="doc.note"
                     class="person-note"
@@ -311,15 +295,15 @@ function next() {
                       v-for="line in doc.note"
                       :key="line"
                     >
-                      {{ line }}
+                      {{ $t(line) }}
                     </p>
                   </div>
                 </li>
               </ol>
               <div class="person-office">
-                <p>办公时间：星期一至星期五：上午9时至下午6时, 星期六、星期日及香港公众假期休息</p>
-                <p>地址：香港上环干诺道中168-200号信德中心招商局大厦24楼 2414-2416室</p>
-                <p>如有任何疑问，请随时与我们联系，电话：(852)2379 2088</p>
+                <p>{{ $t('personOfficeHours') }}</p>
+                <p>{{ $t('personOfficeAddress') }}</p>
+                <p>{{ $t('personOfficePhone') }}</p>
               </div>
             </div>
           </template>
@@ -331,14 +315,14 @@ function next() {
             <a
               class="person-back"
               href="/bge/hk/zh-CN/user/kyc"
-              >返回</a
+              >{{ $t('personBack') }}</a
             >
             <button
               class="person-next"
               type="button"
               @click="next"
             >
-              下一页
+              {{ $t('personNext') }}
             </button>
           </div>
         </section>
