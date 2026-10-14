@@ -4,13 +4,17 @@ import CurrencySwitcher from './CurrencySwitcher.vue'
 import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { CaretBottom } from '@element-plus/icons-vue'
-defineProps({
+import { computed } from 'vue'
+import { loggedIn } from './session'
+const props = defineProps({
   active: { type: String, default: '' },
   // Pages that are not signed in show the login/register pair instead of the account menu.
   guest: Boolean,
   // OTC keeps its own call to action next to the account area.
   contact: Boolean,
 })
+// Signed-out visitors see the plain header: no order or asset menus and no bell.
+const showGuest = computed(() => props.guest || !loggedIn.value)
 // 订单 and 资产管理 open the same kind of hover panel as 公司, so every header entry can be
 // reached in one click. The first page of each menu names the sub page it leads to.
 const menus = [
@@ -109,7 +113,7 @@ const menus = [
     </nav>
     <div class="site-header-right">
       <el-popover
-        v-for="menu in menus"
+        v-for="menu in (showGuest ? [] : menus)"
         :key="menu.active"
         placement="bottom"
         trigger="hover"
@@ -142,9 +146,9 @@ const menus = [
           >
         </nav>
       </el-popover>
-      <MessageBell />
-      <template v-if="guest"
-        ><a href="/bge/hk/zh-CN/user/dashboard">{{ $t('text212') }}</a
+      <MessageBell v-if="!showGuest" />
+      <template v-if="showGuest"
+        ><a href="/bge/hk/zh-CN/login">{{ $t('text212') }}</a
         ><button
           type="button"
           class="site-header-register"

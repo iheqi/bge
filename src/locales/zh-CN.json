@@ -864,5 +864,15 @@
   "proInvestorP4": "个人专业投资者是指《证券及期货（专业投资者）规则》第5条所指的个人，并持有港币800万（或等值外币）以上的投资组合，如现金、存款及《证券及期货条例》所定义的证券。",
   "lvDiscount": "Lv 0 折扣 0%",
   "kycGotIt": "我知道了",
-  "otcGoTrade": "去交易"
+  "otcGoTrade": "去交易",
+  "loginAccountPlaceholder": "请输入账号",
+  "loginPasswordPlaceholder": "请输入密码",
+  "loginForgot": "忘记密码？",
+  "loginRegister": "注册账户",
+  "loginCaptchaTitle": "人机验证",
+  "loginCaptchaLabel": "进行人身份验证",
+  "loginSmsLabel": "手机验证码",
+  "loginSmsHint": "输入 20****1 收到的验证码",
+  "loginGaLabel": "谷歌验证码",
+  "loginDemoHint": "演示验证码：111111"
 }

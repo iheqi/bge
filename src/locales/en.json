@@ -864,5 +864,15 @@
   "proInvestorP4": "An individual professional investor is a person under section 5 of the Rules with a portfolio of at least HKD 8 million (or its equivalent), such as cash, deposits and securities defined by the Ordinance.",
   "lvDiscount": "Lv 0 discount 0%",
   "kycGotIt": "Got it",
-  "otcGoTrade": "Trade now"
+  "otcGoTrade": "Trade now",
+  "loginAccountPlaceholder": "Enter your account",
+  "loginPasswordPlaceholder": "Enter your password",
+  "loginForgot": "Forgot password?",
+  "loginRegister": "Create account",
+  "loginCaptchaTitle": "Human verification",
+  "loginCaptchaLabel": "Verify you are human",
+  "loginSmsLabel": "SMS code",
+  "loginSmsHint": "Enter the code sent to 20****1",
+  "loginGaLabel": "Google Authenticator code",
+  "loginDemoHint": "Demo code: 111111"
 }

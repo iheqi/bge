@@ -864,5 +864,15 @@
   "proInvestorP4": "個人專業投資者是指《證券及期貨（專業投資者）規則》第5條所指的個人，並持有港幣800萬（或等值外幣）以上的投資組合，如現金、存款及《證券及期貨條例》所定義的證券。",
   "lvDiscount": "Lv 0 折扣 0%",
   "kycGotIt": "我知道了",
-  "otcGoTrade": "去交易"
+  "otcGoTrade": "去交易",
+  "loginAccountPlaceholder": "請輸入賬號",
+  "loginPasswordPlaceholder": "請輸入密碼",
+  "loginForgot": "忘記密碼？",
+  "loginRegister": "註冊賬户",
+  "loginCaptchaTitle": "人機驗證",
+  "loginCaptchaLabel": "進行人身份驗證",
+  "loginSmsLabel": "手機驗證碼",
+  "loginSmsHint": "輸入 20****1 收到的驗證碼",
+  "loginGaLabel": "谷歌驗證碼",
+  "loginDemoHint": "演示驗證碼：111111"
 }

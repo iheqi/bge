@@ -24,9 +24,17 @@ import Market from './Market.vue'
 import Parameters from './Parameters.vue'
 import FeeStandard from './FeeStandard.vue'
 import Announcement from './Announcement.vue'
+import Login from './Login.vue'
+import { loggedIn } from './session'
 const path = window.location.pathname
+// Signed-out visitors are sent to the login page when they open an account page.
+if (!loggedIn.value && path.startsWith('/bge/hk/zh-CN/user/')) {
+  window.location.replace('/bge/hk/zh-CN/login')
+}
 const page = computed(() =>
-  path.includes('/support/announcement')
+  path.includes('/login')
+    ? 'login'
+    : path.includes('/support/announcement')
     ? 'announcement'
     : path.includes('/market')
     ? 'market'
@@ -70,7 +78,8 @@ const page = computed(() =>
 
 <template>
   <el-config-provider :locale="elementLocale">
-    <Announcement v-if="page === 'announcement'" />
+    <Login v-if="page === 'login'" />
+    <Announcement v-else-if="page === 'announcement'" />
     <MessageCenter v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
     <OtcTrade v-else-if="page === 'otc-trade'" />

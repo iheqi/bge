@@ -8,6 +8,7 @@ import {
   SwitchButton,
 } from '@element-plus/icons-vue'
 import { tr } from './i18n'
+import { signOut } from './session'
 const email = 'heqi**gic@gmail.com'
 const uid = '8395618828'
 // Element Plus icons are used where the design has an equivalent; the shield, percent and
@@ -20,6 +21,9 @@ const links = [
   { label: '费率中心', path: 'fees', custom: 'percent' },
   { label: 'API管理', path: 'api', custom: 'api' },
 ]
+function logout() {
+  signOut()
+}
 async function copyUid() {
   try {
     await navigator.clipboard.writeText(uid)
@@ -136,6 +140,7 @@ async function copyUid() {
           <a
             role="menuitem"
             href="/bge/hk/zh-CN/"
+            @click="logout"
           >
             <span class="account-menu-icon"><el-icon><SwitchButton /></el-icon></span>
             {{ $t('text349') }}
