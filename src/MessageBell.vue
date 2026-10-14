@@ -150,9 +150,12 @@ function leave(event) {
   height: 32px;
   border: 0;
   background: transparent;
-  color: #12b99e;
+  color: #f5ff18;
   cursor: pointer;
   padding: 0;
+}
+.message-trigger:hover {
+  color: #e8f000;
 }
 .message-dot {
   position: absolute;
