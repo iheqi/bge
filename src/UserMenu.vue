@@ -8,9 +8,11 @@ import {
   SwitchButton,
 } from '@element-plus/icons-vue'
 import { tr } from './i18n'
-import { signOut } from './session'
+import { accountId, signOut } from './session'
+import { computed } from 'vue'
 const email = 'heqi**gic@gmail.com'
-const uid = '8395618828'
+// The panel shows the UID of the account that is signed in.
+const uid = computed(() => accountId.value ?? '—')
 // Element Plus icons are used where the design has an equivalent; the shield, percent and
 // API marks are drawn inline so the menu keeps the artwork of the design reference.
 const links = [
@@ -26,7 +28,7 @@ function logout() {
 }
 async function copyUid() {
   try {
-    await navigator.clipboard.writeText(uid)
+    await navigator.clipboard.writeText(uid.value)
     ElMessage.success(tr('UID 已复制'))
   } catch {
     /* The browser can block clipboard access; the UID stays readable. */

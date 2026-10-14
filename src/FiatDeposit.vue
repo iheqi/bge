@@ -198,7 +198,7 @@ function submit() {
                 <a
                   class="dep-link"
                   href="/bge/hk/zh-CN/user/payment/fiat/detail?type=add"
-                  >{{ $t('fiatAddCard') }}</a>
+                  >{{ $t('fiatAddCard') }}</a
                 >
               </div>
               <div

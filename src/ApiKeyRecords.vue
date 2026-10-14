@@ -133,7 +133,7 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
      v-if="editId"
      class="api-cancel-edit"
      @click="resetForm"
-     >{{ $t('apiCancelEdit') }}</a>
+     >{{ $t('apiCancelEdit') }}</a
     >
    </el-form>
    <div class="api-notes">
