@@ -64,11 +64,15 @@ function leave(event) {
       :title="tr('消息中心')"
       @click="open = !open"
     >
-      <el-icon :size="20"><Bell /></el-icon
-      ><span
-        v-if="unreadCount"
-        class="message-dot"
-      />
+      <span class="message-icon"
+        ><el-icon :size="20"><Bell /></el-icon
+        ><span
+          v-if="unreadCount"
+          class="message-dot"
+      /></span>
+      <!-- The bell is the entry point to the new message centre, so it carries the 新增 badge.
+           It sits in the trigger's own flow on the right, the way the nav items carry theirs. -->
+      <em class="nav-tag nav-tag-new message-tag">{{ $t('demoTagNew') }}</em>
     </button>
     <div
       v-show="open"
@@ -144,9 +148,9 @@ function leave(event) {
 }
 .message-trigger {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   height: 32px;
   border: 0;
   background: transparent;
@@ -156,6 +160,19 @@ function leave(event) {
 }
 .message-trigger:hover {
   color: #e8f000;
+}
+/* The unread dot hangs off the icon, so it stays on the bell once the badge widens the trigger. */
+.message-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 32px;
+}
+.message-tag {
+  margin: 0;
+  white-space: nowrap;
+  pointer-events: none;
 }
 .message-dot {
   position: absolute;

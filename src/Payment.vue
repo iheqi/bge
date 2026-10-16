@@ -7,7 +7,9 @@ import { computed, ref } from 'vue'
 import WalletAdd from './WalletAdd.vue'
 import BankDetail from './BankDetail.vue'
 import KycNotice from './KycNotice.vue'
+import KycRequired from './KycRequired.vue'
 import { kycVerified } from './session'
+import { currentAccount, readAccountState } from './demoAccounts'
 function openAdd(href) {
   if (!kycVerified.value) {
     showKycNotice.value = true
@@ -18,15 +20,19 @@ function openAdd(href) {
 const crypto = window.location.pathname.includes('/crypto')
 const addWallet = window.location.pathname.includes('/crypto/add')
 const bankDetail = window.location.pathname.includes('/user/payment/fiat/detail')
-const walletRecord = ref(JSON.parse(localStorage.getItem('bge-wallet-record') || 'null') || {
-  address: '0x9e3729f5a1c237475d9f6a30ff6cf0f7138c7285',
-  network: 'eth-', remark: '123', coin: 'ETH', status: '未认证', expires: '-',
-})
-const showKycNotice = ref(false)
+// The wallet address and the bank card seen here belong to the signed-in demo account. Adding
+// or editing one stores it under that account, so switching accounts shows a different record.
+const walletRecord = ref(
+  readAccountState('wallet-record', structuredClone(currentAccount.value.payment.wallet)),
+)
+// A client without verification has neither a card nor an address, so the whole module opens on
+// the 去认证 prompt rather than on two empty record blocks.
+const showKycNotice = ref(!kycVerified.value)
 const walletFilterCoin = ref('all')
 const walletFilterStatus = ref('all')
-// The bank card added on /user/payment/fiat/detail is stored locally, like the wallet records.
-const bankRecord = ref(JSON.parse(localStorage.getItem('bge-bank-record') || 'null'))
+const bankRecord = ref(
+  readAccountState('bank-record', structuredClone(currentAccount.value.payment.bank)),
+)
 const bankCount = computed(() => (bankRecord.value ? 1 : 0))
 const usageCodes = (usage) =>
   (bankRecord.value?.cards || [])
@@ -40,7 +46,11 @@ const usageCodes = (usage) =>
     <div class="user-layout">
       <UserSidebar />
       <main class="payment-main">
-        <section class="payment-box">
+        <KycRequired v-if="!kycVerified" />
+        <section
+          v-else
+          class="payment-box"
+        >
           <div v-if="!addWallet && !bankDetail" class="payment-tabs">
             <a
               :class="{ active: !crypto }"

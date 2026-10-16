@@ -1,8 +1,24 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
-import { formatCell, tr } from './i18n'
-import { Tickets } from '@element-plus/icons-vue'
+import KycNotice from './KycNotice.vue'
+import KycRequired from './KycRequired.vue'
+import { formatCell, tr, i18n } from './i18n'
+import { kycVerified } from './session'
+import { Tickets, Calendar, Close, UploadFilled } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, ref, watch } from 'vue'
+import {
+  cancelIntentOrder,
+  createIntentOrder,
+  intentOrders,
+  intentStatuses,
+  matchOrders,
+  matchStatuses,
+  pairOptions,
+} from './otcData'
+import { currentAccount } from './demoAccounts'
+const t = i18n.global.t
+const showKycNotice = ref(!kycVerified.value)
 const path = window.location.pathname
 const type = path.includes('/wallet')
   ? 'wallet'
@@ -17,10 +33,12 @@ const tabs = [
   ['otc', 'OTC 订单', '/bge/hk/zh-CN/user/report/otc-orders'],
   ['settle', '结单记录', '/bge/hk/zh-CN/user/report/settle'],
 ]
-const walletTab = ref('fiat')
-const spotTab = ref('history')
-const otcTab = ref('match')
+// Every sub page opens on its first tab.
+const walletTab = ref('digital')
+const spotTab = ref('current')
+const otcTab = ref('intent')
 const otcPair = ref('all')
+const otcDirection = ref('all')
 const otcStatus = ref('all')
 const settleTab = ref('all')
 const walletDirection = ref('deposit')
@@ -31,9 +49,18 @@ const spotOrderType = ref('all')
 const spotSide = ref('all')
 const walletRange = ref([])
 const otcRange = ref([])
-const applied = ref({ spot: [], wallet: [], otc: [] })
+const applied = ref({ spot: [], wallet: [], otc: { pair: 'all', direction: 'all', status: 'all', range: [] } })
 function applyFilters() {
-  applied.value = { ...applied.value, wallet: walletRange.value, otc: otcRange.value }
+  applied.value = {
+    ...applied.value,
+    wallet: walletRange.value,
+    otc: {
+      pair: otcPair.value,
+      direction: otcDirection.value,
+      status: otcStatus.value,
+      range: otcRange.value,
+    },
+  }
 }
 function inRange(time, range) {
   if (!range || range.length !== 2 || !range[0] || !range[1]) return true
@@ -45,22 +72,22 @@ const walletCoins = computed(() => walletTab.value === 'fiat'
   : walletTab.value === 'digital'
     ? ['BTC', 'ETH', 'USDT', 'USDC']
     : ['USD', 'HKD', 'BTC', 'ETH', 'USDT', 'USDC'])
+// Every order table is fed by the signed-in demo account, so switching accounts changes the rows.
+const account = currentAccount
 const rawRows = computed(() => {
   if (type === 'spot') {
-    if (spotTab.value === 'deals') return [['2026-10-09 14:32:08', 'BTC/USDT', '买入', '84,106.64', '0.125 BTC', '10,513.33 USDT', '10.51 USDT', '主动成交']]
-    if (spotTab.value === 'current') return [['2026-10-09 15:06:21', 'ETH/USDT', '限价单', '卖出', '4,982.00', '2.000 ETH', '--', '--', '--', '未成交', '详情']]
-    return [['2026-10-08 11:18:42', 'BTC/USDT', '限价单', '买入', '83,800.00', '0.250 BTC', '83,812.40', '0.250 BTC', '20,953.10 USDT', '完全成交', '详情'], ['2026-10-07 09:44:10', 'ETH/USDT', '市价单', '卖出', '4,910.20', '1.500 ETH', '4,910.20', '1.500 ETH', '7,365.30 USDT', '完全成交', '详情']]
+    const orders = account.value.spotOrders
+    return spotTab.value === 'deals' ? orders.deals : spotTab.value === 'history' ? orders.history : orders.current
   }
   if (type === 'wallet') {
-    if (walletTab.value === 'fiat') return [['2026-10-08 10:25:16', 'USD', '10,000.00', 'HSBC **** 2861', '主要银行卡', '已完成', '查看']]
-    if (walletTab.value === 'transfer' || walletTab.value === 'quick') return [['2026-10-07 16:42:03', 'USDT', '2,500.00', '资金账户', '交易账户', '已完成']]
-    return [['2026-10-06 12:08:44', 'BTC', '0.18000000', 'bc1q...9x2k', '已完成']]
+    const records = account.value.walletRecords
+    if (walletTab.value === 'fiat') return records.fiat
+    if (walletTab.value === 'transfer') return records.transfer
+    if (walletTab.value === 'quick') return records.quick
+    return records.digital
   }
-  if (type === 'otc') {
-    if (otcTab.value === 'match') return [['2026-10-08 15:20:12', '买入', '10,000 HKD', '1,278.40 USDT', '12.00 HKD', '7.8220', '8.0000 HKD', '自行下单', '24', '已完成']]
-    return [['2026-10-05 13:10:09', 'USDT', 'HKD', '1,000.00', '8.0000 HKD', '电邮联系', '12', '已完成']]
-  }
-  return settleTab.value === 'monthly' ? [['2026年09月结单', '下载']] : [['2026年10月08日日结单', '下载']]
+  const reports = account.value.reports
+  return settleTab.value === 'monthly' ? reports.monthly : reports.daily
 })
 function rowTime(row) {
   const name = String(row[0])
@@ -81,13 +108,76 @@ function resetWalletFilters() {
   walletRange.value = []
   applied.value = { ...applied.value, wallet: [] }
 }
+// The two OTC tabs filter on different vocabularies, so switching one resets the row.
+const otcDirections = computed(() => (otcTab.value === 'intent' ? ['买', '卖'] : ['买方', '卖方']))
+const otcStatuses = computed(() => (otcTab.value === 'intent' ? intentStatuses : matchStatuses))
 function resetOtcFilters() {
   otcPair.value = 'all'
+  otcDirection.value = 'all'
   otcStatus.value = 'all'
   otcRange.value = []
-  applied.value = { ...applied.value, otc: [] }
+  applyFilters()
+}
+const matchedFilter = () => (order) =>
+  (applied.value.otc.pair === 'all' || order.pair === applied.value.otc.pair) &&
+  (applied.value.otc.status === 'all' || order.status === applied.value.otc.status) &&
+  inRange(order.createTime, applied.value.otc.range)
+const visibleIntentOrders = computed(() =>
+  intentOrders.value
+    .filter(matchedFilter())
+    .filter((order) => applied.value.otc.direction === 'all' || order.side === applied.value.otc.direction),
+)
+const visibleMatchOrders = computed(() =>
+  matchOrders.value
+    .filter(matchedFilter())
+    .filter((order) => applied.value.otc.direction === 'all' || order.role === applied.value.otc.direction),
+)
+// Cancelling removes the row, so it is only offered while no operator has matched it yet.
+// Match orders mirror the console, which offers no way to withdraw one.
+const canCancelIntent = (order) => order.status === '待匹配'
+async function confirmCancelIntent(order) {
+  if (!canCancelIntent(order)) return
+  try {
+    await ElMessageBox.confirm(t('otcCancelConfirm'), t('otcCancelTitle'), {
+      confirmButtonText: t('confirmAction'),
+      cancelButtonText: tr('取消'),
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
+  cancelIntentOrder(order)
+  ElMessage.success(t('otcCancelDone'))
+}
+const showIntentForm = ref(false)
+const intentPair = ref(pairOptions[0])
+const intentSide = ref('buy')
+const intentQuantity = ref('')
+const intentPrice = ref('')
+const intentValidity = ref('24')
+const intentRemark = ref('')
+const intentCoin = computed(() => intentPair.value.split('/')[0])
+const intentPayCoin = computed(() => intentPair.value.split('/')[1])
+const canSubmitIntent = computed(() => Boolean(intentQuantity.value && intentPrice.value && intentValidity.value))
+function submitIntent() {
+  if (!canSubmitIntent.value) return
+  createIntentOrder({
+    pair: intentPair.value,
+    side: intentSide.value,
+    quantity: intentQuantity.value,
+    price: intentPrice.value,
+    validity: intentValidity.value,
+    remark: intentRemark.value,
+  })
+  showIntentForm.value = false
+  intentQuantity.value = ''
+  intentPrice.value = ''
+  intentRemark.value = ''
+  otcTab.value = 'intent'
+  ElMessage.success(t('otcIntentCreated'))
 }
 watch(walletTab, resetWalletFilters)
+watch(otcTab, resetOtcFilters)
 watch(walletDirection, () => { walletStatus.value = 'all' })
 const columns = () => {
   if (type === 'spot') {
@@ -99,9 +189,6 @@ const columns = () => {
     if (walletTab.value === 'transfer') return ['时间', '币种', '数量', '从', '到', '状态']
     return ['时间', '数字货币', '数量', '发起方地址', '状态']
   }
-  if (type === 'otc') return otcTab.value === 'match'
-    ? ['时间', '买卖方向', '支付金额', '获得金额', '手续费', '成交单价', '最高购买单价', '委托类型', '有效期（小时）', '状态']
-    : ['时间', '支付币种', '获得币种', '购买/出售数量', '最高购买单价', '委托类型', '有效期（小时）', '状态']
   if (type === 'settle') return ['结单名称', '操作']
   return ['委托时间', '交易对', '订单类型', '买卖方向', '委托价格', '委托数量', '成交状态', '详情']
 }
@@ -118,13 +205,47 @@ const columns = () => {
 .report-main {
   min-width: 0;
 }
-.order-title {
-  margin: 0;
+.order-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   padding: 0 0 22px;
   border-bottom: 1px solid #dce2eb;
+}
+.order-title {
+  margin: 0;
   font-size: 22px;
   font-weight: 500;
 }
+.otc-primary{flex:0 0 auto;height:40px;padding:0 28px;border:0;border-radius:5px;background:#f5ff18;color:#111;font-size:14px;font-weight:600;cursor:pointer}
+.otc-primary:hover{background:#e8f000}
+.otc-primary:disabled{background:#eef1f5;color:#a6adb8;cursor:not-allowed}
+.otc-cancel{border:0;background:none;color:#d6a500;font-size:13px;cursor:pointer}
+.otc-cancel:hover{color:#b98e00}
+.otc-form-mask{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;background:rgb(0 0 0 / 50%)}
+.otc-form-dialog{position:relative;display:flex;flex-direction:column;width:min(720px,calc(100vw - 48px));max-height:calc(100vh - 48px);border-radius:16px;background:#fff;box-shadow:0 12px 32px rgb(0 0 0 / 28%);overflow:hidden}
+/* The dark title bar mirrors the header dropdown panels. */
+.otc-form-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 24px;background:#272c37;color:#fff}
+.otc-form-head h2{margin:0;font-size:18px;font-weight:600}
+.otc-close{display:flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:#c0c4cc;font-size:18px;cursor:pointer}
+.otc-close:hover{background:#343b49;color:#fff}
+.otc-form{padding:26px 24px 4px;overflow:auto}
+.otc-form :deep(.el-form-item){margin-bottom:18px}
+.otc-form :deep(.el-form-item__label){padding-right:18px;color:#69717e;font-size:14px;line-height:44px}
+.otc-form :deep(.el-input__wrapper),.otc-form :deep(.el-select__wrapper){min-height:44px;border-radius:8px;box-shadow:0 0 0 1px #d8dee8 inset}
+.otc-form :deep(.el-input__wrapper.is-focus),.otc-form :deep(.el-select__wrapper.is-focused){box-shadow:0 0 0 1px #f0d000 inset}
+.otc-form :deep(.el-textarea__inner){padding:12px;border-radius:8px;box-shadow:0 0 0 1px #d8dee8 inset}
+.otc-form :deep(.el-radio){margin-right:28px;color:#505967;font-size:14px}
+.otc-form :deep(.el-radio__label){padding-left:8px}
+.otc-form :deep(.el-radio__input.is-checked .el-radio__inner){border-color:#f0d000;background:#f0d000}
+.otc-form :deep(.el-radio__input.is-checked + .el-radio__label){color:#303744}
+.otc-form :deep(.el-input-group__append){padding:0 20px;color:#7a8391;background:#f5f6f8;border-color:#d8dee8}
+.otc-upload{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 22px;border:1px dashed #d8dee8;border-radius:8px;background:#fff;color:#d9a600;font-size:14px;cursor:pointer}
+.otc-upload:hover{border-color:#f0d000;background:#fffdf0}
+.otc-form-actions{display:flex;gap:11px;justify-content:flex-end;margin:8px 0 0;padding:18px 0 22px;border-top:1px solid #edf0f4}
+.otc-secondary{min-width:118px;height:40px;border:0;border-radius:6px;background:#eaedf3;color:#303744;font-size:14px;cursor:pointer}
+.otc-secondary:hover{background:#e2e6ee}
 </style>
 <template>
   <div class="user-page report-page">
@@ -144,8 +265,17 @@ const columns = () => {
         >
       </aside>
       <main class="report-main">
-        <section class="report-box">
-          <h1 class="order-title">{{ tr(tabs.find((tab) => tab[0] === type)[1]) }}</h1>
+        <!-- An unverified client has no orders of any kind, so the four record pages are all the
+             same 去认证 prompt instead of empty tables. -->
+        <KycRequired v-if="!kycVerified" />
+        <section
+          v-else
+          class="report-box"
+        >
+          <div class="order-head">
+            <h1 class="order-title">{{ tr(tabs.find((tab) => tab[0] === type)[1]) }}</h1>
+            <button v-if="type === 'otc'" class="otc-primary" @click="showIntentForm = true">{{ $t('otcCreateIntent') }}</button>
+          </div>
           <template v-if="type === 'spot'"
             ><div class="sub-tabs">
               <span :class="{ active: spotTab === 'current' }" @click="spotTab = 'current'">{{ $t('text294') }}</span
@@ -229,27 +359,56 @@ const columns = () => {
               ><span :class="{ active: otcTab === 'match' }" @click="otcTab = 'match'">{{ $t('text318') }}</span>
             </div>
             <div class="filters">
-              <el-select v-model="otcPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option label="BTC/USDT" value="BTC/USDT" /><el-option label="ETH/USDT" value="ETH/USDT" /></el-select><el-select v-model="otcStatus" class="filter-select" :aria-label="$t('text063')"><el-option :label="$t('otcAllStatus')" value="all" /><el-option :label="$t('statusPending')" value="pending" /><el-option label="已完成" value="completed" /><el-option :label="$t('statusCancelled')" value="cancelled" /></el-select
+              <el-select v-model="otcPair" class="filter-select" :aria-label="$t('text247')"><el-option :label="$t('otcAllPairs')" value="all" /><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select><el-select v-model="otcDirection" class="filter-select" :aria-label="$t('otcDirection')"><el-option :label="$t('allSides')" value="all" /><el-option v-for="item in otcDirections" :key="item" :label="tr(item)" :value="item" /></el-select><el-select v-model="otcStatus" class="filter-select" :aria-label="$t('text063')"><el-option :label="$t('otcAllStatus')" value="all" /><el-option v-for="item in otcStatuses" :key="item" :label="tr(item)" :value="item" /></el-select
               ><el-date-picker
                 v-model="otcRange"
                 class="date-picker"
                 type="daterange"
                 value-format="YYYY-MM-DD"
                 range-separator="-"
-                :start-placeholder="tr('开始日期')"
-                :end-placeholder="tr('结束日期')"
-                aria-label="日期范围"
+                :start-placeholder="$t('otcStartDate')"
+                :end-placeholder="$t('otcEndDate')"
+                :aria-label="$t('otcStartDate') + ' - ' + $t('otcEndDate')"
               /><button class="yellow" @click="applyFilters">{{ $t('text283') }}</button
               ><button @click="resetOtcFilters">{{ $t('text299') }}</button>
             </div>
-            <div class="table-head otc-head">
-              <span>{{ $t('text313') }}</span
-              ><span>{{ $t('text302') }}</span
-              ><span>{{ $t('text321') }}</span
-              ><span>{{ $t('text322') }}</span
-              ><span>{{ $t('text323') }}</span
-              ><span>{{ tr('最高购买单价') }}</span><span>{{ tr('委托类型') }}</span><span>{{ tr('有效期（小时）') }}</span><span>{{ $t('text063') }}</span>
-            </div></template
+            <el-table
+              v-if="otcTab === 'intent'"
+              :data="visibleIntentOrders"
+              class="report-table"
+              :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+              :empty-text="$t('text066')"
+            >
+              <el-table-column prop="orderId" :label="$t('otcOrderId')" min-width="190" align="center" />
+              <el-table-column :formatter="formatCell" prop="side" :label="$t('otcDirection')" min-width="90" align="center" />
+              <el-table-column :formatter="formatCell" prop="contact" :label="$t('otcOrderType')" min-width="120" align="center" />
+              <el-table-column prop="getCoin" :label="$t('text322')" min-width="100" align="center" />
+              <el-table-column prop="payCoin" :label="$t('text321')" min-width="100" align="center" />
+              <el-table-column prop="amount" :label="$t('text323')" min-width="140" align="center" />
+              <el-table-column prop="matched" :label="$t('otcMatchedQty')" min-width="140" align="center" />
+              <el-table-column prop="createTime" :label="$t('otcCreateTime')" min-width="170" align="center" />
+              <el-table-column :formatter="formatCell" prop="status" :label="$t('text063')" min-width="100" align="center" />
+              <el-table-column :label="$t('text065')" width="100" align="center">
+                <template #default="{ row }"><button v-if="canCancelIntent(row)" class="otc-cancel" @click="confirmCancelIntent(row)">{{ $t('otcCancelOrder') }}</button><span v-else>--</span></template>
+              </el-table-column>
+            </el-table>
+            <el-table
+              v-else
+              :data="visibleMatchOrders"
+              class="report-table"
+              :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+              :empty-text="$t('text066')"
+            >
+              <el-table-column prop="orderNo" :label="$t('otcOrderNo')" min-width="190" align="center" />
+              <el-table-column :formatter="formatCell" prop="role" :label="$t('otcDirection')" min-width="90" align="center" />
+              <el-table-column prop="buyCoin" :label="$t('otcBuyCoin')" min-width="110" align="center" />
+              <el-table-column prop="payCoin" :label="$t('text321')" min-width="110" align="center" />
+              <el-table-column prop="price" :label="$t('otcMatchPrice')" min-width="130" align="center" />
+              <el-table-column prop="qty" :label="$t('otcMatchQty')" min-width="120" align="center" />
+              <el-table-column prop="createTime" :label="$t('otcCreateTime')" min-width="170" align="center" />
+              <el-table-column :formatter="formatCell" prop="status" :label="$t('text063')" min-width="100" align="center" />
+            </el-table>
+            <div class="pager">‹　›</div></template
           ><template v-else
             ><div class="sub-tabs">
               <span :class="{ active: settleTab === 'all' }" @click="settleTab = 'all'">{{ $t('text165') }}</span
@@ -263,13 +422,14 @@ const columns = () => {
               ><span>{{ $t('text065') }}</span>
             </div></template
           >
-          <el-table :data="mockRows.map(row => Object.fromEntries(row.map((cell, index) => [String(index), cell])))" class="report-table" :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }" :empty-text="$t('text066')">
+          <el-table v-if="type !== 'otc'" :data="mockRows.map(row => Object.fromEntries(row.map((cell, index) => [String(index), cell])))" class="report-table" :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }" :empty-text="$t('text066')">
             <el-table-column v-for="(column, index) in columns()" :key="column" :formatter="formatCell" :prop="String(index)" :label="tr(column)" min-width="130" align="center" />
           </el-table>
-          <div class="pager">‹　›</div>
+          <div v-if="type !== 'otc'" class="pager">‹　›</div>
         </section>
       </main>
     </div>
+    <KycNotice v-model="showKycNotice" />
     <footer>
       <div class="footer-inner">
         <a
@@ -302,5 +462,27 @@ const columns = () => {
         </div>
       </div>
     </footer>
+    <!-- 创建意向单 follows the console form: the same one-sided order the operators enter. -->
+    <div v-if="showIntentForm" class="otc-form-mask" @click.self="showIntentForm = false">
+      <section class="otc-form-dialog">
+        <header class="otc-form-head">
+          <h2>{{ $t('text398') }}</h2>
+          <button class="otc-close" :aria-label="$t('text412')" @click="showIntentForm = false"><el-icon><Close /></el-icon></button>
+        </header>
+        <el-form class="otc-form" label-width="180px" @submit.prevent="submitIntent">
+          <el-form-item :label="$t('text247')" required><el-select v-model="intentPair"><el-option v-for="item in pairOptions" :key="item" :label="item" :value="item" /></el-select></el-form-item>
+          <el-form-item :label="$t('text399')" required><el-radio-group v-model="intentSide"><el-radio value="buy">{{ $t('text400') }}</el-radio><el-radio value="sell">{{ $t('text401') }}</el-radio></el-radio-group></el-form-item>
+          <el-form-item :label="$t('text405')"><el-input :model-value="intentCoin" disabled /></el-form-item>
+          <el-form-item :label="$t('text406')" required><el-input v-model="intentQuantity" :placeholder="$t('text414')" /></el-form-item>
+          <el-form-item :label="$t('text321')"><el-input :model-value="intentPayCoin" disabled /></el-form-item>
+          <el-form-item :label="$t('text407')" required><el-input v-model="intentPrice" :placeholder="$t('text415')"><template #append>{{ intentPayCoin }}</template></el-input></el-form-item>
+          <el-form-item :label="$t('text408')"><el-input model-value="0" disabled><template #append>{{ intentPayCoin }}</template></el-input></el-form-item>
+          <el-form-item :label="$t('text409')" required><el-input v-model="intentValidity" :placeholder="$t('text416')"><template #prefix><el-icon><Calendar /></el-icon></template></el-input></el-form-item>
+          <el-form-item :label="$t('text410')"><el-input v-model="intentRemark" type="textarea" :rows="3" /></el-form-item>
+          <el-form-item :label="$t('text411')"><button type="button" class="otc-upload"><el-icon><UploadFilled /></el-icon>{{ $t('text382') }}</button></el-form-item>
+          <div class="otc-form-actions"><button type="button" class="otc-secondary" @click="showIntentForm = false">{{ $t('text412') }}</button><button type="button" class="otc-primary" :disabled="!canSubmitIntent" @click="submitIntent">{{ $t('text413') }}</button></div>
+        </el-form>
+      </section>
+    </div>
   </div>
 </template>

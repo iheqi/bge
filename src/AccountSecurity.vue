@@ -4,6 +4,7 @@ import UserSidebar from './UserSidebar.vue'
 import { tr } from './i18n'
 import Footer from './Footer.vue'
 import { ref } from 'vue'
+import { currentAccount } from './demoAccounts'
 import {
   ArrowDown,
   Grid,
@@ -36,6 +37,8 @@ const emailSubmitted = ref(false)
 const emailCodeSent = ref(false)
 const sendEmailCode = () => { if (email.value) emailCodeSent.value = true }
 const submitEmail = () => { emailSubmitted.value = true }
+// Devices, login history and the 2FA switches all come from the signed-in demo account.
+const account = currentAccount
 </script>
 <template>
   <div class="user-page account-security">
@@ -112,13 +115,13 @@ const submitEmail = () => { emailSubmitted.value = true }
           <p>{{ $t('text026') }}</p>
           <div class="verify-grid">
             <a href="/bge/hk/zh-CN/user/security/bind-email">
-              {{ $t('text027') }}<small>{{ $t('text028') }}</small>
+              {{ $t('text027') }}<small>{{ $t(account.verification.email ? 'text028' : 'text030') }}</small>
             </a>
             <a href="/bge/hk/zh-CN/user/security?bind=phone">
-              {{ $t('text029') }}<small>{{ $t('text030') }}</small>
+              {{ $t('text029') }}<small>{{ $t(account.verification.phone ? 'secChangePhone' : 'text030') }}</small>
             </a>
             <div>
-              {{ $t('text031') }}<small>{{ $t('text032') }}</small>
+              {{ $t('text031') }}<small>{{ $t(account.verification.ga ? 'text032' : 'text030') }}</small>
             </div>
           </div>
         </section>
@@ -149,19 +152,24 @@ const submitEmail = () => { emailSubmitted.value = true }
             <p>{{ $t('text043') }}</p>
           </div>
           <a>{{ $t('text044') }}</a>
-          <div class="device-row">{{ $t('text045') }}</div>
-          <div class="device-row">{{ $t('text046') }}</div>
+          <div
+            v-for="device in account.security.devices"
+            :key="device.time"
+            class="device-row"
+          >
+            ● {{ device.browser }} {{ device.time }} {{ $t('secIpLabel') }}: {{ device.ip }} {{ tr(device.region) }}
+          </div>
         </section>
         <section class="security-setting activity">
           <h3>{{ $t('text047') }}</h3>
           <p>{{ $t('text048') }}</p>
           <div class="activity-head">{{ $t('text049') }}</div>
           <div
-            v-for="i in 5"
-            :key="i"
+            v-for="row in account.security.activity"
+            :key="row.time"
             class="activity-row"
           >
-            {{ $t('text050') }}
+            {{ row.time }} {{ tr(row.action) }} {{ row.browser }} {{ row.ip }} {{ tr(row.region) }}
           </div>
         </section>
         </template>

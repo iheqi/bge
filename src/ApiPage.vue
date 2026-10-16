@@ -3,6 +3,7 @@ import SiteHeader from './SiteHeader.vue'
 import ApiKeyRecords from './ApiKeyRecords.vue'
 import UserSidebar from './UserSidebar.vue'
 import KycNotice from './KycNotice.vue'
+import KycRequired from './KycRequired.vue'
 import { ref } from 'vue'
 import { kycVerified } from './session'
 
@@ -14,7 +15,8 @@ const showKycNotice = ref(!kycVerified.value)
     <div class="user-layout">
       <UserSidebar />
       <main class="api-main">
-        <ApiKeyRecords />
+        <ApiKeyRecords v-if="kycVerified" />
+        <KycRequired v-else />
       </main>
     </div>
     <KycNotice v-model="showKycNotice" />

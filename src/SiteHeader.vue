@@ -5,6 +5,7 @@ import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { CaretBottom } from '@element-plus/icons-vue'
 import { computed } from 'vue'
+import { i18n } from './i18n'
 import { loggedIn } from './session'
 const props = defineProps({
   active: { type: String, default: '' },
@@ -15,12 +16,15 @@ const props = defineProps({
 })
 // Signed-out visitors see the plain header: no order or asset menus and no bell.
 const showGuest = computed(() => props.guest || !loggedIn.value)
-// 订单 and 资产管理 open the same kind of hover panel as 公司, so every header entry can be
+// The badges mark what this demo build added or reworked, so a reviewer sees it in the nav.
+const tagText = (tag) => i18n.global.t(tag === 'new' ? 'demoTagNew' : 'demoTagModified')
+// 订单 and 资产 open the same kind of hover panel as 公司, so every header entry can be
 // reached in one click. The first page of each menu names the sub page it leads to.
 const menus = [
   {
     active: 'report',
     label: 'text005',
+    tag: 'edit',
     href: '/bge/hk/zh-CN/user/report/spot',
     width: 168,
     popper: 'site-header-orders-popper',
@@ -34,6 +38,7 @@ const menus = [
   {
     active: 'assets',
     label: 'text006',
+    tag: 'edit',
     href: '/bge/hk/zh-CN/user/assets',
     width: 168,
     popper: 'site-header-assets-popper',
@@ -64,12 +69,12 @@ const menus = [
       <a
         :class="{ active: active === 'market' }"
         href="/bge/hk/zh-CN/market"
-        >{{ $t('text001') }}</a
+        >{{ $t('text001') }}<em class="nav-tag nav-tag-new">{{ tagText('new') }}</em></a
       >
       <a
         :class="{ active: active === 'otc' }"
         href="/bge/hk/zh-CN/otc"
-        >{{ $t('text002') }}</a
+        >{{ $t('text002') }}<em class="nav-tag nav-tag-edit">{{ tagText('edit') }}</em></a
       >
       <a
         :class="{ active: active === 'spot' }"
@@ -130,7 +135,12 @@ const menus = [
             <a
               :class="{ active: active === menu.active }"
               :href="menu.href"
-              >{{ $t(menu.label) }}</a
+              >{{ $t(menu.label) }}<em
+                v-if="menu.tag"
+                class="nav-tag"
+                :class="'nav-tag-' + menu.tag"
+                >{{ tagText(menu.tag) }}</em
+              ></a
             >
           </div>
         </template>
@@ -177,6 +187,9 @@ const menus = [
 .site-header-right { gap:29px; margin-left:auto; align-self:stretch; }
 .site-header a { color:inherit; text-decoration:none; }
 .site-header-nav a.active, .site-header-right a.active { color:#fff; }
+.nav-tag { margin-left:6px; padding:0 5px; border-radius:4px; font-size:11px; font-style:normal; line-height:16px; vertical-align:1px; }
+.nav-tag-new { background:#f5ff18; color:#111; }
+.nav-tag-edit { background:#f15a64; color:#fff; }
 .site-header-company-reference { display:flex; align-items:center; align-self:stretch; }
 .site-header-company-trigger { display:flex; align-items:center; gap:4px; }
 .site-header-company-trigger .el-icon { font-size:12px; }

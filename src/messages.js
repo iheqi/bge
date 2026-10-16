@@ -1,4 +1,5 @@
 import { computed, ref, watch } from 'vue'
+import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
 
 export const messageCategories = [
   '全部消息',
@@ -57,7 +58,8 @@ const bodies = {
 }
 // Newest first, one entry per category per day. The copy is stepped per category so that a
 // category never shows the same wording twice in a row, and neighbouring entries stay ~1 day
-// apart, which keeps every filter on two to three pages.
+// apart, which keeps every filter on two to three pages. Each demo account gets its own depth
+// and unread ratio, so the message centre is not identical for every login.
 const start = Date.UTC(2026, 9, 12, 9, 55, 9)
 function stamp(hoursBack) {
   const date = new Date(start - hoursBack * 60 * 60 * 1000)
@@ -67,40 +69,59 @@ function stamp(hoursBack) {
     `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`
   )
 }
-const categories = Object.keys(bodies)
-const days = 18
-// Each category walks its own copy list from a different offset, so a page never repeats wording.
-const offsets = Object.fromEntries(
-  categories.map((category, index) => [category, (index * 2) % bodies[category].length]),
-)
-const initialMessages = []
-for (let day = 0; day < days; day++) {
-  for (let order = 0; order < categories.length; order++) {
-    const category = categories[order]
-    const texts = bodies[category]
-    const copy = (day + offsets[category]) % texts.length
-    // Most entries start read so the unread badge stays realistic.
-    initialMessages.push({
-      id: `${category}-${day}-${copy}`,
+// Unverified clients have only just registered, so their mailbox is short and mostly read. It also
+// has no transaction history to be notified about and nothing that says a review already passed,
+// so those copies are withheld from that mailbox: a client with no assets, orders or card should
+// not be reading a 提现已提交 or 认证已通过 notice.
+const MESSAGE_PROFILE = {
+  person: { days: 18, readEvery: 3, shift: 0 },
+  corporation: { days: 21, readEvery: 2, shift: 1 },
+  institution: { days: 24, readEvery: 4, shift: 2 },
+  unverified: { days: 6, readEvery: 1, shift: 3 },
+}
+const UNVERIFIED_SKIP = {
+  充值提现: [0, 1, 2],
+  认证消息: [1, 4],
+  场外消息: [0, 1, 2],
+  活动消息: [1],
+}
+function buildMessages(kind) {
+  const categories = Object.keys(bodies)
+  const shape = MESSAGE_PROFILE[kind] ?? MESSAGE_PROFILE.person
+  const textsOf = (category) =>
+    kind === 'unverified'
+      ? bodies[category].filter((_, index) => !(UNVERIFIED_SKIP[category] ?? []).includes(index))
+      : bodies[category]
+  // Each category walks its own copy list from a different offset, so a page never repeats wording.
+  const offsets = Object.fromEntries(
+    categories.map((category, index) => [
       category,
-      text: texts[copy],
-      date: stamp(day * 24 + order * 3.5),
-      read: initialMessages.length % 3 !== 0,
-    })
+      (index * 2 + shape.shift) % textsOf(category).length,
+    ]),
+  )
+  const list = []
+  for (let day = 0; day < shape.days; day++) {
+    for (let order = 0; order < categories.length; order++) {
+      const category = categories[order]
+      const texts = textsOf(category)
+      const copy = (day + offsets[category]) % texts.length
+      // Most entries start read so the unread badge stays realistic.
+      list.push({
+        id: `${category}-${day}-${copy}`,
+        category,
+        text: texts[copy],
+        date: stamp(day * 24 + order * 3.5),
+        read: list.length % (shape.readEvery + 1) !== 0,
+      })
+    }
   }
+  if (list.length !== categories.length * shape.days) throw Error('message mock count drifted')
+  return list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
 }
-if (initialMessages.length !== categories.length * days) throw Error('message mock count drifted')
-initialMessages.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-const key = 'bge-demo-messages-v2'
-let saved
-try {
-  saved = JSON.parse(localStorage.getItem(key))
-} catch {
-  /* Unavailable storage falls back to the demonstration data. */
-}
-export const messages = ref(
-  Array.isArray(saved) &&
-    saved.every(
+function isMessageList(value) {
+  return (
+    Array.isArray(value) &&
+    value.every(
       (m) =>
         m &&
         typeof m.id === 'string' &&
@@ -109,21 +130,14 @@ export const messages = ref(
         typeof m.date === 'string' &&
         typeof m.read === 'boolean',
     )
-    ? saved
-    : initialMessages,
-)
+  )
+}
+const initialMessages = buildMessages(currentAccount.value.kind)
+const saved = readAccountState('messages', null)
+export const messages = ref(isMessageList(saved) ? saved : initialMessages)
 export const unreadCount = computed(() => messages.value.filter((m) => !m.read).length)
-watch(
-  messages,
-  (value) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value))
-    } catch {
-      /* Keep the session usable without persistent storage. */
-    }
-  },
-  { deep: true },
-)
+// Only the read state survives a reload; the wording itself is regenerated from the account.
+watch(messages, (value) => writeAccountState('messages', value), { deep: true })
 export function markRead(id) {
   const message = messages.value.find((m) => m.id === id)
   if (message) message.read = true

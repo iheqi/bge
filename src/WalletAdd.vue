@@ -1,15 +1,17 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { ArrowLeft, CopyDocument, Calendar } from '@element-plus/icons-vue'
+import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
 const step = ref(1), coin = ref('ETH'), network = ref('eth-'), address = ref(''), remark = ref(''), confirmed = ref(false)
 const amount = '8.76001', fullAddress = computed(() => address.value || '0xbfc541edbc1e0ecaffa71f6371f63998cc64f1f4c')
 const canContinue = computed(() => address.value && confirmed.value)
-function next() { if (canContinue.value) { localStorage.setItem('bge-wallet-record', JSON.stringify({ address: address.value, network: network.value, remark: remark.value || '—', coin: coin.value, status: '未认证', expires: '-' })); step.value = 2 } }
+// The address is stored per demo account, so each profile keeps its own withdrawal record.
+function next() { if (canContinue.value) { writeAccountState('wallet-record', { address: address.value, network: network.value, remark: remark.value || '—', coin: coin.value, status: '未认证', expires: '-' }); step.value = 2 } }
 function back() { window.location.href = '/bge/hk/zh-CN/user/payment/crypto' }
 // Demo shortcut: mark the stored address as verified and continue on the withdrawal page.
 function finish() {
-  const record = JSON.parse(localStorage.getItem('bge-wallet-record') || 'null')
-  if (record) localStorage.setItem('bge-wallet-record', JSON.stringify({ ...record, status: '已认证' }))
+  const record = readAccountState('wallet-record', currentAccount.value.payment.wallet)
+  if (record) writeAccountState('wallet-record', { ...record, status: '已认证' })
   window.location.href = `/bge/hk/zh-CN/user/crypto/withdraw/${coin.value}`
 }
 </script>

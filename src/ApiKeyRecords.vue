@@ -1,283 +1,378 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { i18n } from './i18n'
+import { currentAccount, useAccountState } from './demoAccounts'
 
 const t = (key, params) => i18n.global.t(key, params)
-const storageKey = 'bge-demo-api-records-v1'
-const seed = [{ id: 'demo-1', remarks: '行情查询', authorities: ['readonly'], ipAddresses: '192.0.2.10', state: 'valid', createdDate: '2026-10-08 10:20:00', apiKey: 'demo_api_readonly_001', secret: 'demo_secret_readonly_001' }, { id: 'demo-2', remarks: '交易策略', authorities: ['readonly', 'trade', 'withdraw'], ipAddresses: '198.51.100.20,198.51.100.21', state: 'overdue', createdDate: '2026-09-01 09:30:00', apiKey: 'demo_api_strategy_002', secret: 'demo_secret_strategy_002' }]
-let initial = seed
-try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (Array.isArray(saved) && saved.every(r => r.id && Array.isArray(r.authorities))) initial = saved } catch {}
-const rows = ref(initial)
+// The key list is editable, so it is stored per demo account on top of that account's seed rows.
+const rows = useAccountState('api-records', currentAccount.value.apiKeys)
+
 const authNames = { readonly: 'apiRead', trade: 'apiTrade', withdraw: 'text309' }
-const authText = (row) => row.authorities.map((a) => i18n.global.t(authNames[a])).join(',')
-const detail = ref(null), verification = ref(false), editId = ref(null)
+const authText = (row) => (row.authorities ?? []).map((a) => t(authNames[a])).join('+')
+const stateKeys = { valid: 'apiValid', expired: 'statusExpired', revoked: 'apiStateRevoked' }
+const stateKey = (row) => stateKeys[row.state] ?? 'apiInvalid'
+// The list never shows a whole key; the head and the tail are enough to tell two keys apart.
+const maskKey = (apiKey) => `${apiKey.slice(0, 8)}****${apiKey.slice(-4)}`
+const riskText = (row) => (row.risk ?? []).map((key) => t(key)).join('、')
+
+const detail = ref(null)
+const verification = ref(false)
+const editId = ref(null)
 const codes = reactive({ sms: '', email: '', ga: '' })
 const formRef = ref()
 const form = reactive({ remarks: '', ipAddresses: '', authorities: ['readonly'] })
 let pending = null
 const rules = {
- remarks: [{ validator: (_, value, done) => done(value.trim() ? undefined : new Error(t('apiRemarkRequired'))), trigger: 'blur' }],
- ipAddresses: [{ validator: (_, value, done) => {
-  const ips = value.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
-  const valid = ips.every(ip => /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && ip.split('.').every(n => Number(n) <= 255))
-  done(!ips.length ? new Error(t('apiIpRequired')) : ips.length > 10 ? new Error(t('apiIpLimit')) : !valid ? new Error(t('apiIpInvalid')) : undefined)
- }, trigger: 'blur' }]
+  remarks: [
+    {
+      validator: (_, value, done) =>
+        done(value.trim() ? undefined : new Error(t('apiRemarkRequired'))),
+      trigger: 'blur',
+    },
+  ],
+  // Binding an IP is optional: an empty field is what the list shows as 免绑.
+  ipAddresses: [
+    {
+      validator: (_, value, done) => {
+        const ips = value
+          .split(/[,\n]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+        const valid = ips.every(
+          (ip) => /^(\d{1,3}\.){3}\d{1,3}$/.test(ip) && ip.split('.').every((n) => Number(n) <= 255),
+        )
+        done(
+          !valid ? new Error(t('apiIpInvalid')) : ips.length > 10 ? new Error(t('apiIpLimit')) : undefined,
+        )
+      },
+      trigger: 'blur',
+    },
+  ],
 }
-function persist() { try { localStorage.setItem(storageKey, JSON.stringify(rows.value)) } catch { ElMessage.warning(t('apiStorageWarn')) } }
 function edit(row) {
- if (!row && rows.value.length >= 10) return ElMessage.warning(t('apiLimit'))
- editId.value = row?.id ?? null
- Object.assign(form, { remarks: row?.remarks ?? '', ipAddresses: row?.ipAddresses ?? '', authorities: [...(row?.authorities ?? ['readonly'])] })
- formRef.value?.clearValidate()
- window.scrollTo({ top: 0, behavior: 'smooth' })
+  if (!row && rows.value.length >= 10) return ElMessage.warning(t('apiLimit'))
+  editId.value = row?.id ?? null
+  Object.assign(form, {
+    remarks: row?.remarks ?? '',
+    ipAddresses: row?.ipAddresses ?? '',
+    authorities: [...(row?.authorities ?? ['readonly'])],
+  })
+  formRef.value?.clearValidate()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 function resetForm() {
- editId.value = null
- Object.assign(form, { remarks: '', ipAddresses: '', authorities: ['readonly'] })
- formRef.value?.clearValidate()
+  editId.value = null
+  Object.assign(form, { remarks: '', ipAddresses: '', authorities: ['readonly'] })
+  formRef.value?.clearValidate()
 }
 function verify(action) {
- pending = action
- Object.assign(codes, { sms: '', email: '', ga: '' })
- verification.value = true
+  pending = action
+  Object.assign(codes, { sms: '', email: '', ga: '' })
+  verification.value = true
 }
 function sendCode(channel) {
- ElMessage.success(t('apiCodeSent', { channel }))
+  ElMessage.success(t('apiCodeSent', { channel }))
 }
 function confirmVerification() {
- if (!/^\d{6}$/.test(codes.sms) || !/^\d{6}$/.test(codes.email) || !/^\d{6}$/.test(codes.ga)) {
-  return ElMessage.warning(t('apiDemoHint'))
- }
- const action = pending
- pending = null
- verification.value = false
- action?.()
+  if (!/^\d{6}$/.test(codes.sms) || !/^\d{6}$/.test(codes.email) || !/^\d{6}$/.test(codes.ga)) {
+    return ElMessage.warning(t('apiDemoHint'))
+  }
+  const action = pending
+  pending = null
+  verification.value = false
+  action?.()
 }
 async function save() {
- if (!(await formRef.value.validate().catch(() => false))) return
- const values = { remarks: form.remarks.trim(), ipAddresses: form.ipAddresses.split(/[,\n]/).map(s => s.trim()).filter(Boolean).join(','), authorities: [...form.authorities] }
- const id = editId.value
- verify(() => {
-  if (id) Object.assign(rows.value.find(r => r.id === id), values)
-  else {
-   const token = crypto.randomUUID()
-   const row = { ...values, id: token, state: 'valid', createdDate: new Date().toLocaleString('sv-SE'), apiKey: `demo_api_${token}`, secret: `demo_secret_${crypto.randomUUID()}` }
-   rows.value.unshift(row)
-   detail.value = row
+  if (!(await formRef.value.validate().catch(() => false))) return
+  const values = {
+    remarks: form.remarks.trim(),
+    ipAddresses: form.ipAddresses
+      .split(/[,\n]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .join(','),
+    authorities: [...form.authorities],
   }
-  persist()
-  resetForm()
-  ElMessage.success(t(id ? 'apiUpdated' : 'apiCreated'))
- })
+  const id = editId.value
+  verify(() => {
+    if (id) {
+      Object.assign(
+        rows.value.find((row) => row.id === id),
+        values,
+      )
+    } else {
+      const token = crypto.randomUUID()
+      const row = {
+        ...values,
+        id: token,
+        // A key created through the demo form is valid, unbound and carries no risk flag yet.
+        state: 'valid',
+        createdDate: new Date().toLocaleString('sv-SE'),
+        apiKey: `dccb2137${token.replace(/-/g, '').slice(0, 20)}8fee`,
+        secret: `demo_secret_${crypto.randomUUID()}`,
+        risk: [],
+      }
+      rows.value.unshift(row)
+      detail.value = row
+    }
+    resetForm()
+    ElMessage.success(t(id ? 'apiUpdated' : 'apiCreated'))
+  })
 }
 async function remove(row) {
- try { await ElMessageBox.confirm(t('apiDeleteConfirm'), t('apiDeleteTitle'), { confirmButtonText: t('apiConfirm'), cancelButtonText: t('text183'), type: 'warning' }) } catch { return }
- verify(() => { rows.value = rows.value.filter(r => r.id !== row.id); persist(); ElMessage.success(t('apiDeleted')) })
+  try {
+    await ElMessageBox.confirm(t('apiDeleteConfirm'), t('apiDeleteTitle'), {
+      confirmButtonText: t('apiConfirm'),
+      cancelButtonText: t('text183'),
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
+  verify(() => {
+    rows.value = rows.value.filter((r) => r.id !== row.id)
+    ElMessage.success(t('apiDeleted'))
+  })
 }
-async function copy(value) { try { await navigator.clipboard.writeText(value); ElMessage.success(t('apiCopied')) } catch { ElMessage.warning(t('apiCopyFailed')) } }
+async function copy(value) {
+  try {
+    await navigator.clipboard.writeText(value)
+    ElMessage.success(t('apiCopied'))
+  } catch {
+    ElMessage.warning(t('apiCopyFailed'))
+  }
+}
 </script>
 <template>
- <section class="api-record api-key-records">
-  <div class="api-head">
-   <h2 class="api-bar-title">{{ editId ? $t('apiEditTitle') : $t('text051') }}</h2>
-   <a class="api-doc-link">{{ $t('text052') }}</a>
-  </div>
-  <div class="api-columns">
-   <el-form
-    ref="formRef"
-    class="api-form"
-    :model="form"
-    :rules="rules"
-    label-position="top"
-    @submit.prevent="save"
-   >
-    <el-form-item
-     :label="$t('apiRemark')"
-     prop="remarks"
-     required
-    >
-     <el-input
-      v-model="form.remarks"
-      :placeholder="$t('apiRemarkPlaceholder')"
-     />
-    </el-form-item>
-    <el-form-item
-     :label="$t('apiBindIp')"
-     prop="ipAddresses"
-     required
-    >
-     <el-input
-      v-model="form.ipAddresses"
-      type="textarea"
-      :rows="3"
-      :placeholder="$t('apiBindIpPlaceholder')"
-     />
-    </el-form-item>
-    <el-form-item :label="$t('apiPermissions')">
-     <el-checkbox-group v-model="form.authorities">
-      <el-checkbox
-       value="readonly"
-       disabled
-       >{{ $t('apiRead') }}</el-checkbox
-      ><el-checkbox value="trade">{{ $t('apiTrade') }}</el-checkbox><el-checkbox value="withdraw">{{ $t('text309') }}</el-checkbox>
-     </el-checkbox-group>
-    </el-form-item>
-    <button
-     class="api-submit"
-     type="submit"
-    >
-     {{ editId ? $t('apiModify') : $t('apiCreateBtn') }}
-    </button>
-    <a
-     v-if="editId"
-     class="api-cancel-edit"
-     @click="resetForm"
-     >{{ $t('apiCancelEdit') }}</a
-    >
-   </el-form>
-   <div class="api-notes">
-    <h3>{{ $t('text053') }}</h3>
-    <div class="api-notes-box">
-     <p>{{ $t('text054') }}</p>
-     <p>{{ $t('text055') }}</p>
-     <p>{{ $t('text056') }}</p>
-     <p>{{ $t('text057') }}</p>
-     <p>{{ $t('text058') }}<a>{{ $t('text059') }}</a></p>
+  <section class="api-record api-key-records">
+    <div class="api-head">
+      <h2 class="api-bar-title">{{ $t('text051') }}</h2>
+      <a class="api-doc-link">{{ $t('text052') }}</a>
     </div>
-   </div>
-  </div>
+    <div class="api-columns">
+      <el-form
+        ref="formRef"
+        class="api-form"
+        :model="form"
+        :rules="rules"
+        label-position="top"
+        @submit.prevent="save"
+      >
+        <el-form-item
+          :label="$t('apiRemark')"
+          prop="remarks"
+          required
+        >
+          <el-input
+            v-model="form.remarks"
+            :placeholder="$t('apiRemarkPlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item
+          :label="$t('apiBindIp')"
+          prop="ipAddresses"
+        >
+          <el-input
+            v-model="form.ipAddresses"
+            type="textarea"
+            :rows="3"
+            :placeholder="$t('apiBindIpPlaceholder')"
+          />
+        </el-form-item>
+        <el-form-item :label="$t('apiPermissions')">
+          <el-checkbox-group v-model="form.authorities">
+            <el-checkbox
+              value="readonly"
+              disabled
+              >{{ $t('apiRead') }}</el-checkbox
+            ><el-checkbox value="trade">{{ $t('apiTrade') }}</el-checkbox
+            ><el-checkbox value="withdraw">{{ $t('text309') }}</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+        <button
+          class="api-submit"
+          type="submit"
+        >
+          {{ editId ? $t('apiModify') : $t('apiCreateBtn') }}
+        </button>
+        <a
+          v-if="editId"
+          class="api-cancel-edit"
+          @click="resetForm"
+          >{{ $t('apiCancelEdit') }}</a
+        >
+      </el-form>
+      <div class="api-notes">
+        <h3>{{ $t('text053') }}</h3>
+        <div class="api-notes-box">
+          <p>{{ $t('text054') }}</p>
+          <p>{{ $t('text055') }}</p>
+          <p>{{ $t('text056') }}</p>
+          <p>{{ $t('text057') }}</p>
+          <p>{{ $t('text058') }}<a>{{ $t('text059') }}</a></p>
+        </div>
+      </div>
+    </div>
 
-  <h2 class="api-bar-title api-record-title">{{ $t('apiRecordsTitle') }}</h2>
-  <el-table
-   :data="rows"
-   row-key="id"
-   :empty-text="$t('text066')"
-   :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
-  >
-   <el-table-column
-    prop="remarks"
-    :label="$t('apiRemarkColumn')"
-    min-width="180"
-   />
-   <el-table-column
-    :label="$t('apiPermissions')"
-    min-width="200"
-   ><template #default="{ row }">{{ authText(row) }}</template></el-table-column>
-   <el-table-column
-    :label="$t('text063')"
-    width="120"
-   ><template #default="{ row }"><span :class="{ expired: row.state === 'overdue' }">{{ row.state === 'valid' ? $t('apiValid') : $t('apiInvalid') }}</span></template></el-table-column>
-   <el-table-column
-    prop="createdDate"
-    :label="$t('text064')"
-    min-width="190"
-   />
-   <el-table-column
-    :label="$t('text065')"
-    width="210"
-    fixed="right"
-   ><template #default="{ row }"><el-button
-    link
-    class="api-action"
-    @click="verify(() => detail = row)"
-    >{{ $t('apiView') }}</el-button
-   ><el-button
-    link
-    class="api-action"
-    @click="edit(row)"
-    >{{ $t('apiEdit') }}</el-button
-   ><el-button
-    link
-    class="api-action api-danger"
-    @click="remove(row)"
-    >{{ $t('text182') }}</el-button></template></el-table-column>
-  </el-table>
+    <h2 class="api-bar-title api-record-title">{{ $t('apiRecordsTitle') }}</h2>
+    <el-table
+      :data="rows"
+      row-key="id"
+      :empty-text="$t('text066')"
+      :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+    >
+      <el-table-column
+        prop="remarks"
+        :label="$t('apiRemarkColumn')"
+        min-width="150"
+      />
+      <el-table-column
+        :label="$t('apiKeyColumn')"
+        min-width="170"
+      ><template #default="{ row }"><span class="api-masked-key">{{ maskKey(row.apiKey) }}</span></template></el-table-column>
+      <el-table-column
+        :label="$t('apiPermissions')"
+        min-width="150"
+      ><template #default="{ row }">{{ authText(row) }}</template></el-table-column>
+      <el-table-column
+        :label="$t('apiIpBinding')"
+        min-width="130"
+      ><template #default="{ row }">{{ row.ipAddresses || $t('apiIpUnbound') }}</template></el-table-column>
+      <el-table-column
+        :label="$t('text063')"
+        width="110"
+      ><template #default="{ row }"><em :class="'api-state api-state-' + row.state">{{ $t(stateKey(row)) }}</em></template></el-table-column>
+      <el-table-column
+        :label="$t('apiRisk')"
+        min-width="180"
+      ><template #default="{ row }">{{ (row.risk ?? []).length ? riskText(row) : '—' }}</template></el-table-column>
+      <el-table-column
+        :label="$t('text065')"
+        width="240"
+        fixed="right"
+      ><template #default="{ row }"><el-button
+        link
+        class="api-action"
+        @click="verify(() => (detail = row))"
+        >{{ $t('apiView') }}</el-button
+      ><el-button
+        link
+        class="api-action"
+        @click="edit(row)"
+        >{{ $t('apiEdit') }}</el-button
+      ><el-button
+        link
+        class="api-action api-danger"
+        @click="remove(row)"
+        >{{ $t('text182') }}</el-button></template></el-table-column>
+    </el-table>
 
-  <el-dialog
-   v-model="verification"
-   width="400px"
-   align-center
-   class="verify-dialog"
-   @closed="pending = null"
-  >
-   <template #header><h3 class="verify-title">{{ $t('apiVerifyTitle') }}</h3></template>
-   <div class="verify-field">
-    <p>{{ $t('apiSmsLabel') }}</p>
-    <label class="verify-line"><input
-     v-model="codes.sms"
-     :placeholder="$t('apiSmsPlaceholder')"
-     maxlength="6"
-    /><button
-     type="button"
-     @click="sendCode(t('apiSmsChannel'))"
+    <el-dialog
+      v-model="verification"
+      width="400px"
+      align-center
+      class="verify-dialog"
+      @closed="pending = null"
     >
-     {{ $t('apiSend') }}
-    </button></label>
-   </div>
-   <div class="verify-field">
-    <p>{{ $t('apiEmailLabel') }}</p>
-    <label class="verify-line"><input
-     v-model="codes.email"
-     :placeholder="$t('apiEmailPlaceholder')"
-     maxlength="6"
-    /><button
-     type="button"
-     @click="sendCode(t('apiEmailChannel'))"
-    >
-     {{ $t('apiSend') }}
-    </button></label>
-   </div>
-   <div class="verify-field">
-    <p>{{ $t('apiGaLabel') }}</p>
-    <label class="verify-line"><input
-     v-model="codes.ga"
-     :placeholder="$t('apiGaLabel')"
-     maxlength="6"
-    /></label>
-   </div>
-   <div class="verify-actions">
-    <button
-     class="verify-cancel"
-     type="button"
-     @click="verification = false"
-    >
-     {{ $t('text183') }}
-    </button>
-    <button
-     class="verify-confirm"
-     type="button"
-     @click="confirmVerification"
-    >
-     {{ $t('transferConfirm') }}
-    </button>
-   </div>
-   <p class="verify-hint">{{ $t('apiDemoHint') }}</p>
-  </el-dialog>
+      <template #header><h3 class="verify-title">{{ $t('apiVerifyTitle') }}</h3></template>
+      <div class="verify-field">
+        <p>{{ $t('apiSmsLabel') }}</p>
+        <label class="verify-line"><input
+          v-model="codes.sms"
+          :placeholder="$t('apiSmsPlaceholder')"
+          maxlength="6"
+        /><button
+          type="button"
+          @click="sendCode(t('apiSmsChannel'))"
+        >
+          {{ $t('apiSend') }}
+        </button></label>
+      </div>
+      <div class="verify-field">
+        <p>{{ $t('apiEmailLabel') }}</p>
+        <label class="verify-line"><input
+          v-model="codes.email"
+          :placeholder="$t('apiEmailPlaceholder')"
+          maxlength="6"
+        /><button
+          type="button"
+          @click="sendCode(t('apiEmailChannel'))"
+        >
+          {{ $t('apiSend') }}
+        </button></label>
+      </div>
+      <div class="verify-field">
+        <p>{{ $t('apiGaLabel') }}</p>
+        <label class="verify-line"><input
+          v-model="codes.ga"
+          :placeholder="$t('apiGaLabel')"
+          maxlength="6"
+        /></label>
+      </div>
+      <div class="verify-actions">
+        <button
+          class="verify-cancel"
+          type="button"
+          @click="verification = false"
+        >
+          {{ $t('text183') }}
+        </button>
+        <button
+          class="verify-confirm"
+          type="button"
+          @click="confirmVerification"
+        >
+          {{ $t('transferConfirm') }}
+        </button>
+      </div>
+      <p class="verify-hint">{{ $t('apiDemoHint') }}</p>
+    </el-dialog>
 
-  <el-dialog
-   :model-value="!!detail"
-   :title="$t('apiViewTitle')"
-   width="760px"
-   center
-   @close="detail = null"
-  >
-   <div
-    v-if="detail"
-    class="key-details"
-   >
-    <div><label>{{ $t('apiRemarkColumn') }}</label><p>{{ detail.remarks }}</p><label>{{ $t('apiPermissions') }}</label><p>{{ authText(detail) }}</p><label>{{ $t('apiBindIp') }}</label><p>{{ detail.ipAddresses }}</p></div><div><label>API Key</label><p>{{ detail.apiKey }} <el-button
-     link
-     class="api-action"
-     @click="copy(detail.apiKey)"
-     >{{ $t('depCopy') }}</el-button></p><label>{{ $t('apiSecret') }}</label><p>{{ detail.secret }} <el-button
-     link
-     class="api-action"
-     @click="copy(detail.secret)"
-     >{{ $t('depCopy') }}</el-button></p></div>
-   </div>
-  </el-dialog>
- </section>
+    <el-dialog
+      :model-value="!!detail"
+      :title="$t('apiViewTitle')"
+      width="760px"
+      center
+      @close="detail = null"
+    >
+      <div
+        v-if="detail"
+        class="key-details"
+      >
+        <div>
+          <label>{{ $t('apiRemarkColumn') }}</label>
+          <p>{{ detail.remarks }}</p>
+          <label>{{ $t('apiPermissions') }}</label>
+          <p>{{ authText(detail) }}</p>
+          <label>{{ $t('apiIpBinding') }}</label>
+          <p>{{ detail.ipAddresses || $t('apiIpUnbound') }}</p>
+        </div>
+        <div>
+          <label>API Key</label>
+          <p>
+            {{ detail.apiKey }}
+            <el-button
+              link
+              class="api-action"
+              @click="copy(detail.apiKey)"
+              >{{ $t('depCopy') }}</el-button
+            >
+          </p>
+          <label>{{ $t('apiSecret') }}</label>
+          <p>
+            {{ detail.secret }}
+            <el-button
+              link
+              class="api-action"
+              @click="copy(detail.secret)"
+              >{{ $t('depCopy') }}</el-button
+            >
+          </p>
+        </div>
+      </div>
+    </el-dialog>
+  </section>
 </template>
 <style scoped>
 .api-key-records{--el-color-primary:#c9a000}
@@ -309,11 +404,15 @@ async function copy(value) { try { await navigator.clipboard.writeText(value); E
 .api-record-title{margin:56px 0 20px}
 .api-key-records :deep(.el-table){font-size:14px}
 .api-key-records :deep(.el-table__cell){padding:16px 0}
+.api-masked-key{color:#303744;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* 状态 reads as a chip, the way the key list does elsewhere in the console. */
+.api-state{display:inline-block;padding:2px 10px;border-radius:4px;font-size:13px;font-style:normal}
+.api-state-valid{background:#e8f7ec;color:#2f9e5c}
+.api-state-expired,.api-state-revoked{background:#f0f2f5;color:#8a93a0}
 .api-action{color:#d9a600;font-size:14px}
 .api-action:hover{color:#b98c00}
 .api-danger{color:#e0443a}
 .api-danger:hover{color:#c2352c}
-.expired{color:#e0443a}
 .verify-title{margin:0;color:#171d27;font-size:20px;font-weight:500;text-align:center}
 .verify-field{margin-bottom:22px}
 .verify-field p{margin:0 0 10px;color:#3f4a56;font-size:14px}

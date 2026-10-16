@@ -1,24 +1,16 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
 import UserSidebar from './UserSidebar.vue'
+import KycNotice from './KycNotice.vue'
+import KycRequired from './KycRequired.vue'
 import { formatMoney } from './currency'
 import { i18n, tr } from './i18n'
 import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { kycVerified } from './session'
-import {
-  ArrowDown,
-  Grid,
-  Wallet,
-  Tickets,
-  User,
-  Lock,
-  Briefcase,
-  Connection,
-  Search,
-  Sort,
-} from '@element-plus/icons-vue'
+import { Search, Sort } from '@element-plus/icons-vue'
 import { computed, ref } from 'vue'
+import { currentAccount, demoPrices } from './demoAccounts'
 const accountParam = new URLSearchParams(window.location.search).get('account')
 const props = defineProps({ assets: Boolean })
 const accountTab = ref(
@@ -38,11 +30,11 @@ const coins = [
   ['◎', 'SOL', 'Solana', ''],
 ]
 // Demo balances and USD prices behind the transfer flow, so a transfer always has funds to move.
-const prices = { USD: 1, HKD: 0.128, ETH: 3450, USDC: 1, USDT: 1, BTC: 96000, SOL: 150 }
-const balances = ref({
-  fund: { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08, SOL: 0.02 },
-  trade: { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012, SOL: 0.01 },
-})
+// Each demo account brings its own balances; the copy is local so a transfer holds for the rest
+// of the visit and a reload restores the seeded amounts.
+const profile = currentAccount
+const prices = demoPrices
+const balances = ref(structuredClone(currentAccount.value.balances))
 // Rows under this USD value answer the 隐藏小额资产 switch.
 const SMALL_ASSET_USD = 10
 const hideSmall = ref(false)
@@ -67,6 +59,12 @@ const depositHref = (symbol) =>
     : `/bge/hk/zh-CN/user/crypto/deposit/${symbol}`
 const activeBtc = computed(() => accountBtc(activeAccount.value))
 const totalBtc = computed(() => accountBtc('fund') + accountBtc('trade'))
+// The 总览 tab follows the same three tabs; 总资产 is the two accounts added up, so the headline
+// here reads the same as the asset page instead of a fixed zero.
+const overviewBtc = computed(() =>
+  accountTab.value === 'total' ? totalBtc.value : accountBtc(accountTab.value),
+)
+const showKycNotice = ref(props.assets && !kycVerified.value)
 
 const transferOpen = ref(false)
 const transferFrom = ref('fund')
@@ -104,23 +102,7 @@ function confirmTransfer() {
   <div class="user-page">
     <SiteHeader active="assets" />
     <div class="user-layout">
-      <aside
-        v-if="assets"
-        class="asset-sidebar"
-      >
-        <a
-          class="asset-menu-link"
-          :class="{ sel: accountTab === 'fund' }"
-          href="/bge/hk/zh-CN/user/assets?account=fund"
-          ><el-icon><Wallet /></el-icon>{{ $t('text333') }}</a
-        ><a
-          class="asset-menu-link"
-          :class="{ sel: accountTab === 'trade' }"
-          href="/bge/hk/zh-CN/user/assets?account=trade"
-          ><el-icon><Tickets /></el-icon>{{ $t('text334') }}</a
-        >
-      </aside>
-      <UserSidebar v-else />
+      <UserSidebar v-if="!assets" />
       <main class="user-main">
         <section
           v-if="!assets"
@@ -135,12 +117,13 @@ function confirmTransfer() {
             />
           </div>
           <div>
-            <h3>heqi**gic@gmail.com</h3>
-            <p>UID 8395618828　<span>▢</span>{{ $t('text336') }}</p>
+            <h3>{{ profile.email }}</h3>
+            <p>UID {{ profile.uid }}　<span>▢</span>{{ tr(profile.label) }}</p>
           </div>
         </section>
         <template v-if="!assets"
-          ><section class="overview">
+          ><template v-if="kycVerified"
+            ><section class="overview">
             <h2>{{ $t('text337') }}</h2>
             <div class="tabs">
               <b
@@ -168,7 +151,11 @@ function confirmTransfer() {
             <p class="label">
               {{ accountTab === 'total' ? $t('text338') : tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text339') }}
             </p>
-            <strong>{{ formatMoney(0, 'USD', 4) }}</strong>
+            <strong
+              >{{ overviewBtc.toFixed(8) }} BTC <small
+                >≈ {{ formatMoney(overviewBtc * prices.BTC, 'USD', 4) }}</small
+              ></strong
+            >
             <div>
               <button>{{ $t('text275') }}</button><button class="muted">{{ $t('text276') }}</button>
             </div>
@@ -186,7 +173,8 @@ function confirmTransfer() {
               </h2>
               <div class="empty">{{ $t('text066') }}</div>
             </section>
-          </div><div v-if="!assets" class="dashboard-cards">
+          </div></template
+          ><KycRequired v-else /><div v-if="!assets" class="dashboard-cards">
             <section class="dashboard-card activity-card">
               <header><h2>{{ $t('text047') }}</h2><a href="/bge/hk/zh-CN/user/security">{{ $t('text340') }}</a></header>
               <div class="activity-row"><span>OSX Chrome 154.0.0.0<small>2026-10-08 15:33:28</small></span><b>116.49.145.110<small>{{ tr('登录') }}</small></b></div>
@@ -202,16 +190,17 @@ function confirmTransfer() {
             </section>
           </div></template
         ><template v-else
-          ><section class="asset-banner">
+          ><!-- The asset module is one page now: the two header menu entries land here and pick
+              the account through this tab row instead of a sidebar. The tab sits below the two
+              shared modules, right on top of the account it switches. -->
+          <template v-if="kycVerified"
+            ><section class="asset-banner">
             <span>{{ $t('text341') }}</span
             ><strong
               >{{ totalBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(totalBtc * prices.BTC, 'USD', 4) }}</small></strong
             ><a>{{ $t('text342') }}</a>
           </section>
-          <div
-            v-if="kycVerified"
-            class="asset-panels"
-          >
+          <div class="asset-panels">
             <section class="asset-panel risk-panel">
               <h3>{{ $t('assetRisk') }}</h3>
               <div class="risk-level">
@@ -233,6 +222,22 @@ function confirmTransfer() {
             </section>
           </div>
           <section class="asset-box">
+            <div class="tabs asset-tabs">
+              <span
+                :class="{ active: accountTab === 'fund' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'fund'"
+                @keydown.enter="accountTab = 'fund'"
+              >{{ $t('text333') }}</span
+              ><span
+                :class="{ active: accountTab === 'trade' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'trade'"
+                @keydown.enter="accountTab = 'trade'"
+              >{{ $t('text334') }}</span>
+            </div>
             <h2 class="asset-account-title">{{ accountName(activeAccount) }}</h2>
             <p class="label">{{ accountName(activeAccount) }}{{ $t('text343') }}</p>
             <strong
@@ -294,6 +299,7 @@ function confirmTransfer() {
               {{ $t('text066') }}
             </div>
           </section></template
+          ><KycRequired v-else /></template
         >
       </main>
     </div>
@@ -404,11 +410,14 @@ function confirmTransfer() {
         </div>
       </section>
     </div>
+    <KycNotice v-model="showKycNotice" />
     <Footer />
   </div>
 </template>
 
 <style scoped>
+/* The asset page picks its account with the shared .tabs row instead of the old sidebar. */
+.asset-tabs{gap:48px}
 .asset-hide-small{--el-checkbox-checked-bg-color:#f0d000;--el-checkbox-checked-input-border-color:#f0d000;--el-checkbox-checked-icon-color:#111;--el-checkbox-input-border-color-hover:#f0d000}
 .asset-hide-small :deep(.el-checkbox__label){padding-left:8px;color:#6f7783;font-size:13px;font-weight:400}
 .asset-panels{display:grid;grid-template-columns:1fr 1.72fr;gap:16px;margin-top:16px}

@@ -5,7 +5,6 @@ import { computed } from 'vue'
 import Home from './Home.vue'
 import Spot from './Spot.vue'
 import Otc from './Otc.vue'
-import OtcTrade from './OtcTrade.vue'
 import Company from './Company.vue'
 import UserCenter from './UserCenter.vue'
 import CryptoWithdraw from './CryptoWithdraw.vue'
@@ -27,11 +26,16 @@ import Parameters from './Parameters.vue'
 import FeeStandard from './FeeStandard.vue'
 import Announcement from './Announcement.vue'
 import Login from './Login.vue'
+import DemoNote from './DemoNote.vue'
 import { loggedIn } from './session'
 const path = window.location.pathname
 // Signed-out visitors are sent to the login page when they open an account page.
 if (!loggedIn.value && path.startsWith('/bge/hk/zh-CN/user/')) {
   window.location.replace('/bge/hk/zh-CN/login')
+}
+// 场外 › 去交易 used to open its own page; it now shares 订单 › OTC 订单.
+if (path.replace(/\/$/, '') === '/bge/hk/zh-CN/otc/trade') {
+  window.location.replace('/bge/hk/zh-CN/user/report/otc-orders')
 }
 const page = computed(() =>
   path.includes('/login')
@@ -70,9 +74,7 @@ const page = computed(() =>
                 ? 'assets'
                 : path.includes('/user/dashboard')
                   ? 'dashboard'
-    : path.includes('/otc/trade')
-                    ? 'otc-trade'
-                    : path.includes('/otc')
+    : path.includes('/otc')
                     ? 'otc'
                     : path.includes('/security')
                       ? 'security'
@@ -88,7 +90,6 @@ const page = computed(() =>
     <Announcement v-else-if="page === 'announcement'" />
     <MessageCenter v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/user/messages'" />
     <Spot v-else-if="path.replace(/\/$/, '') === '/bge/hk/zh-CN/spot'" />
-    <OtcTrade v-else-if="page === 'otc-trade'" />
     <Otc v-else-if="page === 'otc'" />
     <FeeStandard v-else-if="path.replace(/\/$/, '').endsWith('/user/fee-standard')" />
     <Parameters v-else-if="path.replace(/\/$/, '').endsWith('/user/fees')" />
@@ -115,5 +116,7 @@ const page = computed(() =>
       :security="page === 'security'"
     />
     <Home v-else />
+    <!-- Lives here rather than in each page so the note follows every route on its own. -->
+    <DemoNote />
   </el-config-provider>
 </template>

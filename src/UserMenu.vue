@@ -150,6 +150,9 @@ async function copyUid() {
         </nav>
       </div>
     </el-popover>
+    <!-- The personal centre is a changed module too: its overview now carries real balances and
+         the account pages behind this entry are the ones the verification gate covers. -->
+    <em class="nav-tag nav-tag-edit account-menu-tag">{{ $t('demoTagModified') }}</em>
   </div>
 </template>
 
@@ -158,6 +161,12 @@ async function copyUid() {
   display: flex;
   align-items: center;
   align-self: stretch;
+  gap: 6px;
+}
+/* The chip is last in the row, so it takes the right-most slot and the avatar shifts over. */
+.account-menu-tag {
+  margin: 0;
+  pointer-events: none;
 }
 .account-menu .avatar {
   /* The trigger fills the header so the panel opens flush below it. */

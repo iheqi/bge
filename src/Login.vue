@@ -3,10 +3,12 @@ import SiteHeader from './SiteHeader.vue'
 import Footer from './Footer.vue'
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { i18n } from './i18n'
+import { i18n, tr } from './i18n'
 import { signIn } from './session'
+import { demoAccounts } from './demoAccounts'
 
 const account = ref('')
+const picked = ref('')
 const password = ref('')
 const captchaOpen = ref(false)
 const captchaState = ref('idle')
@@ -31,6 +33,13 @@ function checkCaptcha() {
       securityOpen.value = true
     }, 420)
   }, 700)
+}
+// Fills the form with one of the built-in demo accounts. The captcha and SMS steps still run, so
+// the walkthrough keeps showing the real sign-in flow.
+function pick(item) {
+  picked.value = item.id
+  account.value = item.id
+  password.value = 'bge-demo'
 }
 function sendSms() {
   ElMessage.success(t('apiCodeSent', { channel: t('apiSmsChannel') }))
@@ -80,6 +89,22 @@ function confirmSecurity() {
             >{{ $t('loginRegister') }}</a
           >
         </div>
+        <section class="demo-accounts">
+          <p>{{ $t('demoLoginPick') }}</p>
+          <div class="demo-account-row">
+            <button
+              v-for="item in demoAccounts"
+              :key="item.id"
+              type="button"
+              :class="{ picked: picked === item.id }"
+              @click="pick(item)"
+            >
+              <b>{{ tr(item.label) }}</b
+              ><small>{{ item.uid }}</small>
+            </button>
+          </div>
+          <em>{{ $t('demoLoginHint') }}</em>
+        </section>
       </section>
     </main>
     <Footer />
@@ -323,6 +348,58 @@ function confirmSecurity() {
 }
 .login-register:hover {
   color: #b98c00;
+}
+.demo-accounts {
+  margin-top: 34px;
+  padding-top: 24px;
+  border-top: 1px solid #edf0f4;
+}
+.demo-accounts > p {
+  margin: 0 0 12px;
+  color: #171d27;
+  font-size: 14px;
+  font-weight: 500;
+}
+.demo-account-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.demo-account-row button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid #dfe4ec;
+  border-radius: 6px;
+  background: #fff;
+  color: #303744;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.demo-account-row button b {
+  font-size: 14px;
+  font-weight: 500;
+}
+.demo-account-row button small {
+  color: #9aa2ad;
+  font-size: 12px;
+}
+.demo-account-row button:hover {
+  border-color: #f0d000;
+}
+.demo-account-row button.picked {
+  border-color: #f0d000;
+  background: #fffbe0;
+}
+.demo-accounts > em {
+  display: block;
+  margin-top: 12px;
+  color: #9aa2ad;
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.6;
 }
 .login-mask {
   position: fixed;

@@ -1,13 +1,3 @@
-.user-layout .asset-sidebar {
-  flex-shrink: 0;
-}
-.user-layout .asset-sidebar .asset-menu-link {
-  padding-left: 32px;
-}
-.user-layout .asset-sidebar .asset-menu-link.sel {
-  color: #151923;
-  font-weight: 500;
-}
 .asset-box .asset-account-title {
   margin: 0;
   padding: 24px 0;

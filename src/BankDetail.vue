@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { i18n, tr } from './i18n'
+import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
 // Fiat currencies the bank card can be used for; ADS/DSz are the demo placeholders of the design.
 const currencies = [
   { code: 'USD', name: '美元' },
@@ -32,7 +33,8 @@ const summary = computed(() =>
     ...(form.value.tag ? [{ key: 'text393', value: form.value.tag }] : []),
   ].filter((item) => item.value),
 )
-const stored = JSON.parse(localStorage.getItem('bge-bank-record') || 'null')
+// The card is scoped to the signed-in demo account, so each profile keeps its own bank record.
+const stored = readAccountState('bank-record', currentAccount.value.payment.bank)
 if (editMode && stored) {
   form.value = {
     account: stored.account || '',
@@ -77,13 +79,10 @@ function submit() {
 }
 function save() {
   // Stored locally so the fiat page can list the card; the backend call replaces this later.
-  localStorage.setItem(
-    'bge-bank-record',
-    JSON.stringify({
-      ...form.value,
-      cards: chosen.value.map((row) => ({ code: row.code, usage: row.usage })),
-    }),
-  )
+  writeAccountState('bank-record', {
+    ...form.value,
+    cards: chosen.value.map((row) => ({ code: row.code, usage: row.usage })),
+  })
   ElMessage.success(i18n.global.t('text386'))
   back()
 }
