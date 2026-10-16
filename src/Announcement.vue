@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import SiteHeader from './SiteHeader.vue'
 import Footer from './Footer.vue'
+import { tr } from './i18n'
 
 const base = '/bge/hk/zh-CN/support/announcement'
 const articles = [
