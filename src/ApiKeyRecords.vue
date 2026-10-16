@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { i18n } from './i18n'
 import { currentAccount, useAccountState } from './demoAccounts'
+import VerifyDialog from './VerifyDialog.vue'
 
 const t = (key, params) => i18n.global.t(key, params)
 // The key list is editable, so it is stored per demo account on top of that account's seed rows.
@@ -19,7 +20,6 @@ const riskText = (row) => (row.risk ?? []).map((key) => t(key)).join('、')
 const detail = ref(null)
 const verification = ref(false)
 const editId = ref(null)
-const codes = reactive({ sms: '', email: '', ga: '' })
 const formRef = ref()
 const form = reactive({ remarks: '', ipAddresses: '', authorities: ['readonly'] })
 let pending = null
@@ -66,21 +66,15 @@ function resetForm() {
   Object.assign(form, { remarks: '', ipAddresses: '', authorities: ['readonly'] })
   formRef.value?.clearValidate()
 }
+// The three-field identity check lives in VerifyDialog; this page only remembers what to run once
+// it passes.
 function verify(action) {
   pending = action
-  Object.assign(codes, { sms: '', email: '', ga: '' })
   verification.value = true
 }
-function sendCode(channel) {
-  ElMessage.success(t('apiCodeSent', { channel }))
-}
-function confirmVerification() {
-  if (!/^\d{6}$/.test(codes.sms) || !/^\d{6}$/.test(codes.email) || !/^\d{6}$/.test(codes.ga)) {
-    return ElMessage.warning(t('apiDemoHint'))
-  }
+function runPending() {
   const action = pending
   pending = null
-  verification.value = false
   action?.()
 }
 async function save() {
@@ -134,14 +128,6 @@ async function remove(row) {
     rows.value = rows.value.filter((r) => r.id !== row.id)
     ElMessage.success(t('apiDeleted'))
   })
-}
-async function copy(value) {
-  try {
-    await navigator.clipboard.writeText(value)
-    ElMessage.success(t('apiCopied'))
-  } catch {
-    ElMessage.warning(t('apiCopyFailed'))
-  }
 }
 </script>
 <template>
@@ -268,66 +254,10 @@ async function copy(value) {
         >{{ $t('text182') }}</el-button></template></el-table-column>
     </el-table>
 
-    <el-dialog
+    <VerifyDialog
       v-model="verification"
-      width="400px"
-      align-center
-      class="verify-dialog"
-      @closed="pending = null"
-    >
-      <template #header><h3 class="verify-title">{{ $t('apiVerifyTitle') }}</h3></template>
-      <div class="verify-field">
-        <p>{{ $t('apiSmsLabel') }}</p>
-        <label class="verify-line"><input
-          v-model="codes.sms"
-          :placeholder="$t('apiSmsPlaceholder')"
-          maxlength="6"
-        /><button
-          type="button"
-          @click="sendCode(t('apiSmsChannel'))"
-        >
-          {{ $t('apiSend') }}
-        </button></label>
-      </div>
-      <div class="verify-field">
-        <p>{{ $t('apiEmailLabel') }}</p>
-        <label class="verify-line"><input
-          v-model="codes.email"
-          :placeholder="$t('apiEmailPlaceholder')"
-          maxlength="6"
-        /><button
-          type="button"
-          @click="sendCode(t('apiEmailChannel'))"
-        >
-          {{ $t('apiSend') }}
-        </button></label>
-      </div>
-      <div class="verify-field">
-        <p>{{ $t('apiGaLabel') }}</p>
-        <label class="verify-line"><input
-          v-model="codes.ga"
-          :placeholder="$t('apiGaLabel')"
-          maxlength="6"
-        /></label>
-      </div>
-      <div class="verify-actions">
-        <button
-          class="verify-cancel"
-          type="button"
-          @click="verification = false"
-        >
-          {{ $t('text183') }}
-        </button>
-        <button
-          class="verify-confirm"
-          type="button"
-          @click="confirmVerification"
-        >
-          {{ $t('transferConfirm') }}
-        </button>
-      </div>
-      <p class="verify-hint">{{ $t('apiDemoHint') }}</p>
-    </el-dialog>
+      @verified="runPending"
+    />
 
     <el-dialog
       :model-value="!!detail"
@@ -349,26 +279,13 @@ async function copy(value) {
           <p>{{ detail.ipAddresses || $t('apiIpUnbound') }}</p>
         </div>
         <div>
-          <label>API Key</label>
-          <p>
-            {{ detail.apiKey }}
-            <el-button
-              link
-              class="api-action"
-              @click="copy(detail.apiKey)"
-              >{{ $t('depCopy') }}</el-button
-            >
-          </p>
-          <label>{{ $t('apiSecret') }}</label>
-          <p>
-            {{ detail.secret }}
-            <el-button
-              link
-              class="api-action"
-              @click="copy(detail.secret)"
-              >{{ $t('depCopy') }}</el-button
-            >
-          </p>
+          <!-- The detail panel shows the same masked key as the list: the secret stays out of it. -->
+          <label>{{ $t('apiKeyColumn') }}</label>
+          <p>{{ maskKey(detail.apiKey) }}</p>
+          <label>{{ $t('text064') }}</label>
+          <p>{{ detail.createdDate }}</p>
+          <label>{{ $t('text063') }}</label>
+          <p>{{ $t(stateKey(detail)) }}</p>
         </div>
       </div>
     </el-dialog>
@@ -413,21 +330,6 @@ async function copy(value) {
 .api-action:hover{color:#b98c00}
 .api-danger{color:#e0443a}
 .api-danger:hover{color:#c2352c}
-.verify-title{margin:0;color:#171d27;font-size:20px;font-weight:500;text-align:center}
-.verify-field{margin-bottom:22px}
-.verify-field p{margin:0 0 10px;color:#3f4a56;font-size:14px}
-.verify-line{display:flex;align-items:center;gap:16px;padding-bottom:10px;border-bottom:1px solid #dfe4ec}
-.verify-line input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:#303744;font-size:14px}
-.verify-line input::placeholder{color:#b6bcc6}
-.verify-line button{padding:0;border:0;background:none;color:#d9a600;font-size:14px;cursor:pointer;white-space:nowrap}
-.verify-line button:hover{color:#b98c00}
-.verify-actions{display:flex;justify-content:center;gap:48px;margin-top:34px}
-.verify-cancel,.verify-confirm{width:120px;height:40px;border:0;border-radius:4px;font-size:15px;cursor:pointer}
-.verify-cancel{background:#eef0f5;color:#171d27}
-.verify-cancel:hover{background:#e4e8ee}
-.verify-confirm{background:#f5ff18;color:#111;font-weight:600}
-.verify-confirm:hover{background:#e8f000}
-.verify-hint{margin:16px 0 0;color:#9aa2ad;font-size:12px;text-align:center}
 .key-details{display:grid;grid-template-columns:1fr 1fr;gap:40px}
 .key-details > div:first-child{border-right:1px dashed #e4e7ed;padding-right:24px}
 .key-details label{color:#929ba9}

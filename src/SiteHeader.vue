@@ -31,7 +31,8 @@ const menus = [
     links: [
       { label: 'text289', href: '/bge/hk/zh-CN/user/report/spot' },
       { label: 'text290', href: '/bge/hk/zh-CN/user/report/wallet' },
-      { label: 'text291', href: '/bge/hk/zh-CN/user/report/otc-orders' },
+      // OTC gained intent and match detail pages plus the 新增 labels on its actions.
+      { label: 'text291', href: '/bge/hk/zh-CN/user/report/otc-orders', tag: 'edit' },
       { label: 'text292', href: '/bge/hk/zh-CN/user/report/settle' },
     ],
   },
@@ -152,7 +153,12 @@ const menus = [
             v-for="link in menu.links"
             :key="link.href"
             :href="link.href"
-            >{{ $t(link.label) }}</a
+            >{{ $t(link.label) }}<em
+              v-if="link.tag"
+              class="nav-tag"
+              :class="'nav-tag-' + link.tag"
+              >{{ tagText(link.tag) }}</em
+            ></a
           >
         </nav>
       </el-popover>

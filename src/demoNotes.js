@@ -6,8 +6,16 @@ const notes = {
   '/bge/hk/zh-CN/otc': ['noteOtc'],
   '/bge/hk/zh-CN/user/dashboard': ['noteDashboard', 'noteKycGate'],
   '/bge/hk/zh-CN/user/report': ['noteOrders', 'noteKycGate'],
-  '/bge/hk/zh-CN/user/report/otc-orders': ['noteOrders', 'noteMatch', 'noteKycGate'],
-  '/bge/hk/zh-CN/user/assets': ['noteAssets', 'noteKycGate'],
+  '/bge/hk/zh-CN/user/report/otc-orders': [
+    'noteOrders',
+    'noteMatch',
+    'noteOtcDetail',
+    'noteKycGate',
+  ],
+  // Every 详情 entry in the order module lands on the same page, whatever the record is.
+  '/bge/hk/zh-CN/user/report/detail': ['noteDetail', 'noteKycGate'],
+  '/bge/hk/zh-CN/user/assets': ['noteAssets', 'noteAssetsFrozen', 'noteKycGate'],
+  '/bge/hk/zh-CN/user/fees': ['noteFee'],
   // 收付款管理 and API 管理 take the same gate, so they carry the 未认证 line as well.
   '/bge/hk/zh-CN/user/payment': ['noteKycGate'],
   '/bge/hk/zh-CN/user/api': ['noteApi', 'noteKycGate'],
