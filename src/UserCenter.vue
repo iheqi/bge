@@ -238,7 +238,7 @@ function confirmTransfer() {
                 @keydown.enter="accountTab = 'trade'"
               >{{ $t('text334') }}</span>
             </div>
-            <h2 class="asset-account-title">{{ accountName(activeAccount) }}</h2>
+            <!-- The tab row already names the account, so it carries the heading on its own. -->
             <p class="label">{{ accountName(activeAccount) }}{{ $t('text343') }}</p>
             <strong
               >{{ activeBtc.toFixed(8) }} BTC <small>≈ {{ formatMoney(activeBtc * prices.BTC, 'USD', 4) }}</small></strong
