@@ -4,13 +4,21 @@ import UserSidebar from './UserSidebar.vue'
 import KycNotice from './KycNotice.vue'
 import KycRequired from './KycRequired.vue'
 import { formatMoney } from './currency'
-import { i18n, tr } from './i18n'
+import { formatCell, i18n, tr } from './i18n'
 import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { kycVerified } from './session'
 import { Search, Sort } from '@element-plus/icons-vue'
 import { computed, ref } from 'vue'
 import { currentAccount, demoPrices } from './demoAccounts'
+import {
+  ORDER_FEED_FIELDS,
+  openOrderColumns,
+  openOrdersHref,
+  openOrdersOf,
+  orderFeedOf,
+  ordersHref,
+} from './dashboardOrders'
 import { routeSearch } from './route'
 const accountParam = new URLSearchParams(routeSearch()).get('account')
 const props = defineProps({ assets: Boolean })
@@ -73,6 +81,11 @@ const totalBtc = computed(() => accountBtc('fund') + accountBtc('trade'))
 const overviewBtc = computed(() =>
   accountTab.value === 'total' ? totalBtc.value : accountBtc(accountTab.value),
 )
+// The two panels below the overview are a summary of the 订单 module, worked out from that module's
+// own rows in dashboardOrders.js so 总览 cannot drift away from what 订单 shows.
+const openColumns = openOrderColumns()
+const openOrders = computed(() => openOrdersOf(profile.value))
+const orderFeed = computed(() => orderFeedOf(profile.value))
 const showKycNotice = ref(props.assets && !kycVerified.value)
 
 const transferOpen = ref(false)
@@ -172,15 +185,72 @@ function confirmTransfer() {
           <div class="panels">
             <section>
               <h2>
-                {{ $t('text294') }}<small>{{ $t('text340') }}</small>
+                {{ $t('text294') }}<a
+                  class="panel-more"
+                  :href="openOrdersHref"
+                  >{{ $t('text340') }}</a
+                >
               </h2>
-              <div class="empty">{{ $t('text066') }}</div>
+              <el-table
+                v-if="openOrders.length"
+                :data="openOrders"
+                class="panel-table"
+                :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+              >
+                <el-table-column
+                  v-for="column in openColumns"
+                  :key="column.label"
+                  :formatter="formatCell"
+                  :prop="column.prop"
+                  :label="tr(column.label)"
+                  :min-width="column.width"
+                  align="center"
+                />
+              </el-table>
+              <div
+                v-else
+                class="empty"
+              >
+                {{ $t('text066') }}
+              </div>
             </section>
             <section>
               <h2>
-                {{ $t('text005') }}<small>{{ $t('text340') }}</small>
+                {{ $t('text005') }}<a
+                  class="panel-more"
+                  :href="ordersHref"
+                  >{{ $t('text340') }}</a
+                >
               </h2>
-              <div class="empty">{{ $t('text066') }}</div>
+              <el-table
+                v-if="orderFeed.length"
+                :data="orderFeed"
+                class="panel-table"
+                :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+              >
+                <el-table-column
+                  :label="tr('类型')"
+                  :min-width="90"
+                  align="center"
+                >
+                  <template #default="{ row }">{{ $t(row.kind) }}</template>
+                </el-table-column>
+                <el-table-column
+                  v-for="field in ORDER_FEED_FIELDS"
+                  :key="field[0]"
+                  :formatter="formatCell"
+                  :prop="field[0]"
+                  :label="tr(field[1])"
+                  :min-width="field[2]"
+                  align="center"
+                />
+              </el-table>
+              <div
+                v-else
+                class="empty"
+              >
+                {{ $t('text066') }}
+              </div>
             </section>
           </div></template
           ><KycRequired v-else /><div v-if="!assets" class="dashboard-cards">

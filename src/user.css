@@ -156,11 +156,28 @@
   height: 365px;
   padding: 25px;
 }
-.panels h2 small {
+.panels h2 a {
   float: right;
   color: #9aa8bb;
   font-size: 13px;
   font-weight: normal;
+  text-decoration: none;
+}
+.panels h2 a:hover {
+  color: #b98c00;
+}
+/* The panels carry the 订单 module's own rows, so they use its table at the size a 365px panel can
+   hold — the module's is built for a full-width page. */
+.panel-table {
+  font-size: 12px;
+}
+.panel-table th.el-table__cell,
+.panel-table td.el-table__cell {
+  padding: 6px 0;
+}
+.panel-table .cell {
+  padding: 0 6px;
+  line-height: 18px;
 }
 .empty {
   text-align: center;
