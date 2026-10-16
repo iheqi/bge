@@ -45,6 +45,14 @@ const visibleCoins = computed(() =>
 )
 const activeAccount = computed(() => (accountTab.value === 'trade' ? 'trade' : 'fund'))
 const accountName = (account) => tr(account === 'trade' ? '交易账户' : '资金账户')
+// The fee tier, the risk rating and the two limits come from the account slice, so the asset page
+// and the fee centre describe the same client.
+const plan = computed(() => profile.value.plan)
+const frozenOf = (account, symbol) => profile.value.frozen[account]?.[symbol] ?? null
+const hkd = (value) =>
+  `HKD ${Number(Math.abs(value)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+const holdLeft = computed(() => plan.value.holdLimit - plan.value.holdUsed)
+const dailyLeft = computed(() => plan.value.dailyLimit - plan.value.dailyUsed)
 const balanceOf = (account, symbol) => balances.value[account][symbol] ?? 0
 const btcValue = (symbol, amount) => (amount * (prices[symbol] ?? 0)) / prices.BTC
 const accountBtc = (account) => coins.reduce((sum, coin) => sum + btcValue(coin[1], balanceOf(account, coin[1])), 0)
@@ -204,9 +212,15 @@ function confirmTransfer() {
             <section class="asset-panel risk-panel">
               <h3>{{ $t('assetRisk') }}</h3>
               <div class="risk-level">
-                <b>{{ $t('assetRiskLevel') }}</b><span class="risk-bars"><i /><i /><i /><i /><i /></span>
+                <b>{{ $t(plan.riskKey) }}</b
+                ><span class="risk-bars"
+                  ><i
+                    v-for="step in 5"
+                    :key="step"
+                    :class="{ off: step > plan.riskLevel }"
+                /></span>
               </div>
-              <p class="risk-date">2026-08-18</p>
+              <p class="risk-date">{{ plan.riskDate }}</p>
             </section>
             <section class="asset-panel quota-panel">
               <header>
@@ -214,10 +228,12 @@ function confirmTransfer() {
                 <a href="/bge/hk/zh-CN/quote-limit">{{ $t('assetQuotaLink') }}</a>
               </header>
               <div class="quota-grid">
-                <div><b>HKD 3,000,000,000.00</b><small>{{ $t('assetQuotaHolding') }}</small></div>
-                <div><b class="over">{{ $t('assetQuotaOver') }} HKD 2,056,268,000,953.32</b><small>{{ $t('assetQuotaHoldingLeft') }}</small></div>
-                <div><b>HKD 1,500,000,000.00</b><small>{{ $t('assetQuotaDaily') }}</small></div>
-                <div><b>HKD 1,500,000,000.00</b><small>{{ $t('assetQuotaDailyLeft') }}</small></div>
+                <div><b>{{ hkd(plan.holdLimit) }}</b><small>{{ $t('assetQuotaHolding') }}</small></div>
+                <!-- Negative means the position is already past the limit, which is the only case
+                     the red 超出 state is for. -->
+                <div><b :class="{ over: holdLeft < 0 }">{{ holdLeft < 0 ? $t('assetQuotaOver') + ' ' : '' }}{{ hkd(holdLeft) }}</b><small>{{ $t('assetQuotaHoldingLeft') }}</small></div>
+                <div><b>{{ hkd(plan.dailyLimit) }}</b><small>{{ $t('assetQuotaDaily') }}</small></div>
+                <div><b :class="{ over: dailyLeft < 0 }">{{ dailyLeft < 0 ? $t('assetQuotaOver') + ' ' : '' }}{{ hkd(dailyLeft) }}</b><small>{{ $t('assetQuotaDailyLeft') }}</small></div>
               </div>
             </section>
           </div>
@@ -272,7 +288,28 @@ function confirmTransfer() {
                   ><small>{{ tr(coin[2]) }}</small></span
                 >
               </div>
-              <b>{{ formatAmount(balanceOf(activeAccount, coin[1])) }}</b><b>0</b
+              <b>{{ formatAmount(balanceOf(activeAccount, coin[1])) }}</b
+              ><el-popover
+                v-if="frozenOf(activeAccount, coin[1])"
+                trigger="hover"
+                :show-after="0"
+                :teleported="false"
+                placement="top"
+                popper-class="frozen-popper"
+              >
+                <template #reference
+                  ><b class="frozen-value">{{ formatAmount(frozenOf(activeAccount, coin[1]).amount) }}</b></template
+                >
+                <p class="frozen-title">{{ $t('assetFrozenSource') }}</p>
+                <p
+                  v-for="order in frozenOf(activeAccount, coin[1]).orders"
+                  :key="order"
+                  class="frozen-order"
+                >
+                  {{ $t('assetFrozenOrder', { id: order }) }}
+                </p>
+              </el-popover>
+              <b v-else>0</b
               ><b
                 >{{ btcValue(coin[1], balanceOf(activeAccount, coin[1])).toFixed(8) }}<small>≈ {{ formatMoney(balanceOf(activeAccount, coin[1]) * (prices[coin[1]] ?? 0), 'USD', 4) }}</small></b
               >
@@ -428,6 +465,12 @@ function confirmTransfer() {
 .risk-level b{color:#171d27;font-size:15px;font-weight:500}
 .risk-bars{display:inline-flex;gap:3px}
 .risk-bars i{display:block;width:6px;height:15px;background:#f5c518}
+.risk-bars i.off{background:#e6eaf0}
+/* A frozen balance looks like any other number until you hover it for the orders behind it. */
+.frozen-value{border-bottom:1px dashed #c8cfd9;cursor:help}
+.frozen-title{margin:0 0 8px;color:#171d27;font-size:13px;font-weight:600}
+.frozen-order{margin:0 0 4px;color:#697585;font-size:12px;overflow-wrap:anywhere}
+.frozen-order:last-child{margin-bottom:0}
 .risk-date{margin:14px 0 0;color:#9aa2ad;font-size:12px}
 .quota-panel header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .quota-panel header a{color:#d9a600;font-size:13px;text-decoration:none}

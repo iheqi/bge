@@ -2,10 +2,16 @@
 import { computed, ref } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { tr } from './i18n'
-// Demo account: level 0 with no volume yet, matching the fee schedule below.
-const level = 'Lv 0'
-const discount = { maker: '0%', taker: '0%' }
-const volume = { spot: '0.00', assets: '0.00' }
+import { currentAccount } from './demoAccounts'
+// The tier, its discounts and the volumes come from the signed-in demo account, so switching
+// accounts moves both this panel and the 我的费率 column below it.
+const plan = currentAccount.value.plan
+const level = `Lv ${plan.level}`
+const discount = { maker: `${plan.makerDiscount}%`, taker: `${plan.takerDiscount}%` }
+const volume = { spot: plan.spotVolume, assets: plan.assetVolume }
+// The published rates the tier discount comes off, kept next to the discount that changes them.
+const BASE_FEE = { maker: 0.2, taker: 0.25 }
+const rate = (side) => `${Number((BASE_FEE[side] * (1 - plan[`${side}Discount`] / 100)).toFixed(4))}%`
 const tabs = [
   ['spot', 'text426'],
   ['funding', 'text427'],
@@ -24,7 +30,14 @@ const spotFees = [
   ['ETH/USDT', '仅PI'],
   ['USDT/USD', '仅PI'],
   ['USDT/HKD', '仅PI'],
-].map(([pair, tag]) => ({ pair, tag, maker: '0%', makerBase: '0%', taker: '0.25%', takerBase: '0.25%' }))
+].map(([pair, tag]) => ({
+  pair,
+  tag,
+  maker: rate('maker'),
+  makerBase: `${BASE_FEE.maker}%`,
+  taker: rate('taker'),
+  takerBase: `${BASE_FEE.taker}%`,
+}))
 const cryptoFunding = [
   ['ETH', 'ETH', '0.00010000', '0.00000000', '0.00400000'],
   ['USDC', 'ETH', '10.00000000', '0.00000000', '10.00000000'],
@@ -143,9 +156,9 @@ const sellExample = [
               <th colspan="2">{{ $t('text429') }}</th>
             </tr>
             <tr>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount') }}</small></th>
+              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount', { level: plan.level, discount: plan.makerDiscount }) }}</small></th>
               <th class="fee-base">{{ $t('text431') }}</th>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount') }}</small></th>
+              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount', { level: plan.level, discount: plan.takerDiscount }) }}</small></th>
               <th class="fee-base">{{ $t('text431') }}</th>
             </tr>
           </thead>

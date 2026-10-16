@@ -2,7 +2,20 @@
 import SiteHeader from './SiteHeader.vue'
 import { tr } from './i18n'
 import Footer from './Footer.vue'
+import { currentAccount } from './demoAccounts'
 
+// The same plan the asset page reads, so the two pages cannot quote different limits.
+const plan = currentAccount.value.plan
+const hkd = (value) =>
+  `${Number(Math.abs(value)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} HKD`
+// One decimal, so a day that has barely started still reads as a live figure rather than 0%.
+const share = (used, limit) =>
+  limit > 0 ? Math.min(Math.round((used / limit) * 1000) / 10, 100) : 0
+// The record table carries no currency suffix, so it formats on its own.
+const amount = (value) =>
+  Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const dailyUsedShare = share(plan.dailyUsed, plan.dailyLimit)
+const holdUsedShare = share(plan.holdUsed, plan.holdLimit)
 const changes = [
   ['使用额度', '法币购买数字货币（如BTC/USD，ETH/HKD）', '委托发起'],
   ['恢复额度', '数字货币卖出成法币（如BTC/USD，ETH/HKD）', '委托成交'],
@@ -59,8 +72,8 @@ const changes = [
                 <td>{{ tr('每日恢复额度') }}</td>
                 <td>—</td>
                 <td>—</td>
-                <td class="positive">+1,500,000,000.00</td>
-                <td>1,500,000,000.00</td>
+                <td class="positive">+{{ amount(plan.dailyLimit) }}</td>
+                <td>{{ amount(plan.dailyLimit) }}</td>
               </tr>
             </tbody>
           </table>
@@ -75,38 +88,38 @@ const changes = [
             <dl>
               <div>
                 <dt>{{ $t('quotaRiskLevel') }}</dt>
-                <dd>{{ $t('assetRiskLevel') }} <span class="quote-bars"><i /><i /><i /><i /><i /></span></dd>
+                <dd>{{ $t(plan.riskKey) }} <span class="quote-bars"><i v-for="step in 5" :key="step" :class="{ off: step > plan.riskLevel }" /></span></dd>
               </div>
-              <div><dt>{{ $t('quotaAssessedAt') }}</dt><dd>2026-08-18</dd></div>
+              <div><dt>{{ $t('quotaAssessedAt') }}</dt><dd>{{ plan.riskDate }}</dd></div>
             </dl>
             <p class="quote-note">{{ $t('quotaRiskNote') }}</p>
           </section>
           <section class="quote-card">
             <h3>{{ $t('assetQuota') }}</h3>
             <p class="quote-meter-title">{{ $t('quotaDailyLimit') }}</p>
-            <span class="quote-meter"><i style="width: 0" /></span>
+            <span class="quote-meter"><i :style="{ width: dailyUsedShare + '%' }" /></span>
             <dl>
               <div>
-                <dt>{{ $t('quotaTotal') }}</dt><dd>1,500,000,000.00 HKD</dd>
+                <dt>{{ $t('quotaTotal') }}</dt><dd>{{ hkd(plan.dailyLimit) }}</dd>
               </div>
               <div>
-                <dt>{{ $t('text266') }} 0%</dt><dd>0.00 HKD</dd>
+                <dt>{{ $t('text266') }} {{ dailyUsedShare }}%</dt><dd>{{ hkd(plan.dailyUsed) }}</dd>
               </div>
               <div>
-                <dt>{{ $t('quotaLeft') }}</dt><dd>1,500,000,000.00 HKD</dd>
+                <dt>{{ $t('quotaLeft') }}</dt><dd>{{ hkd(plan.dailyLimit - plan.dailyUsed) }}</dd>
               </div>
             </dl>
             <p class="quote-meter-title">{{ $t('quotaPositionLimit') }}</p>
-            <span class="quote-meter filled"><i style="width: 100%" /></span>
+            <span class="quote-meter filled"><i :style="{ width: holdUsedShare + '%' }" /></span>
             <dl>
               <div>
-                <dt>{{ $t('quotaTotal') }}</dt><dd>3,000,000,000.00 HKD</dd>
+                <dt>{{ $t('quotaTotal') }}</dt><dd>{{ hkd(plan.holdLimit) }}</dd>
               </div>
               <div>
-                <dt>{{ $t('text266') }} 100%</dt><dd>2,059,268,000,953.32 HKD</dd>
+                <dt>{{ $t('text266') }} {{ holdUsedShare }}%</dt><dd>{{ hkd(plan.holdUsed) }}</dd>
               </div>
               <div>
-                <dt>{{ $t('quotaLeft') }}</dt><dd class="over">{{ $t('assetQuotaOver') }} 2,056,268,000,953.32 HKD</dd>
+                <dt>{{ $t('quotaLeft') }}</dt><dd :class="{ over: plan.holdLimit - plan.holdUsed < 0 }">{{ plan.holdLimit - plan.holdUsed < 0 ? $t('assetQuotaOver') + ' ' : '' }}{{ hkd(plan.holdLimit - plan.holdUsed) }}</dd>
               </div>
             </dl>
           </section>
@@ -146,6 +159,7 @@ const changes = [
 .quote-card dd.over{color:#e0443a}
 .quote-bars{display:inline-flex;gap:3px}
 .quote-bars i{display:block;width:6px;height:15px;background:#f5c518}
+.quote-bars i.off{background:#e6e8ec}
 .quote-note{margin:20px 0 0;color:#9aa2ad;font-size:12px}
 .quote-meter-title{margin:22px 0 0;color:#3f4a56;font-size:13.5px;font-weight:600}
 .quote-meter{display:block;height:6px;margin:12px 0 16px;border-radius:3px;background:#ececec}
