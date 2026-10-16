@@ -137,81 +137,305 @@ function hexKey(random, length) {
 }
 const SIZE = (pair) => [PAIR_BASE[pair][0], PAIR_BASE[pair][1]]
 
-function buildSpot(random, scale) {
+// A fee tier, a risk rating and an account limit travel together, so the fee centre, the two
+// panels on the asset page and the spot fees all read the same plan. 个人 sits in the lowest tier
+// and is over its position limit, which is what the 超出 state on the asset page is for.
+const ACCOUNT_PLANS = {
+  person: {
+    level: 1,
+    makerDiscount: 0,
+    takerDiscount: 0,
+    spotVolume: '2.40',
+    assetVolume: '0.09',
+    riskLevel: 3,
+    riskKey: 'riskMidHigh',
+    riskDate: '2026-08-18',
+    // The limit is a multiple of what the account actually holds: 个人 sits just under it, which is
+    // what the 超出 state on the asset page is there to show.
+    limitFactor: 0.9,
+  },
+  corporation: {
+    level: 3,
+    makerDiscount: 20,
+    takerDiscount: 10,
+    spotVolume: '62.40',
+    assetVolume: '2.34',
+    riskLevel: 4,
+    riskKey: 'riskHigh',
+    riskDate: '2026-06-04',
+    limitFactor: 1.15,
+  },
+  institution: {
+    level: 5,
+    makerDiscount: 40,
+    takerDiscount: 25,
+    spotVolume: '432.00',
+    assetVolume: '16.20',
+    riskLevel: 5,
+    riskKey: 'assetRiskLevel',
+    riskDate: '2026-04-21',
+    limitFactor: 1.25,
+  },
+  unverified: {
+    level: 0,
+    makerDiscount: 0,
+    takerDiscount: 0,
+    spotVolume: '0.00',
+    assetVolume: '0.00',
+    riskLevel: 0,
+    riskKey: 'riskNone',
+    riskDate: '—',
+    limitFactor: 0,
+  },
+}
+// The published spot rates. A tier discount comes off these, so 我的费率 moves with the level.
+const BASE_FEE = { maker: 0.2, taker: 0.25 }
+const feeOf = (plan, side) => {
+  const rate =
+    (side === 'maker' ? BASE_FEE.maker : BASE_FEE.taker) * (1 - plan[`${side}Discount`] / 100)
+  return Number(rate.toFixed(4))
+}
+// HKD per BTC, so the position limit can be compared with the balances below.
+const HKD_PER_BTC = demoPrices.BTC / demoPrices.HKD
+
+// A payment reference the way a bank would print it: the day it was raised plus a running number.
+const paymentSerial = (id, index) =>
+  `PS20261014${String((numericSeed(id) + index * 977) % 100000).padStart(5, '0')}`
+
+// A pending spot order keeps the same id wherever it is named, so the order detail page and the
+// frozen-balance tooltip point at the same record.
+export function spotOrderId(id, tab, index) {
+  const base = tab === 'current' ? 1209057511240028160n : 1209056642133905184n
+  return String(base + BigInt(numericSeed(id)) * 7919n + BigInt(index) * 12345678n)
+}
+
+// Spot orders are sized against the trade account balance, so a resting order never asks for more
+// than the account holds and the frozen amount derived from it stays under the balance.
+function buildSpot(random, profile, plan, trade) {
   const round = (base, spread) => base * (1 + (random() - 0.5) * spread)
+  // Rows 0 and 2 rest on the same pair and side, so 交易账户 has two orders freezing one coin.
+  const pairAt = (index) => SPOT_PAIRS[index === 2 ? 1 : (index + 1) % SPOT_PAIRS.length]
   const current = []
-  for (let index = 0; index < 2; index++) {
-    const pair = SPOT_PAIRS[(index + 1) % SPOT_PAIRS.length]
-    const [coin, base] = SIZE(pair)
-    const quantity = base * scale * (0.4 + random())
-    current.push([
-      stamp(4 + index * 7),
+  const currentDetail = []
+  for (let index = 0; index < 3; index++) {
+    const pair = pairAt(index)
+    const coin = pair.split('/')[0]
+    const quote = pair.split('/')[1]
+    const side = index === 1 ? '卖出' : '买入'
+    const type = index === 1 ? '市价单' : '限价单'
+    const price = Number(round(PAIR_PRICE[pair], 0.02).toFixed(2))
+    const held = (side === '买入' ? trade[quote] : trade[coin]) ?? 0
+    const quantity = Number(
+      (side === '买入'
+        ? (held * (0.18 + random() * 0.14)) / price
+        : held * (0.18 + random() * 0.14)
+      ).toFixed(6),
+    )
+    const notional = Number((price * quantity).toFixed(2))
+    const detail = {
+      orderId: spotOrderId(profile.id, 'current', index),
       pair,
-      index % 2 ? '市价单' : '限价单',
-      index % 2 ? '卖出' : '买入',
-      money(round(PAIR_PRICE[pair], 0.02)),
+      coin,
+      quote,
+      type,
+      side,
+      price,
+      quantity,
+      notional,
+      filled: 0,
+      cancelled: 0,
+      stp: '不启用',
+      source: 'Web 交易页',
+      uid: profile.uid,
+      fee: Number(
+        ((notional * feeOf(plan, type === '市价单' ? 'taker' : 'maker')) / 100).toFixed(6),
+      ),
+      feeCoin: quote,
+      status: '未成交',
+      createTime: stamp(4 + index * 7),
+    }
+    currentDetail.push(detail)
+    current.push([
+      detail.createTime,
+      pair,
+      type,
+      side,
+      money(price),
       `${quantity.toFixed(6)} ${coin}`,
-      '未成交',
+      detail.status,
       '详情',
     ])
   }
   const history = []
+  const historyDetail = []
   for (let index = 0; index < 4; index++) {
     const pair = SPOT_PAIRS[index % SPOT_PAIRS.length]
-    const [coin, base] = SIZE(pair)
-    const orderPrice = round(PAIR_PRICE[pair], 0.03)
-    const filledPrice = orderPrice * (1 + (random() - 0.5) * 0.004)
-    const quantity = base * scale * (0.5 + random())
+    const coin = pair.split('/')[0]
     const quote = pair.split('/')[1]
-    history.push([
-      stamp(20 + index * 26),
+    const side = index % 2 ? '卖出' : '买入'
+    const type = index % 2 ? '市价单' : '限价单'
+    const price = Number(round(PAIR_PRICE[pair], 0.03).toFixed(2))
+    const filledPrice = Number((price * (1 + (random() - 0.5) * 0.004)).toFixed(2))
+    const held = (side === '买入' ? trade[quote] : trade[coin]) ?? 0
+    const quantity = Number(
+      (side === '买入'
+        ? (held * (0.2 + random() * 0.2)) / price
+        : held * (0.2 + random() * 0.2)
+      ).toFixed(6),
+    )
+    const status = index === 3 ? '已撤单' : '完全成交'
+    const filled = status === '完全成交' ? quantity : Number((quantity * 0.35).toFixed(6))
+    const cancelled = status === '已撤单' ? Number((quantity - filled).toFixed(6)) : 0
+    const detail = {
+      orderId: spotOrderId(profile.id, 'history', index),
       pair,
-      index % 2 ? '市价单' : '限价单',
-      index % 2 ? '卖出' : '买入',
-      money(orderPrice),
+      coin,
+      quote,
+      type,
+      side,
+      price,
+      quantity,
+      notional: Number((price * quantity).toFixed(2)),
+      avgPrice: filledPrice,
+      filled,
+      cancelled,
+      stp: '不启用',
+      source: index % 2 ? 'API' : 'Web 交易页',
+      uid: profile.uid,
+      fee: Number(
+        ((filledPrice * filled * feeOf(plan, type === '市价单' ? 'taker' : 'maker')) / 100).toFixed(
+          6,
+        ),
+      ),
+      feeCoin: quote,
+      amount: Number((filledPrice * filled).toFixed(2)),
+      status,
+      createTime: stamp(20 + index * 26),
+    }
+    historyDetail.push(detail)
+    history.push([
+      detail.createTime,
+      pair,
+      type,
+      side,
+      money(price),
       `${quantity.toFixed(6)} ${coin}`,
       money(filledPrice),
-      `${quantity.toFixed(6)} ${coin}`,
-      `${money(filledPrice * quantity)} ${quote}`,
-      index === 3 ? '未成交' : '完全成交',
+      `${filled.toFixed(6)} ${coin}`,
+      `${money(detail.amount)} ${quote}`,
+      status,
       '详情',
     ])
   }
   const deals = []
   for (let index = 0; index < 4; index++) {
     const pair = SPOT_PAIRS[(index + 2) % SPOT_PAIRS.length]
-    const [coin, base] = SIZE(pair)
+    const coin = pair.split('/')[0]
     const quote = pair.split('/')[1]
     const price = round(PAIR_PRICE[pair], 0.02)
-    const quantity = base * scale * (0.3 + random())
+    const quantity = ((trade[coin] ?? 0) * (0.15 + random() * 0.2)).toFixed(6)
     deals.push([
       stamp(9 + index * 15),
       pair,
       index % 2 ? '卖出' : '买入',
       money(price),
-      `${quantity.toFixed(6)} ${coin}`,
+      `${quantity} ${coin}`,
       `${money(price * quantity)} ${quote}`,
       `${money(price * quantity * 0.001, 4)} ${quote}`,
       index % 2 ? '被动成交' : '主动成交',
     ])
   }
-  return { current, history, deals }
+  return { current, history, deals, currentDetail, historyDetail }
 }
 
-function buildWallet(random, scale, bank) {
+function buildWallet(random, profile, scale, bank) {
   const coins = ['BTC', 'ETH', 'USDT', 'USDC']
+  const networks = { BTC: 'Bitcoin', ETH: 'ERC20', USDT: 'TRC20', USDC: 'ERC20' }
   const addresses = ['bc1q...9x2k', '0x9e37...7285', 'TXk8...q7fa', '0x41bd...c0e9']
-  const digital = coins.map((symbol, index) => [
-    stamp(30 + index * 22),
-    symbol,
-    (scale * (0.05 + random() * 0.4)).toFixed(8),
-    addresses[index],
-    index === 3 ? '处理中' : '已完成',
-  ])
-  const fiat = [
-    [stamp(52), 'USD', money(12500 * scale), bank?.account ?? '—', '主要银行卡', '已完成', '查看'],
-    [stamp(96), 'HKD', money(68000 * scale), bank?.account ?? '—', '主要银行卡', '处理中', '查看'],
+  // The first coin of each pair came in, the second went out, so the detail page has both
+  // directions to fork on.
+  const digital = []
+  const digitalDetail = []
+  coins.forEach((symbol, index) => {
+    const deposit = index < 2
+    const status = index === 3 ? '处理中' : '已完成'
+    const quantity = Number((scale * (0.05 + random() * 0.4)).toFixed(8))
+    const fee = deposit ? 0 : Number((quantity * 0.002).toFixed(8))
+    const detail = {
+      direction: deposit ? '存款' : '取款',
+      no: String(
+        1209056642998171648n + BigInt(numericSeed(profile.id)) * 131n + BigInt(index) * 7717n,
+      ),
+      uid: profile.uid,
+      coin: symbol,
+      network: networks[symbol],
+      quantity,
+      fee,
+      received: Number((quantity - fee).toFixed(8)),
+      txid: deposit ? `0x${hexKey(random, 56)}` : '—',
+      address: addresses[index],
+      addressVerified: index === 0 ? '已认证' : index === 3 ? '未认证' : '已认证',
+      confirmations: status === '处理中' ? 3 : 19 + index * 7,
+      bank: bank?.name ?? '—',
+      bankAccount: bank?.account ?? '—',
+      companyBank: 'Bank of China (Hong Kong)',
+      companyAccount: '012-875-12345678',
+      serial: deposit ? paymentSerial(profile.id, index) : '—',
+      risk: deposit ? (index === 0 ? '低风险' : '关注') : '—',
+      createTime: stamp(30 + index * 22),
+      status,
+    }
+    digitalDetail.push(detail)
+    digital.push([
+      detail.createTime,
+      detail.direction,
+      symbol,
+      quantity.toFixed(8),
+      addresses[index],
+      status,
+      '详情',
+    ])
+  })
+  const fiat = []
+  const fiatDetail = []
+  const fiatRows = [
+    { direction: '存款', coin: 'USD', amount: 12500 * scale, status: '已完成', hours: 52 },
+    { direction: '取款', coin: 'HKD', amount: 68000 * scale, status: '处理中', hours: 96 },
   ]
+  fiatRows.forEach((row, index) => {
+    const fee = row.direction === '存款' ? 0 : Number((row.amount * 0.001).toFixed(2))
+    const detail = {
+      direction: row.direction,
+      no: String(
+        1209057511333904384n + BigInt(numericSeed(profile.id)) * 233n + BigInt(index) * 991n,
+      ),
+      uid: profile.uid,
+      coin: row.coin,
+      amount: row.amount,
+      fee,
+      received: Number((row.amount - fee).toFixed(2)),
+      bank: bank?.name ?? '—',
+      bankAccount: bank?.account ?? '—',
+      companyBank: 'Bank of China (Hong Kong)',
+      companyAccount: '012-875-12345678',
+      serial: row.direction === '存款' ? paymentSerial(profile.id, index + 8) : '—',
+      risk: row.direction === '存款' ? (index === 0 ? '低风险' : '关注') : '—',
+      createTime: stamp(row.hours),
+      status: row.status,
+      tag: '主要银行卡',
+    }
+    fiatDetail.push(detail)
+    fiat.push([
+      detail.createTime,
+      detail.direction,
+      row.coin,
+      money(row.amount),
+      bank?.account ?? '—',
+      '主要银行卡',
+      row.status,
+      '详情',
+    ])
+  })
   const transfer = [
     [stamp(12), 'USDT', money(3200 * scale), '资金账户', '交易账户', '已完成'],
     [stamp(70), 'ETH', (0.4 * scale).toFixed(8), '交易账户', '资金账户', '已完成'],
@@ -221,7 +445,7 @@ function buildWallet(random, scale, bank) {
     [stamp(36), 'USDT', money(900 * scale), '资金账户', '交易账户', '已完成'],
     [stamp(128), 'HKD', money(8000 * scale), '交易账户', '资金账户', '已完成'],
   ]
-  return { digital, fiat, transfer, quick }
+  return { digital, fiat, transfer, quick, digitalDetail, fiatDetail }
 }
 
 function buildSettle() {
@@ -240,31 +464,64 @@ function buildSettle() {
 
 // 买卖意向单 and OTC 匹配单 — one row per client-side order and per matched pair, mirroring the
 // operator console. A match order is never withdrawn, so 已取消 does not exist here.
-function buildOtc(random, scale, pairs) {
+function buildOtc(random, scale, pairs, id) {
   const contacts = ['客户端下单', '电邮联系', '电话联系']
-  const intentStatuses = ['待匹配', '已匹配', '已完成', '已撤单']
+  // 待匹配 / 已匹配 are the live states: only those still freeze the currency they pay with, and
+  // the sell intents are what 资金账户 reports as frozen.
+  const intentStatuses = [
+    '待匹配',
+    '已匹配',
+    '已撤单',
+    '已匹配',
+    '已完成',
+    '待匹配',
+    '已撤单',
+    '已完成',
+  ]
+  // A realistic size per base coin, so a sell intent never claims to sell 1200 BTC.
+  const intentSizes = { BTC: 0.05, ETH: 1.2, USDC: 600, USDT: 800 }
   const intentOrders = []
   for (let index = 0; index < 8; index++) {
     const pair = pairs[index % pairs.length]
     const [base, quote] = pair.split('/')
     const buy = index % 2 === 0
-    const status =
-      intentStatuses[index % 4 === 3 ? 3 : index % 4 === 2 ? 2 : index % 4 === 1 ? 1 : 0]
-    const quantity = (buy ? 1.5 : 1200) * scale * (0.5 + random())
+    const status = intentStatuses[index]
+    const quantity = (intentSizes[base] ?? 100) * scale * (0.5 + random()) * (buy ? 1 : 0.6)
     const digits = base === 'BTC' || base === 'ETH' ? 4 : 0
     const amount = `${money(quantity, digits)} ${base}`
+    const price = OTC_PRICE[pair] ?? 1
+    // The detail page has to answer what is locked and for how long, so every intent carries a
+    // validity window, a note and the amount still frozen against it.
+    const live = status === '待匹配' || status === '已匹配'
     intentOrders.push({
-      orderId: String(1209056642133905184n + BigInt(index) * 12345678n),
+      orderId: String(
+        1209056642133905184n + BigInt(numericSeed(id)) * 4099n + BigInt(index) * 12345678n,
+      ),
       pair,
       side: buy ? '买' : '卖',
       contact: contacts[index % contacts.length],
       getCoin: buy ? base : quote,
       payCoin: buy ? quote : base,
       amount,
+      qty: Number(quantity.toFixed(digits)),
+      priceValue: price,
+      digits,
       matched: status === '已匹配' || status === '已完成' ? amount : `0 ${base}`,
       createTime: stamp(6 + index * 30),
       status,
-      price: money(OTC_PRICE[pair] ?? 1),
+      price: money(price),
+      // The note a client leaves is free text, so the seeded ones name the message key and the
+      // price they quote rather than carrying a sentence no other language can render.
+      validityHours: [24, 72, 168][index % 3],
+      remarkKey: buy ? 'otcRemarkBuy' : 'otcRemarkSell',
+      remarkPrice: money(price),
+      attachment: status === '待匹配' ? `trade-request-${index + 1}.pdf` : '—',
+      // A buy locks the currency it pays with, a sell locks the currency it gives away.
+      frozen: live
+        ? buy
+          ? `${money(price * quantity, 0)} ${quote}`
+          : `${money(quantity, digits)} ${base}`
+        : `0 ${buy ? quote : base}`,
     })
   }
   const matchStatuses = ['待审核', '待复核', '已完成', '已拒绝']
@@ -273,19 +530,94 @@ function buildOtc(random, scale, pairs) {
     const pair = pairs[(index + 1) % pairs.length]
     const [base, quote] = pair.split('/')
     const quantity = (index % 2 === 0 ? 1.2 : 900) * scale * (0.5 + random())
+    const price = OTC_PRICE[pair] ?? 1
     matchOrders.push({
-      orderNo: String(1209057511240028160n + BigInt(index) * 98765432n),
+      orderNo: String(
+        1209057511240028160n + BigInt(numericSeed(id)) * 6151n + BigInt(index) * 98765432n,
+      ),
       role: index % 2 === 0 ? '买方' : '卖方',
       pair,
       buyCoin: base,
       payCoin: quote,
-      price: `${money(OTC_PRICE[pair] ?? 1)} ${quote}`,
+      price: `${money(price)} ${quote}`,
+      priceValue: price,
       qty: `${money(quantity, 4)} ${base}`,
+      qtyValue: Number(quantity.toFixed(4)),
       createTime: stamp(10 + index * 34),
       status: matchStatuses[index % matchStatuses.length],
     })
   }
   return { intentOrders, matchOrders }
+}
+
+// The operator console shows a matched order as a two-sided ticket: who took each side, what each
+// side pays and receives, and the trail of whoever touched it. None of that exists in the list
+// data, so it is derived from the order number — the same order always produces the same ticket.
+export function matchDetailOf(account, orderNo, uid) {
+  const order = account.otc.matchOrders.find((item) => item.orderNo === orderNo)
+  if (!order) return null
+  return buildMatchTicket(order, uid)
+}
+
+export function buildMatchTicket(order, uid) {
+  const random = makeRandom(numericSeed(order.orderNo))
+  const counterpartUid = String(8395610000n + BigInt(Math.floor(random() * 8000)))
+  const notional = Number((order.qtyValue * order.priceValue).toFixed(2))
+  const makerFee = Number((notional * 0.001).toFixed(2))
+  const takerFee = Number((notional * 0.0015).toFixed(2))
+  const buyerFee = order.role === '买方' ? takerFee : makerFee
+  const sellerFee = order.role === '买方' ? makerFee : takerFee
+  const buyer = {
+    uid: order.role === '买方' ? uid : counterpartUid,
+    roleKey: 'otcBuyer',
+    kind: '买方',
+    getCoin: order.buyCoin,
+    getAmount: order.qtyValue,
+    payCoin: order.payCoin,
+    payAmount: notional,
+    fee: buyerFee,
+    feeTypeKey: order.role === '买方' ? 'otcFeeTaker' : 'otcFeeMaker',
+  }
+  const seller = {
+    uid: order.role === '卖方' ? uid : counterpartUid,
+    roleKey: 'otcSeller',
+    kind: '卖方',
+    getCoin: order.payCoin,
+    getAmount: notional,
+    payCoin: order.buyCoin,
+    payAmount: order.qtyValue,
+    fee: sellerFee,
+    feeTypeKey: order.role === '卖方' ? 'otcFeeTaker' : 'otcFeeMaker',
+  }
+  return {
+    orderNo: order.orderNo,
+    pair: order.pair,
+    price: order.priceValue,
+    qty: order.qtyValue,
+    buyCoin: order.buyCoin,
+    payCoin: order.payCoin,
+    createTime: order.createTime,
+    status: order.status,
+    buyer,
+    seller,
+    buyerFee,
+    sellerFee,
+    feeCoin: order.payCoin,
+    preview: [buyer, seller],
+    // The trail names a message key per line, so the note reads in the visitor's language while
+    // the operator ids stay as they are.
+    log: [
+      { action: '创建撮合单', operator: uid, time: order.createTime, remarkKey: 'otcLogCreated' },
+      { action: '风控复核', operator: 'risk@bge-demo', time: stamp(9), remarkKey: 'otcLogRisk' },
+      {
+        action: '更新状态',
+        operator: 'dealer@bge-demo',
+        time: stamp(5),
+        remarkKey: 'otcLogStatus',
+        status: order.status,
+      },
+    ],
+  }
 }
 
 // Devices and activity are kept as parts rather than finished sentences so the page can
@@ -363,6 +695,8 @@ const API_KEY_SETS = {
       risk: ['apiRiskIdle'],
     },
   ],
+  // Three keys, one per state, so 有效 / 已过期 / 已吊销 all stay demonstrable without the list
+  // looking like a dumping ground.
   institution: [
     {
       remarks: 'grid-bot-prod',
@@ -371,54 +705,6 @@ const API_KEY_SETS = {
       state: 'valid',
       createdDate: '2026-10-01 09:12:00',
       risk: ['apiRiskUnboundTradeKey'],
-    },
-    {
-      remarks: 'ledger-readonly',
-      authorities: ['readonly'],
-      ipAddresses: '203.0.113.14',
-      state: 'valid',
-      createdDate: '2026-09-18 17:40:00',
-      risk: [],
-    },
-    {
-      remarks: 'quant-test',
-      authorities: ['readonly', 'trade'],
-      ipAddresses: '',
-      state: 'valid',
-      createdDate: '2026-09-05 10:05:00',
-      risk: ['apiRiskUnboundTradeKey', 'apiRiskMultiIp'],
-    },
-    {
-      remarks: 'rebalance',
-      authorities: ['readonly', 'trade', 'withdraw'],
-      ipAddresses: '203.0.113.31',
-      state: 'valid',
-      createdDate: '2026-08-27 13:22:00',
-      risk: ['apiRiskRateLimit'],
-    },
-    {
-      remarks: 'old-script',
-      authorities: ['readonly'],
-      ipAddresses: '203.0.113.42',
-      state: 'valid',
-      createdDate: '2025-11-09 20:31:00',
-      risk: ['apiRiskExpiring', 'apiRiskIdle'],
-    },
-    {
-      remarks: 'hedge-bot',
-      authorities: ['readonly', 'trade'],
-      ipAddresses: '203.0.113.55',
-      state: 'valid',
-      createdDate: '2026-06-14 07:58:00',
-      risk: ['apiRiskErrorRate'],
-    },
-    {
-      remarks: 'report-56',
-      authorities: ['readonly'],
-      ipAddresses: '203.0.113.61',
-      state: 'valid',
-      createdDate: '2026-05-30 16:11:00',
-      risk: [],
     },
     {
       remarks: 'dca-32',
@@ -452,6 +738,49 @@ function buildApiKeys(profile) {
   }))
 }
 
+// Total holdings in HKD. The account limit on the asset page is quoted in HKD, so it has to be
+// compared against the same book the balance table shows.
+function positionValue(balances) {
+  const total = (book) =>
+    Object.entries(book).reduce((sum, [coin, amount]) => sum + (demoPrices[coin] ?? 0) * amount, 0)
+  return Number(((total(balances.fund) + total(balances.trade)) / demoPrices.HKD).toFixed(2))
+}
+
+// What each account has locked, and by which orders. A resting spot 买入 freezes the currency it
+// pays with, a live OTC 卖 intent freezes the coin it gives away — so hovering a frozen cell can
+// name the orders responsible.
+function buildFrozen(balances, spot, otc) {
+  const add = (book, coin, amount, orderId) => {
+    if (!amount) return
+    if (!book[coin]) book[coin] = { amount: 0, orders: [] }
+    book[coin].amount += amount
+    book[coin].orders.push(orderId)
+  }
+  const fund = {}
+  const trade = {}
+  otc.intentOrders
+    .filter(
+      (order) => order.side === '卖' && (order.status === '待匹配' || order.status === '已匹配'),
+    )
+    .forEach((order) => add(fund, order.payCoin, order.qty, order.orderId))
+  spot.currentDetail.forEach((order) => {
+    if (order.side === '买入') add(trade, order.quote, order.notional, order.orderId)
+    else add(trade, order.coin, order.quantity, order.orderId)
+  })
+  // Never freeze more than the account actually holds.
+  const clamp = (book, available) =>
+    Object.fromEntries(
+      Object.entries(book).map(([coin, entry]) => [
+        coin,
+        {
+          amount: Number(Math.min(entry.amount, available[coin] ?? 0).toFixed(8)),
+          orders: entry.orders,
+        },
+      ]),
+    )
+  return { fund: clamp(fund, balances.fund), trade: clamp(trade, balances.trade) }
+}
+
 const VERIFICATION = {
   person: { email: true, phone: false, ga: true, passwordUpdatedAt: '2026-08-18' },
   corporation: { email: true, phone: true, ga: true, passwordUpdatedAt: '2026-06-04' },
@@ -462,6 +791,7 @@ const VERIFICATION = {
 export function buildAccount(profile) {
   const random = makeRandom(numericSeed(profile.id))
   const scale = profile.scale
+  const plan = ACCOUNT_PLANS[profile.kind]
   const pairPool =
     profile.kind === 'institution'
       ? ['ETH/USDC', 'BTC/USDC', 'USDT/HKD']
@@ -503,34 +833,69 @@ export function buildAccount(profile) {
   const empty = unverified
     ? {
         balances: { fund: {}, trade: {} },
-        spotOrders: { current: [], history: [], deals: [] },
-        walletRecords: { digital: [], fiat: [], transfer: [], quick: [] },
+        spotOrders: { current: [], history: [], deals: [], currentDetail: [], historyDetail: [] },
+        walletRecords: {
+          digital: [],
+          fiat: [],
+          transfer: [],
+          quick: [],
+          digitalDetail: [],
+          fiatDetail: [],
+        },
         reports: { daily: [], monthly: [] },
         otc: { intentOrders: [], matchOrders: [] },
       }
     : null
+  const balances = empty
+    ? empty.balances
+    : {
+        fund: scaleOf(
+          { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08, SOL: 0.02 },
+          scale,
+        ),
+        trade: scaleOf(
+          { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012, SOL: 0.01 },
+          scale,
+        ),
+      }
+  const spotOrders = empty ? empty.spotOrders : buildSpot(random, profile, plan, balances.trade)
+  const otc = empty ? empty.otc : buildOtc(random, Math.max(scale, 0.5), pairPool, profile.id)
+  const holdUsed = positionValue(balances)
+  // Today's orders, priced in HKD, are what the 交易剩余额度(今日) line is measured against.
+  const today = new Date(DEMO_TODAY).toISOString().slice(0, 10)
+  const dailyUsed = Number(
+    (
+      spotOrders.currentDetail
+        .filter((order) => order.createTime.startsWith(today))
+        .reduce((sum, order) => sum + (demoPrices[order.quote] ?? 0) * order.notional, 0) /
+      demoPrices.HKD
+    ).toFixed(2),
+  )
   return {
     ...profile,
-    balances: empty
-      ? empty.balances
-      : {
-          fund: scaleOf(
-            { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08, SOL: 0.02 },
-            scale,
-          ),
-          trade: scaleOf(
-            { USD: 3000, HKD: 5000, ETH: 0.35, USDC: 420, USDT: 180, BTC: 0.012, SOL: 0.01 },
-            scale,
-          ),
-        },
-    spotOrders: empty ? empty.spotOrders : buildSpot(random, Math.max(scale, 0.4)),
-    walletRecords: empty ? empty.walletRecords : buildWallet(random, Math.max(scale, 0.4), bank),
+    balances,
+    spotOrders,
+    walletRecords: empty
+      ? empty.walletRecords
+      : buildWallet(random, profile, Math.max(scale, 0.4), bank),
     reports: empty ? empty.reports : buildSettle(),
-    otc: empty ? empty.otc : buildOtc(random, Math.max(scale, 0.5), pairPool),
+    otc,
     security: buildSecurity(profile),
     payment: { bank, wallet },
     apiKeys: buildApiKeys(profile),
     verification: VERIFICATION[profile.kind],
+    plan: {
+      ...plan,
+      maker: feeOf(plan, 'maker'),
+      taker: feeOf(plan, 'taker'),
+      holdUsed,
+      // Rounded to the nearest 10,000 HKD so the panel reads like a policy figure rather than a
+      // valuation.
+      holdLimit: Math.round((holdUsed * plan.limitFactor) / 10000) * 10000,
+      dailyLimit: Math.round((holdUsed * plan.limitFactor) / 20000) * 10000,
+      dailyUsed,
+    },
+    frozen: buildFrozen(balances, spotOrders, otc),
   }
 }
 

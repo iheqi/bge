@@ -1,5 +1,4 @@
-import { ref } from 'vue'
-import { currentAccount } from './demoAccounts'
+import { currentAccount, useAccountState } from './demoAccounts'
 
 // OTC follows the operator console: a client raises a one-sided intent order, an operator
 // matches a buy intent with a sell intent, and the resulting match order goes through
@@ -9,15 +8,25 @@ export const intentStatuses = ['待匹配', '已匹配', '已完成', '已撤单
 // A match order cannot be withdrawn, so 已取消 is not one of its states.
 export const matchStatuses = ['待审核', '待复核', '已完成', '已拒绝']
 
-// Seeded from the signed-in demo account. Switching accounts reloads the page, so these refs
-// are rebuilt with the new account's orders.
-export const intentOrders = ref([...currentAccount.value.otc.intentOrders])
-export const matchOrders = ref([...currentAccount.value.otc.matchOrders])
+// Seeded from the signed-in demo account, then kept per account on top of that seed. Opening a
+// detail page is a full page load, so an order created or withdrawn in the list has to outlive it.
+export const intentOrders = useAccountState(
+  'otc-intent-orders',
+  currentAccount.value.otc.intentOrders,
+)
+export const matchOrders = useAccountState('otc-match-orders', currentAccount.value.otc.matchOrders)
 
-// A client-side order is placed by the client itself and waits for an operator to match it.
+const amountText = (value, digits) =>
+  value.toLocaleString('en-US', { maximumFractionDigits: digits })
+
+// A client-side order is placed by the client itself and waits for an operator to match it. It
+// carries the same fields as the seeded ones, so its detail page is just as complete.
 export function createIntentOrder({ pair, side, quantity, price, validity, remark }) {
   const [base, quote] = pair.split('/')
   const buy = side === 'buy'
+  const qty = Number(quantity)
+  const priceValue = Number(price)
+  const digits = base === 'BTC' || base === 'ETH' ? 4 : 0
   const order = {
     orderId: String(Date.now()) + String(intentOrders.value.length + 1).padStart(2, '0'),
     pair,
@@ -25,13 +34,22 @@ export function createIntentOrder({ pair, side, quantity, price, validity, remar
     contact: '客户端下单',
     getCoin: buy ? base : quote,
     payCoin: buy ? quote : base,
-    amount: `${quantity} ${base}`,
+    amount: `${amountText(qty, digits)} ${base}`,
+    qty,
+    priceValue,
+    digits,
     matched: `0 ${base}`,
     createTime: new Date().toLocaleString('zh-CN', { hour12: false }).replaceAll('/', '-'),
     status: '待匹配',
-    price,
-    validity,
-    remark,
+    price: amountText(priceValue, 2),
+    validityHours: Number(validity),
+    remarkKey: null,
+    remark: remark || '—',
+    attachment: '—',
+    // A buy locks what it pays with, a sell locks what it gives away.
+    frozen: buy
+      ? `${amountText(priceValue * qty, 2)} ${quote}`
+      : `${amountText(qty, digits)} ${base}`,
   }
   intentOrders.value.unshift(order)
   return order
