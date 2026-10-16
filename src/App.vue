@@ -17,6 +17,7 @@ import KycPerson from './KycPerson.vue'
 import KycCorp from './KycCorp.vue'
 import KycInstitution from './KycInstitution.vue'
 import Report from './Report.vue'
+import ReportDetail from './ReportDetail.vue'
 import AccountSecurity from './AccountSecurity.vue'
 import ApiPage from './ApiPage.vue'
 import Payment from './Payment.vue'
@@ -60,7 +61,10 @@ const page = computed(() =>
         ? 'api'
         : path.includes('/user/security')
           ? 'user-security'
-          : path.includes('/user/report')
+          // A record's detail page sits under /user/report, so its branch has to come first.
+          : path.includes('/user/report/detail')
+            ? 'report-detail'
+            : path.includes('/user/report')
             ? 'report'
             : path.includes('/user/kyc/person')
               ? 'kyc-person'
@@ -107,6 +111,7 @@ const page = computed(() =>
     <FiatDeposit v-else-if="page === 'fiat-deposit'" />
     <QuoteLimit v-else-if="page === 'quote-limit'" />
     <FiatWithdraw v-else-if="page === 'fiat-withdraw'" />
+    <ReportDetail v-else-if="page === 'report-detail'" />
     <Report v-else-if="page === 'report'" />
     <AccountSecurity v-else-if="page === 'user-security'" />
     <ApiPage v-else-if="page === 'api'" />

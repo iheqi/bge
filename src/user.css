@@ -747,13 +747,21 @@
   font-size: 14px;
   padding-top: 80px;
 }
+/* A footer that follows the table. It used to be absolutely positioned, which left it floating
+   over the last rows whenever the table was shorter than the box. */
 .pager {
-  position: absolute;
-  bottom: 100px;
-  right: 30px;
-  background: #f7f8fa;
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 4px 0;
   color: #c1c7d0;
-  padding: 8px 10px;
+  font-size: 13px;
+}
+.pager span {
+  min-width: 32px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #f7f8fa;
+  text-align: center;
 }
 .report-page .user-layout aside {
   min-height: 688px;
