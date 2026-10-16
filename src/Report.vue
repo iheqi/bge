@@ -30,10 +30,12 @@ const type = path.includes('/wallet')
     : path.includes('/settle')
       ? 'settle'
       : 'spot'
-// Every sub page opens on its first tab.
-const walletTab = ref('digital')
-const spotTab = ref('current')
-const otcTab = ref('intent')
+// A sub page opens on its first tab, unless a detail page sent the reader back to a specific one.
+const openedTab = new URLSearchParams(window.location.search).get('tab')
+const pick = (values, fallback) => (values.includes(openedTab) ? openedTab : fallback)
+const walletTab = ref(pick(['digital', 'fiat', 'transfer', 'quick'], 'digital'))
+const spotTab = ref(pick(['current', 'history', 'deals'], 'current'))
+const otcTab = ref(pick(['intent', 'match'], 'intent'))
 const otcPair = ref('all')
 const otcDirection = ref('all')
 const otcStatus = ref('all')

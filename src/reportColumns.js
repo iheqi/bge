@@ -17,6 +17,23 @@ const ACTIONS = new Set(['详情', '查看', '操作'])
 export const detailHref = (type, id) =>
   `/bge/hk/zh-CN/user/report/detail?type=${type}&id=${encodeURIComponent(id)}`
 
+// Which list, and which of its tabs, each kind of detail page was opened from. 返回上一级 has to
+// land on that tab rather than on the module's first one.
+const DETAIL_ORIGINS = {
+  'spot-current': ['spot', 'current'],
+  'spot-history': ['spot', 'history'],
+  'wallet-digital': ['wallet', 'digital'],
+  'wallet-fiat': ['wallet', 'fiat'],
+  'otc-intent': ['otc', 'intent'],
+  'otc-match': ['otc', 'match'],
+}
+
+export function listHref(type) {
+  const origin = DETAIL_ORIGINS[type]
+  const base = reportTabs.find((entry) => entry[0] === origin?.[0])?.[2]
+  return base ? `${base}?tab=${origin[1]}` : reportTabs[0][2]
+}
+
 // The position arrays behind the spot, wallet and settle tables carry no field names, so the label
 // list is also the field list: index N of a row is index N of this array.
 export function columns(type, tab) {
@@ -58,13 +75,14 @@ export function columns(type, tab) {
     ]
   }
   if (type === 'wallet') {
+    // The wallet lists end on 详情 rather than 操作: every cell in that column opens the row.
     if (tab === 'fiat')
-      return ['时间', '类型', '法币', '汇款金额', '汇款银行卡', '银行卡标签', '状态', '操作']
+      return ['时间', '类型', '法币', '汇款金额', '汇款银行卡', '银行卡标签', '状态', '详情']
     if (tab === 'transfer') return ['时间', '币种', '数量', '从', '到', '状态']
     // 跨币种划转 carries the same six fields as 跨账户划转; it used to be rendered under the
     // five-column 数字资产 header, which hid its status.
     if (tab === 'quick') return ['时间', '币种', '数量', '从', '到', '状态']
-    return ['时间', '类型', '数字货币', '数量', '发起方地址', '状态', '操作']
+    return ['时间', '类型', '数字货币', '数量', '发起方地址', '状态', '详情']
   }
   if (type === 'settle') return ['结单名称', '操作']
   return []

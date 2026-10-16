@@ -1092,5 +1092,6 @@
   "apiEpFundingOut": "交易账户 → 资金账户",
   "feeTabSpot": "现货交易费率",
   "feeTabFunding": "出入金费用",
-  "feeTabOtc": "OTC交易费率"
+  "feeTabOtc": "OTC交易费率",
+  "detailBack": "返回上一级"
 }

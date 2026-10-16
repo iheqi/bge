@@ -1092,5 +1092,6 @@
   "apiEpFundingOut": "Trading account to funding account",
   "feeTabSpot": "Spot trading fees",
   "feeTabFunding": "Deposit and withdrawal fees",
-  "feeTabOtc": "OTC trading fees"
+  "feeTabOtc": "OTC trading fees",
+  "detailBack": "Back to list"
 }

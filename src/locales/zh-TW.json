@@ -1092,5 +1092,6 @@
   "apiEpFundingOut": "交易帳戶 → 資金帳戶",
   "feeTabSpot": "現貨交易費率",
   "feeTabFunding": "出入金費用",
-  "feeTabOtc": "OTC交易費率"
+  "feeTabOtc": "OTC交易費率",
+  "detailBack": "返回上一級"
 }

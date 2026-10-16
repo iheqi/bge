@@ -7,7 +7,7 @@ import KycRequired from './KycRequired.vue'
 import { formatCell, i18n, tr } from './i18n'
 import { kycVerified } from './session'
 import { currentAccount, matchDetailOf } from './demoAccounts'
-import { reportTabs as tabs } from './reportColumns'
+import { listHref, reportTabs as tabs } from './reportColumns'
 import { Tickets } from '@element-plus/icons-vue'
 import { computed } from 'vue'
 
@@ -31,9 +31,8 @@ const openTabs = {
   'otc-match': 'otc',
 }
 const activeTab = computed(() => openTabs[detailType] ?? '')
-const backHref = computed(
-  () => tabs.find((tab) => tab[0] === activeTab.value)?.[2] ?? '/bge/hk/zh-CN/user/report/spot',
-)
+// The list page reads the tab back out of this link, so the reader returns to the tab they left.
+const backHref = listHref(detailType)
 
 // Spot and wallet rows are position arrays, so the id is the index into the same list the table
 // rendered — and the detail arrays are built alongside them, in the same order.
@@ -370,7 +369,7 @@ const empty = computed(() => !blocks.value.length)
             <a
               class="detail-back"
               :href="backHref"
-              >{{ $t('personBack') }}</a
+              >{{ $t('detailBack') }}</a
             >
           </div>
           <div
