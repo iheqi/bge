@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:single": "node scripts/build-single.mjs",
     "format": "prettier --write src index.html vite.config.js package.json .prettierrc.json",
     "format:check": "prettier --check src index.html vite.config.js package.json .prettierrc.json",
     "test:i18n": "node scripts/check-i18n.mjs",

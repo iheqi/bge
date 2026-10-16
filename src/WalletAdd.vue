@@ -2,17 +2,18 @@
 import { computed, ref } from 'vue'
 import { ArrowLeft, CopyDocument, Calendar } from '@element-plus/icons-vue'
 import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
+import { go } from './route'
 const step = ref(1), coin = ref('ETH'), network = ref('eth-'), address = ref(''), remark = ref(''), confirmed = ref(false)
 const amount = '8.76001', fullAddress = computed(() => address.value || '0xbfc541edbc1e0ecaffa71f6371f63998cc64f1f4c')
 const canContinue = computed(() => address.value && confirmed.value)
 // The address is stored per demo account, so each profile keeps its own withdrawal record.
 function next() { if (canContinue.value) { writeAccountState('wallet-record', { address: address.value, network: network.value, remark: remark.value || '—', coin: coin.value, status: '未认证', expires: '-' }); step.value = 2 } }
-function back() { window.location.href = '/bge/hk/zh-CN/user/payment/crypto' }
+function back() { go('/bge/hk/zh-CN/user/payment/crypto') }
 // Demo shortcut: mark the stored address as verified and continue on the withdrawal page.
 function finish() {
   const record = readAccountState('wallet-record', currentAccount.value.payment.wallet)
   if (record) writeAccountState('wallet-record', { ...record, status: '已认证' })
-  window.location.href = `/bge/hk/zh-CN/user/crypto/withdraw/${coin.value}`
+  go(`/bge/hk/zh-CN/user/crypto/withdraw/${coin.value}`)
 }
 </script>
 <template><section class="wallet-add"><div class="wallet-breadcrumb"><b>{{ $t('text268') }}</b><span>/</span><b>{{ $t('walletTitle') }}</b><span>/</span><span>{{ $t('walletAdd') }}</span></div><div class="wallet-notice"><b>{{ $t('walletNoticeTitle') }}</b><small>{{ $t('walletNotice') }}</small></div><div class="wallet-steps"><div :class="{active:step===1}"><i>1</i><b>{{ step===1 ? $t('walletStepRunning') : $t('walletStepPrefix') + '1' }}</b><small>{{ $t('walletStep1') }}</small></div><em></em><div :class="{active:step===2}"><i>2</i><b>{{ step===2 ? $t('walletStepRunning') : $t('walletStepPrefix') + '2' }}</b><small>{{ $t('walletStep2') }}</small></div><em></em><div><i>3</i><b>{{ $t('walletStepPrefix') + '3' }}</b><small>{{ $t('walletStep3') }}</small></div></div><template v-if="step===1"><h3>{{ $t('walletChooseCoin') }}</h3><el-select v-model="coin" class="wallet-select"><el-option label="ETH" value="ETH"/><el-option label="BTC" value="BTC"/><el-option label="USDT" value="USDT"/></el-select><h3>{{ $t('walletInputAddress') }}</h3><el-input v-model="address" class="wallet-line" :placeholder="$t('walletAddressPlaceholder')"/><div class="wallet-help"><p>{{ $t('walletHelp1') }}</p><p>• {{ $t('walletHelp2') }}</p><p>• {{ $t('walletHelp3') }}</p></div><h3>{{ $t('walletRemark') }}</h3><el-input v-model="remark" class="wallet-line" :placeholder="$t('walletRemarkPlaceholder')"/><label class="wallet-check"><el-checkbox v-model="confirmed"/>{{ $t('walletConfirm') }}</label><div class="wallet-actions"><el-button @click="back">{{ $t('text183') }}</el-button><el-button type="primary" :disabled="!canContinue" @click="next">{{ $t('walletNext') }}</el-button></div></template><template v-else><div class="wallet-verify"><div class="wallet-verify-address">{{ $t('walletVerifyAddress') }} {{ fullAddress }} <el-icon><CopyDocument/></el-icon></div><div class="wallet-expired">{{ $t('walletExpiry', { time: '23:59:52' }) }} ⓘ</div><dl><dt>{{ $t('text315') }}</dt><dd>{{ amount }} {{ coin }}</dd><dt>{{ $t('text345') }}</dt><dd>{{ coin }}</dd><dt>{{ $t('text285') }}</dt><dd>{{ network }}</dd><dt>{{ $t('walletToAddress') }}</dt><dd>{{ fullAddress }} <el-icon><CopyDocument/></el-icon></dd><dt>{{ $t('walletQr') }}</dt><dd><span class="wallet-qr"/></dd></dl><ul><li>{{ $t('walletVerifyNote1') }}</li><li>{{ $t('walletVerifyNote2') }}</li><li>{{ $t('walletVerifyNote3') }}</li><li>{{ $t('walletVerifyNote4') }}</li></ul></div><div class="wallet-verify-actions"><el-button @click="step=1"><el-icon><ArrowLeft/></el-icon>{{ $t('walletBackEdit') }}</el-button><el-button type="primary" @click="finish">{{ $t('walletFinish') }}</el-button></div></template></section></template>

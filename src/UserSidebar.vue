@@ -1,7 +1,8 @@
 <script setup>
 import { Grid, Wallet, User, Lock, Briefcase, Connection } from '@element-plus/icons-vue'
 import { tr } from './i18n'
-const path = window.location.pathname
+import { routePath } from './route'
+const path = routePath()
 const links = [
   ['总览', '/bge/hk/zh-CN/user/dashboard', Grid],
   ['身份认证', '/bge/hk/zh-CN/user/kyc', User],

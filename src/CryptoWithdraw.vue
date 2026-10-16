@@ -7,6 +7,7 @@ import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { i18n, tr } from './i18n'
 import { InfoFilled } from '@element-plus/icons-vue'
+import { go, routePath } from './route'
 
 const t = (key, params) => i18n.global.t(key, params)
 
@@ -17,7 +18,7 @@ const coins = [
   { symbol: 'USDC', name: 'USD Coin', glyph: '$', network: 'erc20-', chain: 'ERC20', fee: 10, min: 10, limit: 500000, balance: 5600 },
   { symbol: 'SOL', name: 'Solana', glyph: '◎', network: 'sol-', chain: 'SOL', fee: 0.001, min: 0.01, limit: 50000, balance: 0.02 },
 ]
-const requested = decodeURIComponent(window.location.pathname.split('/withdraw/')[1] || 'ETH').toUpperCase()
+const requested = decodeURIComponent(routePath().split('/withdraw/')[1] || 'ETH').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'ETH')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 // Demo balances mirror the funding account on /user/assets.
@@ -38,7 +39,7 @@ const remaining = computed(
 const feeText = computed(() => `${active.value.fee} ${coin.value}`)
 
 function changeCoin(value) {
-  window.location.href = `/bge/hk/zh-CN/user/crypto/withdraw/${value}`
+  go(`/bge/hk/zh-CN/user/crypto/withdraw/${value}`)
 }
 function fillAll() {
   amount.value = String(available.value)

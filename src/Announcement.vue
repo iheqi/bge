@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import SiteHeader from './SiteHeader.vue'
 import Footer from './Footer.vue'
+import { routePath } from './route'
 import { tr } from './i18n'
 
 const base = '/bge/hk/zh-CN/support/announcement'
@@ -19,9 +20,9 @@ const filtered = computed(() => {
   const value = query.value.trim().toLowerCase()
   return value ? articles.filter(item => item.title.toLowerCase().includes(value)) : articles
 })
-const detail = window.location.pathname.includes('/article/')
+const detail = routePath().includes('/article/')
 const detailArticle = computed(() => {
-  const id = Number(window.location.pathname.split('/article/')[1])
+  const id = Number(routePath().split('/article/')[1])
   return articles.find(item => item.id === id) || articles[0]
 })
 </script>

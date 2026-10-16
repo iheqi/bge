@@ -8,6 +8,7 @@ import MessageBell from './MessageBell.vue'
 import { ref, computed } from 'vue'
 import { Search, StarFilled, ArrowRight } from '@element-plus/icons-vue'
 import SiteHeader from './SiteHeader.vue'
+import { go } from './route'
 const tab = ref('spot'),
   quote = ref('all'),
   search = ref('')
@@ -77,7 +78,7 @@ function toggleFavorite(pair) {
   } catch {}
 }
 function trade() {
-  window.location.href = '/bge/hk/zh-CN/spot'
+  go('/bge/hk/zh-CN/spot')
 }
 </script>
 <template>

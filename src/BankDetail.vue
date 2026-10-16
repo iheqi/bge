@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { i18n, tr } from './i18n'
 import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
+import { go, routeSearch } from './route'
 // Fiat currencies the bank card can be used for; ADS/DSz are the demo placeholders of the design.
 const currencies = [
   { code: 'USD', name: '美元' },
@@ -14,7 +15,7 @@ const currencies = [
 const usages = ['both', 'deposit', 'withdraw']
 const usageKeys = { both: 'text375', deposit: 'text376', withdraw: 'text377' }
 // ?type=add opens the empty form, ?type=edit prefills the stored card (from the 编辑 action).
-const editMode = new URLSearchParams(window.location.search).get('type') === 'edit'
+const editMode = new URLSearchParams(routeSearch()).get('type') === 'edit'
 const titleKey = editMode ? 'text389' : 'text364'
 const submitKey = editMode ? 'text390' : 'text383'
 const confirmTitleKey = editMode ? 'text391' : 'text388'
@@ -69,7 +70,7 @@ function drop(event) {
   readFile(event.dataTransfer?.files?.[0])
 }
 function back() {
-  window.location.href = '/bge/hk/zh-CN/user/payment/fiat'
+  go('/bge/hk/zh-CN/user/payment/fiat')
 }
 function submit() {
   if (!chosen.value.length) return ElMessage.warning(i18n.global.t('text384'))

@@ -15,14 +15,15 @@ import {
   Briefcase,
   Connection,
 } from '@element-plus/icons-vue'
-const bindPhone = new URLSearchParams(window.location.search).get('bind') === 'phone'
-const resetPage = window.location.pathname.includes('/reset-password')
-const bindEmailPage = window.location.pathname.includes('/bind-email')
+import { go, routePath, routeSearch } from './route'
+const bindPhone = new URLSearchParams(routeSearch()).get('bind') === 'phone'
+const resetPage = routePath().includes('/reset-password')
+const bindEmailPage = routePath().includes('/bind-email')
 const phone = ref('')
 const code = ref('')
 const submitted = ref(false)
 const sendCode = () => { if (phone.value) submitted.value = true }
-const confirmBind = () => { if (phone.value && code.value) window.location.href = '/bge/hk/zh-CN/user/security' }
+const confirmBind = () => { if (phone.value && code.value) go('/bge/hk/zh-CN/user/security') }
 const oldPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')

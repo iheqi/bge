@@ -11,7 +11,8 @@ import { kycVerified } from './session'
 import { Search, Sort } from '@element-plus/icons-vue'
 import { computed, ref } from 'vue'
 import { currentAccount, demoPrices } from './demoAccounts'
-const accountParam = new URLSearchParams(window.location.search).get('account')
+import { routeSearch } from './route'
+const accountParam = new URLSearchParams(routeSearch()).get('account')
 const props = defineProps({ assets: Boolean })
 const accountTab = ref(
   accountParam === 'trade' || accountParam === 'fund'

@@ -6,6 +6,7 @@ import { ElMessage } from 'element-plus'
 import { i18n, tr } from './i18n'
 import { signIn } from './session'
 import { demoAccounts } from './demoAccounts'
+import { go } from './route'
 
 const account = ref('')
 const picked = ref('')
@@ -47,7 +48,7 @@ function sendSms() {
 function confirmSecurity() {
   if (smsCode.value !== '111111') return ElMessage.warning(t('loginDemoHint'))
   signIn(account.value.trim())
-  window.location.href = '/bge/hk/zh-CN/user/dashboard'
+  go('/bge/hk/zh-CN/user/dashboard')
 }
 </script>
 

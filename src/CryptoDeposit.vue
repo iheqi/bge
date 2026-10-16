@@ -6,6 +6,7 @@ import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { InfoFilled } from '@element-plus/icons-vue'
 import { i18n, tr } from './i18n'
+import { go, routePath } from './route'
 
 const t = (key, params) => i18n.global.t(key, params)
 
@@ -16,7 +17,7 @@ const coins = [
   { symbol: 'USDC', name: 'USD Coin', glyph: '$', network: 'erc20-', chain: 'ERC20', min: 10, confirmations: 12 },
   { symbol: 'SOL', name: 'Solana', glyph: '◎', network: 'sol-', chain: 'SOL', min: 0.01, confirmations: 32 },
 ]
-const requested = decodeURIComponent(window.location.pathname.split('/deposit/')[1] || 'ETH').toUpperCase()
+const requested = decodeURIComponent(routePath().split('/deposit/')[1] || 'ETH').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'ETH')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 const wallet = ref(JSON.parse(localStorage.getItem('bge-wallet-record') || 'null'))
@@ -24,7 +25,7 @@ const verified = computed(() => wallet.value?.status === '已认证' && wallet.v
 const records = ref([])
 
 function changeCoin(value) {
-  window.location.href = `/bge/hk/zh-CN/user/crypto/deposit/${value}`
+  go(`/bge/hk/zh-CN/user/crypto/deposit/${value}`)
 }
 async function copyAddress() {
   try {

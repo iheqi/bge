@@ -10,8 +10,9 @@ import { currentAccount, matchDetailOf } from './demoAccounts'
 import { listHref, reportTabs as tabs } from './reportColumns'
 import { Tickets } from '@element-plus/icons-vue'
 import { computed } from 'vue'
+import { routeSearch } from './route'
 
-const params = new URLSearchParams(window.location.search)
+const params = new URLSearchParams(routeSearch())
 const detailType = params.get('type') ?? ''
 const detailId = params.get('id') ?? ''
 const account = currentAccount

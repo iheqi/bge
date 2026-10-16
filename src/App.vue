@@ -29,14 +29,15 @@ import Announcement from './Announcement.vue'
 import Login from './Login.vue'
 import DemoNote from './DemoNote.vue'
 import { loggedIn } from './session'
-const path = window.location.pathname
+import { redirect, routePath } from './route'
+const path = routePath()
 // Signed-out visitors are sent to the login page when they open an account page.
 if (!loggedIn.value && path.startsWith('/bge/hk/zh-CN/user/')) {
-  window.location.replace('/bge/hk/zh-CN/login')
+  redirect('/bge/hk/zh-CN/login')
 }
 // 场外 › 去交易 used to open its own page; it now shares 订单 › OTC 订单.
 if (path.replace(/\/$/, '') === '/bge/hk/zh-CN/otc/trade') {
-  window.location.replace('/bge/hk/zh-CN/user/report/otc-orders')
+  redirect('/bge/hk/zh-CN/user/report/otc-orders')
 }
 const page = computed(() =>
   path.includes('/login')

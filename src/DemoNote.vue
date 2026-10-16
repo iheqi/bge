@@ -3,8 +3,9 @@ import { computed, ref } from 'vue'
 import { noteFor } from './demoNotes'
 import { readGlobal, writeGlobal } from './storage'
 import { loggedIn } from './session'
+import { routePath } from './route'
 
-const items = computed(() => (loggedIn.value ? noteFor(window.location.pathname) : []))
+const items = computed(() => (loggedIn.value ? noteFor(routePath()) : []))
 // Collapsed by default so the note never covers the page until the presenter asks for it.
 const open = ref(readGlobal('note-open', '0') === '1')
 function toggle() {

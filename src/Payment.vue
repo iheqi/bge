@@ -10,16 +10,17 @@ import KycNotice from './KycNotice.vue'
 import KycRequired from './KycRequired.vue'
 import { kycVerified } from './session'
 import { currentAccount, readAccountState } from './demoAccounts'
+import { go, routePath } from './route'
 function openAdd(href) {
   if (!kycVerified.value) {
     showKycNotice.value = true
     return
   }
-  window.location.href = href
+  go(href)
 }
-const crypto = window.location.pathname.includes('/crypto')
-const addWallet = window.location.pathname.includes('/crypto/add')
-const bankDetail = window.location.pathname.includes('/user/payment/fiat/detail')
+const crypto = routePath().includes('/crypto')
+const addWallet = routePath().includes('/crypto/add')
+const bankDetail = routePath().includes('/user/payment/fiat/detail')
 // The wallet address and the bank card seen here belong to the signed-in demo account. Adding
 // or editing one stores it under that account, so switching accounts shows a different record.
 const walletRecord = ref(

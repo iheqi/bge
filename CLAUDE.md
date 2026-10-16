@@ -26,5 +26,7 @@ Vue 3 + Element Plus + Vite 的官网 Demo，纯静态、无后端：页面数�
 ## 本地开发
 
 - 开发服务器常在 http://localhost:5173/bge/（用户自己起的）。需要另起时用 `npm run dev`，5173 被占用会自动顺延到 5174 等。
-- 路由在 `src/App.vue` 里按 pathname 匹配；新增页面要在那里加分支，`vite.config.js` 的插件会扫描源码中出现的 `/bge/hk/zh-CN/...` 链接并自动生成静态入口页。
+- 路由在 `src/App.vue` 里按 `routePath()` 匹配；新增页面要在那里加分支，`vite.config.js` 的插件会扫描源码中出现的 `/bge/hk/zh-CN/...` 链接并自动生成静态入口页。
+- 地址栏一律通过 `src/route.js` 读，**不要在组件里直接写 `window.location`**：线上是「一个路由一个 HTML」，路径即路由；`npm run build:single` 打出来的单文件离线版把同一个路径放在 hash 里（`#/bge/hk/zh-CN/user/api`），两种形态由 `route.js` 抹平。跳转用 `go()`，重定向用 `redirect()`，普通 `<a href="/bge/...">` 由 `route.js` 的点击拦截在单文件版里转成 hash 跳转。
 - 多语言：中文文案在 `src/locales/zh-CN.json`，新增 key 必须同时补 `zh-TW.json` 和 `en.json`（三个包的 key 集合要一致，校验脚本会检查）。
+- 单文件离线版：`npm run build:single`（先跑 `vite build`，再由 `scripts/build-single.mjs` 把 CSS、JS 和 public/ 里的图片全部内联）产出 `dist-single/bge-demo.html`，双击即可打开，站内可以点着走完。产物不进仓库（`dist-single` 已忽略）。新增图片要被带上，得加进 `build-single.mjs` 的 `ASSETS`。

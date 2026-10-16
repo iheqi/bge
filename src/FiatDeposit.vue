@@ -8,6 +8,7 @@ import { i18n, tr } from './i18n'
 
 const t = (key, params) => i18n.global.t(key, params)
 import { CopyDocument, InfoFilled, UploadFilled, WarningFilled } from '@element-plus/icons-vue'
+import { go, routePath } from './route'
 
 const coins = [
   {
@@ -35,7 +36,7 @@ const coins = [
     },
   },
 ]
-const requested = decodeURIComponent(window.location.pathname.split('/deposit/')[1] || 'HKD').toUpperCase()
+const requested = decodeURIComponent(routePath().split('/deposit/')[1] || 'HKD').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'HKD')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 const bankRows = computed(() => [
@@ -58,7 +59,7 @@ const maskedAccount = computed(() => {
 })
 
 function changeCoin(value) {
-  window.location.href = `/bge/hk/zh-CN/user/fiat/deposit/${value}`
+  go(`/bge/hk/zh-CN/user/fiat/deposit/${value}`)
 }
 async function copyValue(value) {
   try {

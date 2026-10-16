@@ -20,9 +20,10 @@ import { currentAccount } from './demoAccounts'
 import { detailHref, reportTabs as tabs, splitColumns } from './reportColumns'
 import { buildStatementPdf, downloadBlob, statementRows } from './pdf'
 import VerifyDialog from './VerifyDialog.vue'
+import { routePath, routeSearch } from './route'
 const t = i18n.global.t
 const showKycNotice = ref(!kycVerified.value)
-const path = window.location.pathname
+const path = routePath()
 const type = path.includes('/wallet')
   ? 'wallet'
   : path.includes('/otc-orders')
@@ -31,7 +32,7 @@ const type = path.includes('/wallet')
       ? 'settle'
       : 'spot'
 // A sub page opens on its first tab, unless a detail page sent the reader back to a specific one.
-const openedTab = new URLSearchParams(window.location.search).get('tab')
+const openedTab = new URLSearchParams(routeSearch()).get('tab')
 const pick = (values, fallback) => (values.includes(openedTab) ? openedTab : fallback)
 const walletTab = ref(pick(['digital', 'fiat', 'transfer', 'quick'], 'digital'))
 const spotTab = ref(pick(['current', 'history', 'deals'], 'current'))

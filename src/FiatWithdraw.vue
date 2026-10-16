@@ -5,6 +5,7 @@ import Footer from './Footer.vue'
 import { ElMessage } from 'element-plus'
 import { computed, ref } from 'vue'
 import { i18n, tr } from './i18n'
+import { go, routePath } from './route'
 
 const t = (key, params) => i18n.global.t(key, params)
 
@@ -12,7 +13,7 @@ const coins = [
   { symbol: 'HKD', name: '港币', glyph: 'HK$', fee: 0, min: 100, limit: 5000000, balance: 68000 },
   { symbol: 'USD', name: '美元', glyph: '$', fee: 0, min: 10, limit: 1000000, balance: 12500 },
 ]
-const requested = decodeURIComponent(window.location.pathname.split('/withdraw/')[1] || 'HKD').toUpperCase()
+const requested = decodeURIComponent(routePath().split('/withdraw/')[1] || 'HKD').toUpperCase()
 const coin = ref(coins.some((item) => item.symbol === requested) ? requested : 'HKD')
 const active = computed(() => coins.find((item) => item.symbol === coin.value))
 // Demo balances mirror the funding account on /user/assets.
@@ -35,7 +36,7 @@ const maskedAccount = computed(() => {
 })
 
 function changeCoin(value) {
-  window.location.href = `/bge/hk/zh-CN/user/fiat/withdraw/${value}`
+  go(`/bge/hk/zh-CN/user/fiat/withdraw/${value}`)
 }
 function fillPercent(percent) {
   amount.value = ((available.value * percent) / 100).toFixed(2)
