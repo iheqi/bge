@@ -1089,5 +1089,8 @@
   "apiEpCancelByClientId": "按自定义 ID 撤单",
   "apiEpCancelAll": "撤销全部订单",
   "apiEpFundingIn": "资金账户 → 交易账户",
-  "apiEpFundingOut": "交易账户 → 资金账户"
+  "apiEpFundingOut": "交易账户 → 资金账户",
+  "feeTabSpot": "现货交易费率",
+  "feeTabFunding": "出入金费用",
+  "feeTabOtc": "OTC交易费率"
 }

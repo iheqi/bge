@@ -1089,5 +1089,8 @@
   "apiEpCancelByClientId": "按自訂 ID 撤單",
   "apiEpCancelAll": "撤銷全部訂單",
   "apiEpFundingIn": "資金帳戶 → 交易帳戶",
-  "apiEpFundingOut": "交易帳戶 → 資金帳戶"
+  "apiEpFundingOut": "交易帳戶 → 資金帳戶",
+  "feeTabSpot": "現貨交易費率",
+  "feeTabFunding": "出入金費用",
+  "feeTabOtc": "OTC交易費率"
 }

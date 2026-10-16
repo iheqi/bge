@@ -13,9 +13,9 @@ const volume = { spot: plan.spotVolume, assets: plan.assetVolume }
 const BASE_FEE = { maker: 0.2, taker: 0.25 }
 const rate = (side) => `${Number((BASE_FEE[side] * (1 - plan[`${side}Discount`] / 100)).toFixed(4))}%`
 const tabs = [
-  ['spot', 'text426'],
-  ['funding', 'text427'],
-  ['otc', 'text229'],
+  ['spot', 'feeTabSpot'],
+  ['funding', 'feeTabFunding'],
+  ['otc', 'feeTabOtc'],
 ]
 const active = ref('spot')
 const fundingTab = ref('crypto')
@@ -91,17 +91,6 @@ const sellExample = [
       </div>
       <div class="fee-metrics">
         <div class="fee-metric-group">
-          <span class="fee-metric-label">{{ $t('text420') }}</span>
-          <div class="fee-metric-row">
-            <div>
-              <small>{{ $t('text422') }}</small><b>{{ discount.maker }}</b>
-            </div>
-            <div>
-              <small>{{ $t('text423') }}</small><b>{{ discount.taker }}</b>
-            </div>
-          </div>
-        </div>
-        <div class="fee-metric-group">
           <span class="fee-metric-label">{{ $t('text421') }}</span>
           <div class="fee-metric-row">
             <div>
@@ -139,6 +128,22 @@ const sellExample = [
           :aria-label="$t('text283')"
           clearable
         />
+      </div>
+
+      <!-- 折扣比例只对现货与 OTC 生效：出入金按固定费率收，没有折扣可谈。 -->
+      <div
+        v-if="active !== 'funding'"
+        class="fee-discount"
+      >
+        <span class="fee-metric-label">{{ $t('text420') }}</span>
+        <div class="fee-metric-row">
+          <div>
+            <small>{{ $t('text422') }}</small><b>{{ discount.maker }}</b>
+          </div>
+          <div>
+            <small>{{ $t('text423') }}</small><b>{{ discount.taker }}</b>
+          </div>
+        </div>
       </div>
 
       <template v-if="active === 'spot'">
@@ -390,13 +395,13 @@ const sellExample = [
   color: #b98c00;
 }
 .fee-metrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   margin-top: 24px;
   border: 1px solid #edf0f4;
 }
-.fee-metric-group + .fee-metric-group {
-  border-left: 1px solid #edf0f4;
+/* 折扣比例 sits under the tabs, next to the rate table it discounts. */
+.fee-discount {
+  margin-top: 20px;
+  border: 1px solid #edf0f4;
 }
 .fee-metric-label {
   display: block;
@@ -578,13 +583,6 @@ const sellExample = [
 @media (max-width: 900px) {
   .fee-center {
     padding: 20px 16px 32px;
-  }
-  .fee-metrics {
-    grid-template-columns: 1fr;
-  }
-  .fee-metric-group + .fee-metric-group {
-    border-left: 0;
-    border-top: 1px solid #edf0f4;
   }
   .fee-standard-head {
     flex-direction: column;

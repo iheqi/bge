@@ -1089,5 +1089,8 @@
   "apiEpCancelByClientId": "Cancel an order by client id",
   "apiEpCancelAll": "Cancel all orders",
   "apiEpFundingIn": "Funding account to trading account",
-  "apiEpFundingOut": "Trading account to funding account"
+  "apiEpFundingOut": "Trading account to funding account",
+  "feeTabSpot": "Spot trading fees",
+  "feeTabFunding": "Deposit and withdrawal fees",
+  "feeTabOtc": "OTC trading fees"
 }
