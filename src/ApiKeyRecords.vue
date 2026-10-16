@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { i18n } from './i18n'
 import { currentAccount, useAccountState } from './demoAccounts'
@@ -18,6 +18,65 @@ const maskKey = (apiKey) => `${apiKey.slice(0, 8)}****${apiKey.slice(-4)}`
 const riskText = (row) => (row.risk ?? []).map((key) => t(key)).join('、')
 
 const detail = ref(null)
+// The account may hold this many keys. The detail panel counts against the same number the form
+// refuses to go past.
+const API_KEY_LIMIT = 10
+// The interface list the console groups by scenario: what a key is allowed to do reads better
+// against the endpoints it opens than as the bare word 读取 or 交易.
+const API_GROUPS = [
+  ['apiGroupMarket', null, [
+    ['GET /v1/currencies', 'apiEpCurrencies'],
+    ['GET /v1/currencies/{currency}', 'apiEpCurrency'],
+    ['GET /v1/products', 'apiEpProducts'],
+    ['GET /v1/products/{product}', 'apiEpProduct'],
+    ['GET /public/v1/products/{pair}/orderbook', 'apiEpOrderbook'],
+    ['GET /public/v1/products/{pair}/ticker', 'apiEpTicker'],
+    ['GET /public/v1/products/{pair}/trades', 'apiEpTrades'],
+    ['GET /public/v1/products/{pair}/candles', 'apiEpCandles'],
+  ]],
+  ['apiGroupAccount', 'readonly', [
+    ['GET /v1/accounts', 'apiEpAccounts'],
+    ['GET /v1/accounts/{currency}', 'apiEpAccount'],
+  ]],
+  ['apiGroupOrder', 'readonly', [
+    ['GET /v1/orders', 'apiEpOrders'],
+    ['GET /v1/orders/{order_id}', 'apiEpOrder'],
+    ['GET /v1/orders/single/{client_oid}', 'apiEpOrderByClientId'],
+    ['GET /v1/fills', 'apiEpFills'],
+  ]],
+  ['apiGroupTrade', 'trade', [
+    ['POST /v1/orders', 'apiEpCreateOrder'],
+    ['DELETE /v1/orders/{order_id}', 'apiEpCancelOrder'],
+    ['DELETE /v1/orders/single/{client_oid}', 'apiEpCancelByClientId'],
+    ['DELETE /v1/orders', 'apiEpCancelAll'],
+  ]],
+  ['apiGroupTransfer', 'withdraw', [
+    ['POST /v1/deposits/account', 'apiEpFundingIn'],
+    ['POST /v1/withdrawals/account', 'apiEpFundingOut'],
+  ]],
+]
+const permitTree = computed(() =>
+  API_GROUPS.map(([groupKey, perm, endpoints]) => ({
+    id: groupKey,
+    label: t(groupKey),
+    perm,
+    children: endpoints.map(([path, labelKey]) => ({
+      id: `${groupKey}:${path}`,
+      label: t(labelKey),
+      path,
+      perm,
+    })),
+  })),
+)
+// Every group starts open, and the endpoints a key may call start ticked: the public ones need no
+// permission, the rest are ticked when the key holds what the group asks for.
+const permitExpanded = API_GROUPS.map(([groupKey]) => groupKey)
+const permitChecked = computed(() =>
+  permitTree.value
+    .filter((group) => !group.perm || (detail.value?.authorities ?? []).includes(group.perm))
+    .flatMap((group) => group.children.map((child) => child.id)),
+)
+
 const verification = ref(false)
 const editId = ref(null)
 const formRef = ref()
@@ -51,7 +110,7 @@ const rules = {
   ],
 }
 function edit(row) {
-  if (!row && rows.value.length >= 10) return ElMessage.warning(t('apiLimit'))
+  if (!row && rows.value.length >= API_KEY_LIMIT) return ElMessage.warning(t('apiLimit'))
   editId.value = row?.id ?? null
   Object.assign(form, {
     remarks: row?.remarks ?? '',
@@ -89,11 +148,14 @@ async function save() {
     authorities: [...form.authorities],
   }
   const id = editId.value
+  const now = new Date().toLocaleString('sv-SE')
   verify(() => {
     if (id) {
       Object.assign(
         rows.value.find((row) => row.id === id),
         values,
+        // Touching the key — rights, remarks or IPs — is what 最近修改 records.
+        { updatedDate: now },
       )
     } else {
       const token = crypto.randomUUID()
@@ -102,7 +164,8 @@ async function save() {
         id: token,
         // A key created through the demo form is valid, unbound and carries no risk flag yet.
         state: 'valid',
-        createdDate: new Date().toLocaleString('sv-SE'),
+        createdDate: now,
+        updatedDate: now,
         apiKey: `dccb2137${token.replace(/-/g, '').slice(0, 20)}8fee`,
         secret: `demo_secret_${crypto.randomUUID()}`,
         risk: [],
@@ -268,25 +331,88 @@ async function remove(row) {
     >
       <div
         v-if="detail"
-        class="key-details"
+        class="key-detail"
       >
-        <div>
-          <label>{{ $t('apiRemarkColumn') }}</label>
-          <p>{{ detail.remarks }}</p>
-          <label>{{ $t('apiPermissions') }}</label>
-          <p>{{ authText(detail) }}</p>
-          <label>{{ $t('apiIpBinding') }}</label>
-          <p>{{ detail.ipAddresses || $t('apiIpUnbound') }}</p>
-        </div>
-        <div>
+        <h4 class="key-detail-title">{{ $t('apiDetailBasic') }}</h4>
+        <el-descriptions
+          class="key-detail-basic"
+          :column="2"
+          border
+        >
+          <el-descriptions-item :label="$t('apiRemarkColumn')">
+            {{ detail.remarks }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('text063')">
+            <em :class="'api-state api-state-' + detail.state">{{ $t(stateKey(detail)) }}</em>
+          </el-descriptions-item>
           <!-- The detail panel shows the same masked key as the list: the secret stays out of it. -->
-          <label>{{ $t('apiKeyColumn') }}</label>
-          <p>{{ maskKey(detail.apiKey) }}</p>
-          <label>{{ $t('text064') }}</label>
-          <p>{{ detail.createdDate }}</p>
-          <label>{{ $t('text063') }}</label>
-          <p>{{ $t(stateKey(detail)) }}</p>
-        </div>
+          <el-descriptions-item
+            :label="$t('apiKeyColumn')"
+            :span="2"
+          >
+            <span class="api-masked-key">{{ maskKey(detail.apiKey) }}</span>
+            <span class="key-detail-note">{{ $t('apiSecretNote') }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiPermissions')">
+            {{ authText(detail) }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiIpBinding')">
+            {{ detail.ipAddresses || $t('apiIpUnbound') }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('text064')">
+            {{ detail.createdDate }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiLastUpdated')">
+            {{ detail.updatedDate || '—' }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiExpiry')">
+            {{ $t(detail.ipAddresses ? 'apiExpiryBound' : 'apiExpiryUnbound') }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiKeyCount')">
+            {{ rows.length }} / {{ API_KEY_LIMIT }}
+          </el-descriptions-item>
+          <el-descriptions-item
+            :label="$t('apiRisk')"
+            :span="2"
+          >
+            {{ (detail.risk ?? []).length ? riskText(detail) : '—' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <h4 class="key-detail-title">{{ $t('apiDetailPerms') }}</h4>
+        <p class="key-detail-caption">{{ $t('apiPermCaption') }}</p>
+        <el-tree
+          :key="detail.id"
+          class="api-tree"
+          :data="permitTree"
+          node-key="id"
+          show-checkbox
+          :default-expanded-keys="permitExpanded"
+          :default-checked-keys="permitChecked"
+          :props="{ disabled: () => true }"
+        >
+          <template #default="{ data }">
+            <span class="api-tree-node">
+              <span class="api-tree-label">{{ data.label }}</span>
+              <code
+                v-if="data.path"
+                class="api-tree-path"
+                >{{ data.path }}</code
+              >
+              <!-- The permission a group asks for sits on the group: every interface under it needs the same one. -->
+              <span
+                v-if="!data.path"
+                :class="'api-tree-tag api-tree-tag-' + (data.perm ? 'need' : 'public')"
+              >
+                {{
+                  data.perm
+                    ? $t('apiPermNeed', { name: t(authNames[data.perm]) })
+                    : $t('apiPermPublic')
+                }}
+              </span>
+            </span>
+          </template>
+        </el-tree>
       </div>
     </el-dialog>
   </section>
@@ -330,9 +456,25 @@ async function remove(row) {
 .api-action:hover{color:#b98c00}
 .api-danger{color:#e0443a}
 .api-danger:hover{color:#c2352c}
-.key-details{display:grid;grid-template-columns:1fr 1fr;gap:40px}
-.key-details > div:first-child{border-right:1px dashed #e4e7ed;padding-right:24px}
-.key-details label{color:#929ba9}
-.key-details p{overflow-wrap:anywhere;margin:8px 0 24px;line-height:1.6}
+/* Detail dialog: 基本信息 as a bordered description grid, 接口权限 as a read-only tree. */
+.key-detail-title{margin:0 0 16px;padding-left:10px;border-left:4px solid #ffd52a;color:#303744;font-size:15px;font-weight:600}
+.key-detail-basic{margin-bottom:28px}
+.key-detail-basic :deep(.el-descriptions__label){width:112px;background:#f4f6f9;color:#697585;font-weight:400}
+.key-detail-basic :deep(.el-descriptions__content){color:#303744;font-size:14px;overflow-wrap:anywhere}
+.key-detail-note{margin-left:12px;color:#929ba9;font-size:12px}
+.key-detail-caption{margin:-8px 0 14px;color:#929ba9;font-size:13px;line-height:1.7}
+/* Five groups with twenty interfaces would outgrow the dialog, so the tree scrolls inside it. */
+.api-tree{max-height:400px;overflow:auto;padding-right:6px}
+.api-tree :deep(.el-tree-node__content){height:34px}
+.api-tree :deep(.el-checkbox__inner){border-color:#dfe4ec}
+.api-tree :deep(.el-checkbox__input.is-checked .el-checkbox__inner),
+.api-tree :deep(.el-checkbox__input.is-checked.is-disabled .el-checkbox__inner){border-color:#f0d000;background:#f0d000}
+.api-tree :deep(.el-checkbox__input.is-disabled.is-checked .el-checkbox__inner::after){border-color:#fff}
+.api-tree-node{display:flex;flex:1;align-items:center;gap:12px;min-width:0}
+.api-tree-label{color:#303744}
+.api-tree-path{color:#929ba9;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.api-tree-tag{margin-left:auto;padding:1px 8px;border-radius:4px;font-size:12px;white-space:nowrap}
+.api-tree-tag-public{background:#f0f2f5;color:#8a93a0}
+.api-tree-tag-need{background:#fff8dc;color:#b98c00}
 @media (max-width:1200px){.api-columns{flex-direction:column;gap:24px;align-items:stretch}.api-notes{width:100%;flex:1 1 auto;padding-left:0;border-left:0}.api-form{max-width:none}}
 </style>

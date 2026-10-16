@@ -649,7 +649,8 @@ function buildSecurity(profile) {
 }
 
 // The API keys mirror the operator console list: the masked key, what it may do, whether an IP is
-// bound, its state and the risk flags an operator would want to see next to it.
+// bound, its state and the risk flags an operator would want to see next to it. A key that is no
+// longer usable was never touched after it was created, so the two dates match on those.
 const API_KEY_SETS = {
   person: [
     {
@@ -658,6 +659,7 @@ const API_KEY_SETS = {
       ipAddresses: '192.0.2.10',
       state: 'valid',
       createdDate: '2026-10-08 10:20:00',
+      updatedDate: '2026-10-09 16:40:00',
       risk: [],
     },
     {
@@ -666,6 +668,7 @@ const API_KEY_SETS = {
       ipAddresses: '',
       state: 'valid',
       createdDate: '2026-08-19 14:02:00',
+      updatedDate: '2026-09-30 11:05:00',
       risk: ['apiRiskIdle'],
     },
   ],
@@ -676,6 +679,7 @@ const API_KEY_SETS = {
       ipAddresses: '198.51.100.20',
       state: 'valid',
       createdDate: '2026-09-02 09:30:00',
+      updatedDate: '2026-09-28 15:12:00',
       risk: [],
     },
     {
@@ -684,6 +688,7 @@ const API_KEY_SETS = {
       ipAddresses: '198.51.100.21,198.51.100.22',
       state: 'valid',
       createdDate: '2026-07-15 11:45:00',
+      updatedDate: '2026-09-05 10:08:00',
       risk: ['apiRiskMultiIp'],
     },
     {
@@ -692,6 +697,7 @@ const API_KEY_SETS = {
       ipAddresses: '203.0.113.9',
       state: 'expired',
       createdDate: '2025-06-30 08:10:00',
+      updatedDate: '2025-06-30 08:10:00',
       risk: ['apiRiskIdle'],
     },
   ],
@@ -704,6 +710,7 @@ const API_KEY_SETS = {
       ipAddresses: '',
       state: 'valid',
       createdDate: '2026-10-01 09:12:00',
+      updatedDate: '2026-10-12 18:06:00',
       risk: ['apiRiskUnboundTradeKey'],
     },
     {
@@ -712,6 +719,7 @@ const API_KEY_SETS = {
       ipAddresses: '203.0.113.77',
       state: 'expired',
       createdDate: '2025-04-02 12:00:00',
+      updatedDate: '2026-03-18 09:44:00',
       risk: ['apiRiskIdle'],
     },
     {
@@ -720,6 +728,7 @@ const API_KEY_SETS = {
       ipAddresses: '203.0.113.88',
       state: 'revoked',
       createdDate: '2025-02-18 09:26:00',
+      updatedDate: '2025-02-18 09:26:00',
       risk: [],
     },
   ],
@@ -732,6 +741,7 @@ function buildApiKeys(profile) {
   // The console masks the middle of the key, so the head and tail stay recognisable.
   return list.map((item, index) => ({
     ...item,
+    updatedDate: item.updatedDate ?? item.createdDate,
     id: `${profile.id}-key-${index + 1}`,
     apiKey: `dccb2137${hexKey(random, 20)}8fee`,
     secret: `demo_secret_${profile.id}_${index + 1}`,
