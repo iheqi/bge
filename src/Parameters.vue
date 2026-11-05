@@ -1,11 +1,13 @@
 <script setup>
 import SiteHeader from './SiteHeader.vue'
+import UserSidebar from './UserSidebar.vue'
 import FeeContent from './FeeContent.vue'
 </script>
 <template>
   <div class="user-page parameter-page">
     <SiteHeader active="parameters" />
     <div class="user-layout">
+      <UserSidebar />
       <FeeContent />
     </div>
     <footer>

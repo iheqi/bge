@@ -10,15 +10,14 @@ const level = `Lv ${plan.level}`
 const discount = { maker: `${plan.makerDiscount}%`, taker: `${plan.takerDiscount}%` }
 const volume = { spot: plan.spotVolume, assets: plan.assetVolume }
 // The published rates the tier discount comes off, kept next to the discount that changes them.
+// The published table itself lives on the home page; this page only applies the user's discount.
 const BASE_FEE = { maker: 0.2, taker: 0.25 }
 const rate = (side) => `${Number((BASE_FEE[side] * (1 - plan[`${side}Discount`] / 100)).toFixed(4))}%`
 const tabs = [
   ['spot', 'feeTabSpot'],
-  ['funding', 'feeTabFunding'],
   ['otc', 'feeTabOtc'],
 ]
 const active = ref('spot')
-const fundingTab = ref('crypto')
 const search = ref('')
 const spotFees = [
   ['BTC/USDC', '仅PI'],
@@ -34,48 +33,32 @@ const spotFees = [
   pair,
   tag,
   maker: rate('maker'),
-  makerBase: `${BASE_FEE.maker}%`,
   taker: rate('taker'),
-  takerBase: `${BASE_FEE.taker}%`,
 }))
-const cryptoFunding = [
-  ['ETH', 'ETH', '0.00010000', '0.00000000', '0.00400000'],
-  ['USDC', 'ETH', '10.00000000', '0.00000000', '10.00000000'],
-  ['USDT', 'ETH', '10.00000000', '0.00000000', '10.00000000'],
-  ['BTC', 'BTC', '0.00005000', '0.00000000', '0.00012000'],
-].map(([coin, network, minDeposit, fee, minWithdraw]) => ({ coin, network, minDeposit, fee, minWithdraw }))
-const fiatFunding = [
-  ['USD', 'USD', '10.00', '0.00', '10.00'],
-  ['HKD', 'HKD', '100.00', '0.00', '100.00'],
-].map(([coin, network, minDeposit, fee, minWithdraw]) => ({ coin, network, minDeposit, fee, minWithdraw }))
-const funding = computed(() => (fundingTab.value === 'crypto' ? cryptoFunding : fiatFunding))
 const visibleSpot = computed(() =>
   spotFees.filter((row) => row.pair.includes(search.value.trim().toUpperCase())),
 )
-// OTC keeps the commission split of the previous demo data: buy / sell rate per pair.
+// OTC is priced the same way this phase: a two-column rate table off the published numbers, with
+// the account's tier discount applied, so the two tabs read alike.
+const OTC_BASE = 0.15
 const otcFees = [
-  ['BTC/USDC', '0.15%', '0.15%'],
-  ['ETH/USDC', '0.15%', '0.15%'],
-  ['BTC/HKD', '0.10%', '0.10%'],
-  ['ETH/HKD', '0.10%', '0.10%'],
-  ['USDC/USD', '0.05%', '0.05%'],
-  ['BTC/USDT', '0.15%', '0.15%'],
-  ['ETH/USDT', '0.15%', '0.15%'],
-  ['USDT/USD', '0.05%', '0.05%'],
-  ['USDT/HKD', '0.05%', '0.05%'],
-].map(([pair, buy, sell]) => ({ pair, buy, sell }))
+  ['BTC/USDC', `${OTC_BASE}%`],
+  ['ETH/USDC', `${OTC_BASE}%`],
+  ['BTC/HKD', '0.10%'],
+  ['ETH/HKD', '0.10%'],
+  ['USDC/USD', '0.05%'],
+  ['BTC/USDT', `${OTC_BASE}%`],
+  ['ETH/USDT', `${OTC_BASE}%`],
+  ['USDT/USD', '0.05%'],
+  ['USDT/HKD', '0.05%'],
+].map(([pair, base]) => ({
+  pair,
+  base,
+  buy: `${Number((Number.parseFloat(base) * (1 - plan.takerDiscount / 100)).toFixed(4))}%`,
+}))
 const visibleOtc = computed(() =>
   otcFees.filter((row) => row.pair.includes(search.value.trim().toUpperCase())),
 )
-// Worked examples from the fee schedule: buy 2 BTC at 25,000 USDC with 0.2% maker / 0.3% taker.
-const buyExample = [
-  ['Maker', '2 * 0.2%=0.004 BTC', '2-0.004=1.996 BTC'],
-  ['Taker', '2 * 0.3%=0.006 BTC', '2-0.006=1.994 BTC'],
-]
-const sellExample = [
-  ['Maker', '50,000 * 0.2%=100 USDC', '50,000-100=49,900 USDC'],
-  ['Taker', '50,000 * 0.3%=150 USDC', '50,000-150=49,850 USDC'],
-]
 </script>
 
 <template>
@@ -130,11 +113,8 @@ const sellExample = [
         />
       </div>
 
-      <!-- 折扣比例只对现货与 OTC 生效：出入金按固定费率收，没有折扣可谈。 -->
-      <div
-        v-if="active !== 'funding'"
-        class="fee-discount"
-      >
+      <!-- 折扣比例 applies to both tabs: 现货 and OTC are priced off the published rate less this. -->
+      <div class="fee-discount">
         <span class="fee-metric-label">{{ $t('text420') }}</span>
         <div class="fee-metric-row">
           <div>
@@ -147,24 +127,13 @@ const sellExample = [
       </div>
 
       <template v-if="active === 'spot'">
-        <!-- 表头两行：第一行只有 币对 / 挂单 / 吃单 三格，第二行把挂单与吃单各拆成「我的费率」「基础费率」。 -->
+        <!-- 只有「我的费率」：基础费率是公开信息，放在首页。表头的小字说明这列已含等级折扣。 -->
         <table class="fee-table fee-table-spot">
           <thead>
             <tr>
-              <th
-                class="fee-pair"
-                rowspan="2"
-              >
-                {{ $t('text432') }}
-              </th>
-              <th colspan="2">{{ $t('text428') }}</th>
-              <th colspan="2">{{ $t('text429') }}</th>
-            </tr>
-            <tr>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount', { level: plan.level, discount: plan.makerDiscount }) }}</small></th>
-              <th class="fee-base">{{ $t('text431') }}</th>
-              <th class="fee-mine">{{ $t('text430') }}<small>{{ $t('lvDiscount', { level: plan.level, discount: plan.takerDiscount }) }}</small></th>
-              <th class="fee-base">{{ $t('text431') }}</th>
+              <th class="fee-pair">{{ $t('text432') }}</th>
+              <th>{{ $t('text428') }}<small>{{ $t('text430') }} · {{ $t('lvDiscount', { level: plan.level, discount: plan.makerDiscount }) }}</small></th>
+              <th>{{ $t('text429') }}<small>{{ $t('text430') }} · {{ $t('lvDiscount', { level: plan.level, discount: plan.takerDiscount }) }}</small></th>
             </tr>
           </thead>
           <tbody>
@@ -176,14 +145,12 @@ const sellExample = [
                 {{ tr(row.pair) }}<small v-if="row.tag">（{{ tr(row.tag) }}）</small>
               </td>
               <td>{{ row.maker }}</td>
-              <td>{{ row.makerBase }}</td>
               <td>{{ row.taker }}</td>
-              <td>{{ row.takerBase }}</td>
             </tr>
             <tr v-if="!visibleSpot.length">
               <td
                 class="fee-empty"
-                colspan="5"
+                colspan="3"
               >
                 {{ $t('text066') }}
               </td>
@@ -192,57 +159,14 @@ const sellExample = [
         </table>
       </template>
 
-      <template v-else-if="active === 'funding'">
-        <div class="fee-sub-tabs">
-          <button
-            type="button"
-            :class="{ active: fundingTab === 'crypto' }"
-            @click="fundingTab = 'crypto'"
-          >
-            {{ $t('text439') }}
-          </button>
-          <button
-            type="button"
-            :class="{ active: fundingTab === 'fiat' }"
-            @click="fundingTab = 'fiat'"
-          >
-            {{ $t('text440') }}
-          </button>
-        </div>
-        <table class="fee-table">
-          <thead>
-            <tr>
-              <th>{{ $t('text433') }}</th>
-              <th>{{ $t('text434') }}</th>
-              <th>{{ $t('text435') }}</th>
-              <th>{{ $t('text436') }}</th>
-              <th>{{ $t('text437') }}</th>
-              <th>{{ $t('text438') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="row in funding"
-              :key="row.coin"
-            >
-              <td>{{ row.coin }}</td>
-              <td>{{ row.network }}</td>
-              <td>{{ $t('text441') }}</td>
-              <td>{{ row.minDeposit }}</td>
-              <td>{{ row.fee }}</td>
-              <td>{{ row.minWithdraw }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </template>
-
       <template v-else>
+        <!-- OTC 这一期和现货同一种形式：币对 + 两档费率，都是折后价。 -->
         <table class="fee-table">
           <thead>
             <tr>
               <th>{{ $t('text432') }}</th>
-              <th>{{ $t('text400') }}</th>
-              <th>{{ $t('text401') }}</th>
+              <th>{{ $t('text400') }}<small>{{ $t('text430') }} · {{ $t('lvDiscount', { level: plan.level, discount: plan.takerDiscount }) }}</small></th>
+              <th>{{ $t('text401') }}<small>{{ $t('text430') }} · {{ $t('lvDiscount', { level: plan.level, discount: plan.takerDiscount }) }}</small></th>
             </tr>
           </thead>
           <tbody>
@@ -252,7 +176,7 @@ const sellExample = [
             >
               <td>{{ tr(row.pair) }}</td>
               <td>{{ row.buy }}</td>
-              <td>{{ row.sell }}</td>
+              <td>{{ row.buy }}</td>
             </tr>
             <tr v-if="!visibleOtc.length">
               <td
@@ -266,81 +190,6 @@ const sellExample = [
         </table>
       </template>
     </section>
-
-    <section class="fee-card fee-doc">
-      <h2>{{ $t('text442') }}</h2>
-      <table class="fee-table fee-glossary">
-        <thead>
-          <tr>
-            <th>{{ $t('text443') }}</th>
-            <th>{{ $t('text444') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ $t('text445') }}</td>
-            <td>{{ $t('text446') }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2 class="fee-doc-title">{{ $t('text447') }}</h2>
-      <p class="fee-doc-note">{{ $t('text448') }}</p>
-
-      <h3 class="fee-doc-sub">{{ $t('text449') }}</h3>
-      <table class="fee-table">
-        <thead>
-          <tr>
-            <th>{{ $t('text451') }}</th>
-            <th>{{ $t('text452') }}</th>
-            <th>{{ $t('text454') }}</th>
-            <th>{{ $t('text456') }}</th>
-            <th>{{ $t('text457') }}</th>
-            <th>{{ $t('text458') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="[role, fee, receive] in buyExample"
-            :key="role"
-          >
-            <td>25,000.00 USDC</td>
-            <td>2 BTC</td>
-            <td>50,000.00 USDC</td>
-            <td>{{ role }}</td>
-            <td>{{ fee }}</td>
-            <td>{{ receive }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 class="fee-doc-sub">{{ $t('text450') }}</h3>
-      <table class="fee-table">
-        <thead>
-          <tr>
-            <th>{{ $t('text451') }}</th>
-            <th>{{ $t('text453') }}</th>
-            <th>{{ $t('text455') }}</th>
-            <th>{{ $t('text456') }}</th>
-            <th>{{ $t('text457') }}</th>
-            <th>{{ $t('text458') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="[role, fee, receive] in sellExample"
-            :key="role"
-          >
-            <td>25,000.00 USDC</td>
-            <td>2 BTC</td>
-            <td>50,000.00 USDC</td>
-            <td>{{ role }}</td>
-            <td>{{ fee }}</td>
-            <td>{{ receive }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
   </main>
 </template>
 
@@ -348,11 +197,11 @@ const sellExample = [
 .fee-center {
   flex: 1;
   min-width: 0;
-  /* The design keeps one 1190px content column centred on the page background. */
+  /* The design keeps one 1190px content column centred beside the personal-centre sidebar. */
   width: 100%;
   max-width: 1190px;
   margin: 0 auto;
-  padding: 34px 0 60px;
+  padding: 34px 24px 60px;
   background: transparent;
   color: #171a20;
 }
@@ -473,23 +322,6 @@ const sellExample = [
   border-radius: 8px;
   box-shadow: 0 0 0 1px #d8dee8 inset;
 }
-.fee-sub-tabs {
-  display: flex;
-  gap: 32px;
-  margin: 24px 0 0;
-}
-.fee-sub-tabs button {
-  padding: 0 0 12px;
-  border: 0;
-  background: none;
-  color: #9aa1ad;
-  font-size: 16px;
-  cursor: pointer;
-}
-.fee-sub-tabs button.active {
-  color: #171a20;
-  font-weight: 600;
-}
 .fee-table {
   width: 100%;
   margin-top: 18px;
@@ -511,27 +343,13 @@ const sellExample = [
   color: #9aa1ad;
   font-size: 12px;
 }
-/* 现货表：第一行 48px 的分组表头，第二行 48px 的费率表头，「我的费率」比「基础费率」浅一档。 */
-.fee-table-spot thead tr:first-child th {
-  height: 48px;
+/* 现货表头：费率列下面挂一行小字，说明这列已含等级折扣。 */
+.fee-table-spot thead th {
+  height: 56px;
 }
-.fee-table-spot thead tr:last-child th {
-  height: 48px;
-  padding: 4px 14px;
-  border-top: 0;
-}
-.fee-table-spot thead tr:last-child th small {
+.fee-table-spot thead th small {
   margin-top: 2px;
   line-height: 1.35;
-}
-.fee-table-spot th.fee-mine {
-  color: #9aa1ad;
-}
-.fee-table-spot th.fee-mine small {
-  color: #9aa1ad;
-}
-.fee-table-spot th.fee-base {
-  color: #1b1f26;
 }
 .fee-table td {
   height: 56px;
@@ -553,32 +371,6 @@ const sellExample = [
 .fee-table .fee-empty {
   height: 120px;
   color: #9aa1ad;
-}
-.fee-doc > h2 {
-  margin: 0 0 18px;
-  font-size: 20px;
-  font-weight: 600;
-}
-.fee-doc .fee-doc-title {
-  margin-top: 44px;
-}
-.fee-doc-note {
-  margin: 0 0 8px;
-  color: #6b7280;
-  font-size: 14px;
-}
-.fee-doc-sub {
-  margin: 24px 0 0;
-  font-size: 15px;
-  font-weight: 600;
-}
-.fee-glossary td {
-  height: auto;
-  padding: 22px 24px;
-  line-height: 1.9;
-}
-.fee-glossary th {
-  height: 48px;
 }
 @media (max-width: 900px) {
   .fee-center {

@@ -62,6 +62,7 @@ try {
       ].map((file) => [file, {}, '/bge/hk/zh-CN/user/dashboard', '']),
       ['Company', { security: true }, '/bge/hk/zh-CN/security', ''],
       ['UserCenter', { assets: true }, '/bge/hk/zh-CN/user/assets', '?account=fund'],
+      ['UserCenter', { assets: true }, '/bge/hk/zh-CN/user/assets', '?account=otc'],
       ['UserCenter', { assets: true }, '/bge/hk/zh-CN/user/assets', '?account=trade'],
       ['Payment', {}, '/bge/hk/zh-CN/user/payment/crypto', ''],
       ...['wallet', 'otc-orders', 'settle'].map((path) => [

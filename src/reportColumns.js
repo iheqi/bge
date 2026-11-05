@@ -79,9 +79,6 @@ export function columns(type, tab) {
     if (tab === 'fiat')
       return ['时间', '类型', '法币', '汇款金额', '汇款银行卡', '银行卡标签', '状态', '详情']
     if (tab === 'transfer') return ['时间', '币种', '数量', '从', '到', '状态']
-    // 跨币种划转 carries the same six fields as 跨账户划转; it used to be rendered under the
-    // five-column 数字资产 header, which hid its status.
-    if (tab === 'quick') return ['时间', '币种', '数量', '从', '到', '状态']
     return ['时间', '类型', '数字货币', '数量', '发起方地址', '状态', '详情']
   }
   if (type === 'settle') return ['结单名称', '操作']

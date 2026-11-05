@@ -295,6 +295,98 @@ a {
   background: #ad6b17;
   color: #f1bf44;
 }
+/* 基础费率 is public: the home page publishes the trading and withdrawal rates, so a visitor can
+   read them without signing in. The fee centre then applies the client's own tier discount. */
+.public-fees {
+  background: #f3f6fa;
+  padding: 76px 0 84px;
+}
+.public-fees-inner {
+  max-width: 1200px;
+  margin: auto;
+}
+.public-fees h2 {
+  margin: 0 0 16px;
+  font-size: 40px;
+  font-weight: 500;
+  color: #111923;
+}
+.public-fees-note {
+  margin: 0 0 40px;
+  color: #758093;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.public-fees-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.public-fee-card {
+  padding: 24px 24px 20px;
+  border-radius: 6px;
+  background: #fff;
+}
+.public-fee-card h3 {
+  margin: 0 0 18px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111923;
+}
+.public-fee-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.public-fee-card th {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e6ebf2;
+  color: #758093;
+  font-weight: 400;
+  text-align: center;
+}
+.public-fee-card td {
+  padding: 9px 6px;
+  border-bottom: 1px solid #f1f4f8;
+  color: #28303a;
+  text-align: center;
+}
+.public-fee-card tr:last-child td {
+  border-bottom: 0;
+}
+.public-fee-note {
+  margin: 14px 0 0;
+  color: #9aa4b4;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.public-fees-more {
+  display: inline-block;
+  margin-top: 28px;
+  color: #c99d00;
+  font-size: 14px;
+  text-decoration: none;
+}
+.public-fees-more:hover {
+  color: #a88200;
+}
+@media (max-width: 1200px) {
+  .public-fees-inner {
+    margin-left: 40px;
+    margin-right: 40px;
+  }
+}
+@media (max-width: 900px) {
+  .public-fees {
+    padding: 48px 0 56px;
+  }
+  .public-fees h2 {
+    font-size: 28px;
+  }
+  .public-fees-grid {
+    grid-template-columns: 1fr;
+  }
+}
 footer {
   background: #f3f6fa;
   padding: 62px 0 35px;

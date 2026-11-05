@@ -8,7 +8,7 @@ import {
   SwitchButton,
 } from '@element-plus/icons-vue'
 import { tr } from './i18n'
-import { accountId, signOut } from './session'
+import { accountId, kycVerified, signOut } from './session'
 import { computed } from 'vue'
 const email = 'heqi**gic@gmail.com'
 // The panel shows the UID of the account that is signed in.
@@ -20,9 +20,11 @@ const links = [
   { label: '身份认证', path: 'kyc', icon: CircleCheck },
   { label: '账户安全', path: 'security', custom: 'shield' },
   { label: '收付款管理', path: 'payment/fiat', icon: CreditCard },
-  { label: '费率中心', path: 'fees', custom: 'percent' },
+  // 费率中心 is gated: a fee tier only means something once the client has passed verification.
+  { label: '费率中心', path: 'fees', custom: 'percent', kyc: true },
   { label: 'API管理', path: 'api', custom: 'api' },
 ]
+const visibleLinks = computed(() => links.filter((item) => !item.kyc || kycVerified.value))
 function logout() {
   signOut()
 }
@@ -92,7 +94,7 @@ async function copyUid() {
           role="menu"
         >
           <a
-            v-for="item in links"
+            v-for="item in visibleLinks"
             :key="item.path"
             role="menuitem"
             :href="'/bge/hk/zh-CN/user/' + item.path"

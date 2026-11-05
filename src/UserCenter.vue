@@ -22,12 +22,9 @@ import {
 import { routeSearch } from './route'
 const accountParam = new URLSearchParams(routeSearch()).get('account')
 const props = defineProps({ assets: Boolean })
+const ACCOUNTS = ['fund', 'otc', 'trade']
 const accountTab = ref(
-  accountParam === 'trade' || accountParam === 'fund'
-    ? accountParam
-    : props.assets
-      ? 'fund'
-      : 'total',
+  ACCOUNTS.includes(accountParam) ? accountParam : props.assets ? 'fund' : 'total',
 )
 const coins = [
   ['$', 'USD', '美元', '法币'],
@@ -52,8 +49,11 @@ const visibleCoins = computed(() =>
     ? coins.filter((coin) => balanceOf(activeAccount.value, coin[1]) * (prices[coin[1]] ?? 0) >= SMALL_ASSET_USD)
     : coins,
 )
-const activeAccount = computed(() => (accountTab.value === 'trade' ? 'trade' : 'fund'))
-const accountName = (account) => tr(account === 'trade' ? '交易账户' : '资金账户')
+const activeAccount = computed(() => (ACCOUNTS.includes(accountTab.value) ? accountTab.value : 'fund'))
+// 交易账户 split into the OTC desk and the spot book, so the shared tab row and the transfer
+// dialog both name the same three accounts.
+const ACCOUNT_KEYS = { fund: 'text333', otc: 'accountOtc', trade: 'accountSpot' }
+const accountName = (account) => i18n.global.t(ACCOUNT_KEYS[account] ?? 'text333')
 // The fee tier, the risk rating and the two limits come from the account slice, so the asset page
 // and the fee centre describe the same client.
 const plan = computed(() => profile.value.plan)
@@ -75,7 +75,7 @@ const depositHref = (symbol) =>
     ? `/bge/hk/zh-CN/user/fiat/deposit/${symbol}`
     : `/bge/hk/zh-CN/user/crypto/deposit/${symbol}`
 const activeBtc = computed(() => accountBtc(activeAccount.value))
-const totalBtc = computed(() => accountBtc('fund') + accountBtc('trade'))
+const totalBtc = computed(() => ACCOUNTS.reduce((sum, account) => sum + accountBtc(account), 0))
 // The 总览 tab follows the same three tabs; 总资产 is the two accounts added up, so the headline
 // here reads the same as the asset page instead of a fixed zero.
 const overviewBtc = computed(() =>
@@ -92,7 +92,9 @@ const transferOpen = ref(false)
 const transferFrom = ref('fund')
 const transferCoin = ref('BTC')
 const transferAmount = ref('')
-const transferTo = computed(() => (transferFrom.value === 'fund' ? 'trade' : 'fund'))
+// 划转 moves between the three accounts. Swapping walks the ring: 资金 → 现货 → OTC → 资金.
+const TRANSFER_TARGET = { fund: 'trade', trade: 'otc', otc: 'fund' }
+const transferTo = computed(() => TRANSFER_TARGET[transferFrom.value])
 const transferAvailable = computed(() => balanceOf(transferFrom.value, transferCoin.value))
 const coinOf = (symbol) => coins.find((coin) => coin[1] === symbol) ?? coins[0]
 
@@ -119,6 +121,25 @@ function confirmTransfer() {
   transferOpen.value = false
   ElMessage.success(i18n.global.t('transferSuccess'))
 }
+
+// 冻结详情 opens a dialog rather than a hover panel: the orders behind a frozen number are a list,
+// and a list of orders is read a page at a time.
+const FROZEN_PAGE_SIZE = 5
+const frozenDialog = ref(null)
+const frozenPage = ref(1)
+const frozenRows = computed(() => {
+  const orders = frozenDialog.value?.orders ?? []
+  const start = (frozenPage.value - 1) * FROZEN_PAGE_SIZE
+  return orders.slice(start, start + FROZEN_PAGE_SIZE)
+})
+function openFrozen(account, symbol) {
+  const entry = frozenOf(account, symbol)
+  if (!entry?.orders.length) return
+  frozenDialog.value = { coin: symbol, orders: entry.orders }
+  frozenPage.value = 1
+}
+const frozenKind = (order) =>
+  i18n.global.t(order.kind === 'otc' ? 'frozenOtcOrder' : 'frozenSpotOrder')
 </script>
 <template>
   <div class="user-page">
@@ -163,15 +184,22 @@ function confirmTransfer() {
                 @keydown.enter="accountTab = 'fund'"
               >{{ $t('text333') }}</span
               ><span
+                :class="{ active: accountTab === 'otc' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'otc'"
+                @keydown.enter="accountTab = 'otc'"
+              >{{ $t('accountOtc') }}</span
+              ><span
                 :class="{ active: accountTab === 'trade' }"
                 role="button"
                 tabindex="0"
                 @click="accountTab = 'trade'"
                 @keydown.enter="accountTab = 'trade'"
-              >{{ $t('text334') }}</span>
+              >{{ $t('accountSpot') }}</span>
             </div>
             <p class="label">
-              {{ accountTab === 'total' ? $t('text338') : tr(accountTab === 'fund' ? '资金账户' : '交易账户') }}{{ $t('text339') }}
+              {{ accountTab === 'total' ? $t('text338') : accountName(accountTab) }}{{ $t('text339') }}
             </p>
             <strong
               >{{ overviewBtc.toFixed(8) }} BTC <small
@@ -318,12 +346,19 @@ function confirmTransfer() {
                 @keydown.enter="accountTab = 'fund'"
               >{{ $t('text333') }}</span
               ><span
+                :class="{ active: accountTab === 'otc' }"
+                role="button"
+                tabindex="0"
+                @click="accountTab = 'otc'"
+                @keydown.enter="accountTab = 'otc'"
+              >{{ $t('accountOtc') }}</span
+              ><span
                 :class="{ active: accountTab === 'trade' }"
                 role="button"
                 tabindex="0"
                 @click="accountTab = 'trade'"
                 @keydown.enter="accountTab = 'trade'"
-              >{{ $t('text334') }}</span>
+              >{{ $t('accountSpot') }}</span>
             </div>
             <!-- The tab row already names the account, so it carries the heading on its own. -->
             <p class="label">{{ accountName(activeAccount) }}{{ $t('text343') }}</p>
@@ -360,37 +395,27 @@ function confirmTransfer() {
                 >
               </div>
               <b>{{ formatAmount(balanceOf(activeAccount, coin[1])) }}</b
-              ><el-popover
-                v-if="frozenOf(activeAccount, coin[1])"
-                trigger="hover"
-                :show-after="0"
-                :teleported="false"
-                placement="top"
-                popper-class="frozen-popper"
-              >
-                <template #reference
-                  ><b class="frozen-value">{{ formatAmount(frozenOf(activeAccount, coin[1]).amount) }}</b></template
+              ><span class="frozen-cell">
+                <b class="frozen-value">{{ formatAmount(frozenOf(activeAccount, coin[1])?.amount ?? 0) }}</b
+                ><button
+                  v-if="frozenOf(activeAccount, coin[1])?.orders.length"
+                  type="button"
+                  class="frozen-detail"
+                  @click="openFrozen(activeAccount, coin[1])"
                 >
-                <p class="frozen-title">{{ $t('assetFrozenSource') }}</p>
-                <p
-                  v-for="order in frozenOf(activeAccount, coin[1]).orders"
-                  :key="order"
-                  class="frozen-order"
-                >
-                  {{ $t('assetFrozenOrder', { id: order }) }}
-                </p>
-              </el-popover>
-              <b v-else>0</b
-              ><b
+                  {{ $t('text358') }}
+                </button>
+              </span>
+              <b
                 >{{ btcValue(coin[1], balanceOf(activeAccount, coin[1])).toFixed(8) }}<small>≈ {{ formatMoney(balanceOf(activeAccount, coin[1]) * (prices[coin[1]] ?? 0), 'USD', 4) }}</small></b
               >
               <div>
                 <a
-                  v-if="activeAccount !== 'trade'"
+                  v-if="activeAccount === 'fund'"
                   :href="depositHref(coin[1])"
                   >{{ $t('text275') }}</a
                 ><a
-                  v-if="activeAccount !== 'trade'"
+                  v-if="activeAccount === 'fund'"
                   :href="withdrawHref(coin[1])"
                   >{{ $t('text276') }}</a
                 ><a
@@ -518,6 +543,57 @@ function confirmTransfer() {
         </div>
       </section>
     </div>
+    <!-- 冻结详情: the list of orders behind one coin's frozen amount, a page at a time. -->
+    <el-dialog
+      :model-value="!!frozenDialog"
+      :title="$t('frozenOrdersTitle')"
+      width="640px"
+      align-center
+      @close="frozenDialog = null"
+    >
+      <template v-if="frozenDialog">
+        <p class="frozen-dialog-caption">
+          {{ tr(frozenDialog.coin) }} · {{ $t('text347') }}
+          {{ formatAmount(frozenOf(activeAccount, frozenDialog.coin)?.amount ?? 0) }}
+        </p>
+        <el-table
+          :data="frozenRows"
+          :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
+          :empty-text="$t('text066')"
+        >
+          <el-table-column
+            prop="id"
+            :label="$t('frozenOrderId')"
+            min-width="180"
+          />
+          <el-table-column
+            :label="$t('frozenOrderType')"
+            min-width="120"
+          >
+            <template #default="{ row }">{{ frozenKind(row) }}</template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('frozenOrderAmount')"
+            min-width="150"
+          >
+            <template #default="{ row }">{{ formatAmount(row.amount) }} {{ tr(frozenDialog.coin) }}</template>
+          </el-table-column>
+          <el-table-column
+            prop="time"
+            :label="$t('frozenOrderTime')"
+            min-width="170"
+          />
+        </el-table>
+        <el-pagination
+          v-model:current-page="frozenPage"
+          class="frozen-pagination"
+          :page-size="FROZEN_PAGE_SIZE"
+          :total="frozenDialog.orders.length"
+          layout="prev, pager, next"
+          :hide-on-single-page="false"
+        />
+      </template>
+    </el-dialog>
     <KycNotice v-model="showKycNotice" />
     <Footer />
   </div>
@@ -537,11 +613,13 @@ function confirmTransfer() {
 .risk-bars{display:inline-flex;gap:3px}
 .risk-bars i{display:block;width:6px;height:15px;background:#f5c518}
 .risk-bars i.off{background:#e6eaf0}
-/* A frozen balance looks like any other number until you hover it for the orders behind it. */
-.frozen-value{border-bottom:1px dashed #c8cfd9;cursor:help}
-.frozen-title{margin:0 0 8px;color:#171d27;font-size:13px;font-weight:600}
-.frozen-order{margin:0 0 4px;color:#697585;font-size:12px;overflow-wrap:anywhere}
-.frozen-order:last-child{margin-bottom:0}
+/* A frozen balance carries a 详情 link: the orders behind it open in a dialog, not a tooltip. */
+.frozen-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.frozen-value{color:#171d27}
+.frozen-detail{padding:0;border:0;background:none;color:#d9a600;font-size:12px;line-height:1.5;cursor:pointer}
+.frozen-detail:hover{color:#b98c00}
+.frozen-dialog-caption{margin:0 0 14px;color:#697585;font-size:13px}
+.frozen-pagination{justify-content:flex-end;margin-top:16px}
 .risk-date{margin:14px 0 0;color:#9aa2ad;font-size:12px}
 .quota-panel header{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .quota-panel header a{color:#d9a600;font-size:13px;text-decoration:none}

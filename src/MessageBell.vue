@@ -6,11 +6,15 @@ import { tr, i18n } from './i18n'
 import { messages, unreadCount, markRead } from './messages'
 const { root, open } = useClickDropdown()
 const category = ref('all')
+// OTC and 现货交易 get their own quick filters: the message centre keeps them as separate
+// categories, and the bell has to be able to preview either one.
 const categories = [
   { id: 'all', label: '全部', value: null },
   { id: 'system', label: '系统', value: '系统消息' },
   { id: 'wallet', label: '充提', value: '充值提现' },
   { id: 'security', label: '安全', value: '安全消息' },
+  { id: 'spot', label: '现货', value: '现货交易消息' },
+  { id: 'otc', label: 'OTC', value: 'OTC消息' },
 ]
 const visibleMessages = computed(() => {
   const value = categories.find((item) => item.id === category.value).value
@@ -21,7 +25,8 @@ const icons = {
   充值提现: '💰',
   安全消息: '🔒',
   认证消息: '🪪',
-  场外消息: '🤝',
+  OTC消息: '🤝',
+  现货交易消息: '📈',
   活动消息: '🎁',
 }
 function readAll() {

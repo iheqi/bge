@@ -6,6 +6,26 @@ import UserMenu from './UserMenu.vue'
 import MessageBell from './MessageBell.vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import SiteHeader from './SiteHeader.vue'
+// 基础费率 is public information, so it is published here rather than behind the sign-in. The fee
+// centre shows the same numbers with the client's own tier discount applied.
+const spotFeeRows = [
+  ['BTC/USDC', '0.20%', '0.25%'],
+  ['ETH/USDC', '0.20%', '0.25%'],
+  ['BTC/HKD', '0.20%', '0.25%'],
+  ['USDT/HKD', '0.20%', '0.25%'],
+]
+const otcFeeRows = [
+  ['BTC/USDC', '0.15%', '0.15%'],
+  ['ETH/USDC', '0.15%', '0.15%'],
+  ['BTC/HKD', '0.10%', '0.10%'],
+  ['USDT/HKD', '0.05%', '0.05%'],
+]
+const withdrawFeeRows = [
+  ['BTC', 'Bitcoin', '0.00012000 BTC'],
+  ['ETH', 'ERC20', '0.00400000 ETH'],
+  ['USDT', 'TRC20', '10.00000000 USDT'],
+  ['USDC', 'ERC20', '10.00000000 USDC'],
+]
 </script>
 
 <template>
@@ -93,6 +113,87 @@ import SiteHeader from './SiteHeader.vue'
             <div class="coin green">₮</div>
             <div class="coin gold">₿</div>
           </div>
+        </div>
+      </section>
+
+      <section class="public-fees">
+        <div class="public-fees-inner">
+          <h2>{{ $t('feeHomeTitle') }}</h2>
+          <p class="public-fees-note">{{ $t('feeHomeNote') }}</p>
+          <div class="public-fees-grid">
+            <div class="public-fee-card">
+              <h3>{{ $t('feePublicSpot') }}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ $t('text432') }}</th>
+                    <th>{{ $t('text428') }}</th>
+                    <th>{{ $t('text429') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in spotFeeRows"
+                    :key="row[0]"
+                  >
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="public-fee-card">
+              <h3>{{ $t('feePublicOtc') }}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ $t('text432') }}</th>
+                    <th>{{ $t('text400') }}</th>
+                    <th>{{ $t('text401') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in otcFeeRows"
+                    :key="row[0]"
+                  >
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="public-fee-card">
+              <h3>{{ $t('feePublicWithdraw') }}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ $t('text433') }}</th>
+                    <th>{{ $t('text434') }}</th>
+                    <th>{{ $t('text437') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in withdrawFeeRows"
+                    :key="row[0]"
+                  >
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="public-fee-note">{{ $t('feePublicWithdrawNote') }}</p>
+            </div>
+          </div>
+          <a
+            class="public-fees-more"
+            href="/bge/hk/zh-CN/user/fee-standard"
+            >{{ $t('text419') }} ›</a
+          >
         </div>
       </section>
     </main>

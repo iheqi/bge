@@ -11,7 +11,24 @@ const rows = useAccountState('api-records', currentAccount.value.apiKeys)
 
 const authNames = { readonly: 'apiRead', trade: 'apiTrade', withdraw: 'text309' }
 const authText = (row) => (row.authorities ?? []).map((a) => t(authNames[a])).join('+')
-const stateKeys = { valid: 'apiValid', expired: 'statusExpired', revoked: 'apiStateRevoked' }
+// A key lives in one of two environments. Sandbox keys are the ones that have not been verified
+// yet, so 未生效 is what they read as; a verified key sits in production as 生效中. Production is
+// listed first because it is the list a client checks most of the time.
+const envTabs = [
+  { id: 'production', key: 'apiEnvProduction' },
+  { id: 'sandbox', key: 'apiEnvSandbox' },
+]
+const envTab = ref('production')
+// Rows seeded before the split carry no environment: they are the working keys, so production.
+const envOf = (row) => row.env ?? 'production'
+const envRows = computed(() => rows.value.filter((row) => envOf(row) === envTab.value))
+const envCount = (env) => rows.value.filter((row) => envOf(row) === env).length
+const stateKeys = {
+  valid: 'apiActive',
+  inactive: 'apiInactive',
+  expired: 'statusExpired',
+  revoked: 'apiStateRevoked',
+}
 const stateKey = (row) => stateKeys[row.state] ?? 'apiInvalid'
 // The list never shows a whole key; the head and the tail are enough to tell two keys apart.
 const maskKey = (apiKey) => `${apiKey.slice(0, 8)}****${apiKey.slice(-4)}`
@@ -162,8 +179,10 @@ async function save() {
       const row = {
         ...values,
         id: token,
-        // A key created through the demo form is valid, unbound and carries no risk flag yet.
-        state: 'valid',
+        // A new key starts in the sandbox and is not live until the operator verifies it, so it is
+        // created 未生效; moving it to production is done in the 管理后台, not from this list.
+        env: 'sandbox',
+        state: 'inactive',
         createdDate: now,
         updatedDate: now,
         apiKey: `dccb2137${token.replace(/-/g, '').slice(0, 20)}8fee`,
@@ -171,6 +190,7 @@ async function save() {
         risk: [],
       }
       rows.value.unshift(row)
+      envTab.value = 'sandbox'
       detail.value = row
     }
     resetForm()
@@ -192,6 +212,8 @@ async function remove(row) {
     ElMessage.success(t('apiDeleted'))
   })
 }
+// 验证 happens in the 管理后台, so this list is read-only about it: a key waiting for that check
+// reads as 未生效 and only shows up under 生产 once the operator has approved it.
 </script>
 <template>
   <section class="api-record api-key-records">
@@ -265,8 +287,31 @@ async function remove(row) {
     </div>
 
     <h2 class="api-bar-title api-record-title">{{ $t('apiRecordsTitle') }}</h2>
+    <!-- 沙箱 and 生产 are separate lists: a key belongs to exactly one environment at a time. -->
+    <div
+      class="api-env-tabs"
+      role="tablist"
+    >
+      <button
+        v-for="item in envTabs"
+        :key="item.id"
+        type="button"
+        role="tab"
+        :aria-selected="envTab === item.id"
+        :class="{ active: envTab === item.id }"
+        @click="envTab = item.id"
+      >
+        {{ $t(item.key) }} ({{ envCount(item.id) }})
+      </button>
+    </div>
+    <p
+      v-if="envTab === 'sandbox'"
+      class="api-env-hint"
+    >
+      {{ $t('apiSandboxHint') }}
+    </p>
     <el-table
-      :data="rows"
+      :data="envRows"
       row-key="id"
       :empty-text="$t('text066')"
       :header-cell-style="{ background: '#f4f6f9', color: '#697585', fontWeight: '400' }"
@@ -341,6 +386,9 @@ async function remove(row) {
         >
           <el-descriptions-item :label="$t('apiRemarkColumn')">
             {{ detail.remarks }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="$t('apiEnv')">
+            {{ $t(envOf(detail) === 'sandbox' ? 'apiEnvSandbox' : 'apiEnvProduction') }}
           </el-descriptions-item>
           <el-descriptions-item :label="$t('text063')">
             <em :class="'api-state api-state-' + detail.state">{{ $t(stateKey(detail)) }}</em>
@@ -451,7 +499,13 @@ async function remove(row) {
 /* 状态 reads as a chip, the way the key list does elsewhere in the console. */
 .api-state{display:inline-block;padding:2px 10px;border-radius:4px;font-size:13px;font-style:normal}
 .api-state-valid{background:#e8f7ec;color:#2f9e5c}
+.api-state-inactive{background:#fff8dc;color:#b98c00}
 .api-state-expired,.api-state-revoked{background:#f0f2f5;color:#8a93a0}
+/* 沙箱 / 生产 sit above the record table, the way the console splits the two environments. */
+.api-env-tabs{display:flex;gap:36px;border-bottom:1px solid #edf0f4;margin-bottom:18px}
+.api-env-tabs button{padding:0 4px 14px;border:0;border-bottom:2px solid transparent;background:none;color:#9aa1ad;font-size:16px;cursor:pointer}
+.api-env-tabs button.active{border-bottom-color:#f0d000;color:#171a20;font-weight:600}
+.api-env-hint{margin:0 0 16px;padding:12px 16px;border-radius:4px;background:#fff8dc;color:#8a6d00;font-size:13px;line-height:1.7}
 .api-action{color:#d9a600;font-size:14px}
 .api-action:hover{color:#b98c00}
 .api-danger{color:#e0443a}

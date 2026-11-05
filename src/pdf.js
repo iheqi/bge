@@ -104,6 +104,7 @@ export function downloadBlob(blob, filename) {
 export function statementRows(account) {
   const coins = new Set([
     ...Object.keys(account.balances.fund),
+    ...Object.keys(account.balances.otc),
     ...Object.keys(account.balances.trade),
   ])
   return [...coins]
@@ -111,7 +112,10 @@ export function statementRows(account) {
     .map((coin) => [
       coin,
       (account.balances.fund[coin] ?? 0).toFixed(8),
+      (account.balances.otc[coin] ?? 0).toFixed(8),
       (account.balances.trade[coin] ?? 0).toFixed(8),
-      (account.frozen.fund[coin]?.amount ?? 0).toFixed(8),
+      ((account.frozen.otc[coin]?.amount ?? 0) + (account.frozen.trade[coin]?.amount ?? 0)).toFixed(
+        8,
+      ),
     ])
 }

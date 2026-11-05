@@ -1,13 +1,16 @@
 import { computed, ref, watch } from 'vue'
 import { currentAccount, readAccountState, writeAccountState } from './demoAccounts'
 
+// OTC and 现货交易 are separate categories: the two trading desks notify about different things
+// and the reader filters on one of them at a time.
 export const messageCategories = [
   '全部消息',
   '系统消息',
   '充值提现',
   '安全消息',
   '认证消息',
-  '场外消息',
+  'OTC消息',
+  '现货交易消息',
   '活动消息',
 ]
 // Body copy per category. The wording is translated through source-keys.json, the same way the
@@ -41,12 +44,19 @@ const bodies = {
     '请补充上传手持证件照，以便我们继续处理您的认证申请。',
     '您的银行卡认证已通过，现在可以进行法币存款与取款操作。',
   ],
-  场外消息: [
+  OTC消息: [
     '您的 OTC 订单 #20260617001 已匹配到报价方，请在 15 分钟内完成支付。',
-    '您的 OTC 订单 #20260617002 已完成，数字资产已划转至您的交易账户。',
+    '您的 OTC 订单 #20260617002 已完成，数字资产已划转至您的 OTC 交易账户。',
     '您的 OTC 订单 #20260617003 已超时取消，如有需要请重新下单。',
-    '您有一笔新的场外询价，请前往 OTC 订单页面查看详情。',
-    '场外交易提醒：请仅通过平台确认的收款方式付款，谨防冒充客服的诈骗行为。',
+    '您有一笔新的 OTC 询价，请前往 OTC 订单页面查看详情。',
+    'OTC 交易提醒：请仅通过平台确认的收款方式付款，谨防冒充客服的诈骗行为。',
+  ],
+  现货交易消息: [
+    '您的现货委托已全部成交：BTC/USDC 买入 0.25000000 BTC，成交均价 62,180.00 USDC。',
+    '您的现货委托已部分成交，剩余数量仍在挂单，可在当前委托中查看。',
+    '您的现货委托已撤销，冻结的资金已释放回现货交易账户。',
+    '现货交易提醒：市价单可能因流动性不足产生滑点，请确认价格后再下单。',
+    '您本月的现货交易手续费已按费率等级折扣结算，详情请前往费率中心查看。',
   ],
   活动消息: [
     'Congratulations on completing the task, please go to the Reward Center to claim or view the reward.',
@@ -82,7 +92,8 @@ const MESSAGE_PROFILE = {
 const UNVERIFIED_SKIP = {
   充值提现: [0, 1, 2],
   认证消息: [1, 4],
-  场外消息: [0, 1, 2],
+  OTC消息: [0, 1, 2],
+  现货交易消息: [0, 1, 2],
   活动消息: [1],
 }
 function buildMessages(kind) {

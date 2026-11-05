@@ -436,16 +436,14 @@ function buildWallet(random, profile, scale, bank) {
       '详情',
     ])
   })
+  // 划转 runs between the three accounts the asset page now shows; 跨账号快速划转 is gone.
   const transfer = [
-    [stamp(12), 'USDT', money(3200 * scale), '资金账户', '交易账户', '已完成'],
-    [stamp(70), 'ETH', (0.4 * scale).toFixed(8), '交易账户', '资金账户', '已完成'],
-    [stamp(140), 'BTC', (0.02 * scale).toFixed(8), '资金账户', '交易账户', '已完成'],
+    [stamp(12), 'USDT', money(3200 * scale), '资金账户', '现货交易账户', '已完成'],
+    [stamp(70), 'ETH', (0.4 * scale).toFixed(8), '现货交易账户', '资金账户', '已完成'],
+    [stamp(140), 'BTC', (0.02 * scale).toFixed(8), '资金账户', 'OTC交易账户', '已完成'],
+    [stamp(190), 'USDC', money(1500 * scale), 'OTC交易账户', '资金账户', '已完成'],
   ]
-  const quick = [
-    [stamp(36), 'USDT', money(900 * scale), '资金账户', '交易账户', '已完成'],
-    [stamp(128), 'HKD', money(8000 * scale), '交易账户', '资金账户', '已完成'],
-  ]
-  return { digital, fiat, transfer, quick, digitalDetail, fiatDetail }
+  return { digital, fiat, transfer, digitalDetail, fiatDetail }
 }
 
 function buildSettle() {
@@ -666,7 +664,8 @@ const API_KEY_SETS = {
       remarks: 'tax-report',
       authorities: ['readonly'],
       ipAddresses: '',
-      state: 'valid',
+      env: 'sandbox',
+      state: 'inactive',
       createdDate: '2026-08-19 14:02:00',
       updatedDate: '2026-09-30 11:05:00',
       risk: ['apiRiskIdle'],
@@ -686,7 +685,8 @@ const API_KEY_SETS = {
       remarks: 'payroll-batch',
       authorities: ['readonly', 'trade'],
       ipAddresses: '198.51.100.21,198.51.100.22',
-      state: 'valid',
+      env: 'sandbox',
+      state: 'inactive',
       createdDate: '2026-07-15 11:45:00',
       updatedDate: '2026-09-05 10:08:00',
       risk: ['apiRiskMultiIp'],
@@ -701,8 +701,8 @@ const API_KEY_SETS = {
       risk: ['apiRiskIdle'],
     },
   ],
-  // Three keys, one per state, so 有效 / 已过期 / 已吊销 all stay demonstrable without the list
-  // looking like a dumping ground.
+  // Production keys cover every state, and one sandbox key shows the 未生效 → 生效中 flow without
+  // the list looking like a dumping ground.
   institution: [
     {
       remarks: 'grid-bot-prod',
@@ -731,6 +731,16 @@ const API_KEY_SETS = {
       updatedDate: '2025-02-18 09:26:00',
       risk: [],
     },
+    {
+      remarks: 'quant-lab',
+      authorities: ['readonly', 'trade'],
+      ipAddresses: '203.0.113.120',
+      env: 'sandbox',
+      state: 'inactive',
+      createdDate: '2026-10-14 15:20:00',
+      updatedDate: '2026-10-14 15:20:00',
+      risk: [],
+    },
   ],
 }
 
@@ -753,42 +763,63 @@ function buildApiKeys(profile) {
 function positionValue(balances) {
   const total = (book) =>
     Object.entries(book).reduce((sum, [coin, amount]) => sum + (demoPrices[coin] ?? 0) * amount, 0)
-  return Number(((total(balances.fund) + total(balances.trade)) / demoPrices.HKD).toFixed(2))
+  return Number(
+    ((total(balances.fund) + total(balances.otc) + total(balances.trade)) / demoPrices.HKD).toFixed(
+      2,
+    ),
+  )
 }
 
-// What each account has locked, and by which orders. A resting spot 买入 freezes the currency it
-// pays with, a live OTC 卖 intent freezes the coin it gives away — so hovering a frozen cell can
-// name the orders responsible.
+// What each account has locked, and by which orders. A live OTC intent freezes the currency it
+// pays with, and it does so in the OTC account; a resting spot order does the same in the spot
+// account. Each entry keeps the order, the amount and the time, because the asset page opens the
+// list behind the frozen number rather than naming the ids in a tooltip.
 function buildFrozen(balances, spot, otc) {
-  const add = (book, coin, amount, orderId) => {
+  const add = (book, coin, amount, order) => {
     if (!amount) return
     if (!book[coin]) book[coin] = { amount: 0, orders: [] }
     book[coin].amount += amount
-    book[coin].orders.push(orderId)
+    book[coin].orders.push({ id: order.id, kind: order.kind, amount, time: order.time })
   }
-  const fund = {}
-  const trade = {}
+  const otcBook = {}
   otc.intentOrders
-    .filter(
-      (order) => order.side === '卖' && (order.status === '待匹配' || order.status === '已匹配'),
+    .filter((order) => order.status === '待匹配' || order.status === '已匹配')
+    .forEach((order) =>
+      add(
+        otcBook,
+        order.payCoin,
+        // A buy locks the quote at the quoted price, a sell locks the base it gives away.
+        order.side === '卖' ? order.qty : Number((order.priceValue * order.qty).toFixed(8)),
+        { id: order.orderId, kind: 'otc', time: order.createTime },
+      ),
     )
-    .forEach((order) => add(fund, order.payCoin, order.qty, order.orderId))
+  const trade = {}
   spot.currentDetail.forEach((order) => {
-    if (order.side === '买入') add(trade, order.quote, order.notional, order.orderId)
-    else add(trade, order.coin, order.quantity, order.orderId)
+    const payCoin = order.side === '买入' ? order.quote : order.coin
+    const amount = order.side === '买入' ? order.notional : order.quantity
+    add(trade, payCoin, amount, { id: order.orderId, kind: 'spot', time: order.createTime })
   })
-  // Never freeze more than the account actually holds.
+  // Never freeze more than the account actually holds. The entries scale down together, so the
+  // dialog still lists every order behind the number instead of losing the ones that did not fit.
   const clamp = (book, available) =>
     Object.fromEntries(
-      Object.entries(book).map(([coin, entry]) => [
-        coin,
-        {
-          amount: Number(Math.min(entry.amount, available[coin] ?? 0).toFixed(8)),
-          orders: entry.orders,
-        },
-      ]),
+      Object.entries(book).map(([coin, entry]) => {
+        const held = available[coin] ?? 0
+        const factor = entry.amount > held ? held / entry.amount : 1
+        const orders = entry.orders.map((order) => ({
+          ...order,
+          amount: Number((order.amount * factor).toFixed(8)),
+        }))
+        return [
+          coin,
+          {
+            amount: Number(orders.reduce((sum, order) => sum + order.amount, 0).toFixed(8)),
+            orders,
+          },
+        ]
+      }),
     )
-  return { fund: clamp(fund, balances.fund), trade: clamp(trade, balances.trade) }
+  return { fund: {}, otc: clamp(otcBook, balances.otc), trade: clamp(trade, balances.trade) }
 }
 
 const VERIFICATION = {
@@ -842,13 +873,12 @@ export function buildAccount(profile) {
   // but unverified visitor is allowed to see.
   const empty = unverified
     ? {
-        balances: { fund: {}, trade: {} },
+        balances: { fund: {}, otc: {}, trade: {} },
         spotOrders: { current: [], history: [], deals: [], currentDetail: [], historyDetail: [] },
         walletRecords: {
           digital: [],
           fiat: [],
           transfer: [],
-          quick: [],
           digitalDetail: [],
           fiatDetail: [],
         },
@@ -861,6 +891,12 @@ export function buildAccount(profile) {
     : {
         fund: scaleOf(
           { USD: 12500, HKD: 68000, ETH: 2.4, USDC: 5600, USDT: 3200, BTC: 0.08, SOL: 0.02 },
+          scale,
+        ),
+        // 交易账户 is two books now: the OTC desk holds the coins its live intents commit, the
+        // spot book holds what the order book is resting on.
+        otc: scaleOf(
+          { USD: 4000, HKD: 52000, ETH: 3, USDC: 6000, USDT: 4000, BTC: 0.09, SOL: 0.01 },
           scale,
         ),
         trade: scaleOf(
